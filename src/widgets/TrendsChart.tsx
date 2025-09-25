@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { colors, typography } from '../theme';
 
 interface TrendsData {
   time: string;
@@ -31,8 +32,8 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ data, height = 200 }) => {
     <Card 
       title="Динамика показателей" 
       className="h-full" 
-      bodyStyle={{ padding: '4px', height: 'calc(100% - 40px)' }}
-      headStyle={{ padding: '8px 12px', minHeight: '40px' }}
+      bodyStyle={{ padding: typography.spacing.xs, height: `calc(100% - ${typography.sizes.cardHeight.header})` }}
+      headStyle={{ padding: typography.sizes.cardPadding.combined, minHeight: typography.sizes.cardHeight.header }}
     >
       <div className="h-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -59,8 +60,8 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ data, height = 200 }) => {
                 backgroundColor: 'white',
                 border: '1px solid #d9d9d9',
                 borderRadius: '6px',
-                fontSize: '10px',
-                padding: '4px 6px'
+                fontSize: typography.fontSize.xs,
+                padding: typography.spacing.xs + ' ' + typography.spacing.sm
               }}
             />
             <Line

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Badge, Button, Dropdown, List, Typography, Space, Divider, Empty } from 'antd';
 import { BellOutlined, EyeOutlined, ExclamationCircleOutlined, WarningOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { colors, typography } from '../theme';
 
 const { Text } = Typography;
 
@@ -101,7 +102,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToNotific
                   notification.level === 'critical' ? 'border-l-2 border-l-red-400 bg-red-50' :
                   notification.level === 'warning' ? 'border-l-2 border-l-orange-400 bg-orange-50' : 'bg-white'
                 }`}
-                style={{ borderBottom: index < recentNotifications.length - 1 ? '1px solid #f0f0f0' : 'none' }}
+                style={{ borderBottom: index < recentNotifications.length - 1 ? `1px solid ${colors.border.light}` : 'none' }}
               >
                 <List.Item.Meta
                   avatar={getNotificationIcon(notification.level)}

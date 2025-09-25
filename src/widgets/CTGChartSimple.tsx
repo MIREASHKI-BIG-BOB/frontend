@@ -3,6 +3,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
 import { useEffect, useState } from 'react';
 import { AlertSystem } from '../utils/AlertSystem';
+import { colors, typography } from '../theme';
 
 type Point = { t: number; fhr: number; uc: number };
 
@@ -150,7 +151,7 @@ export default function CTGChartSimple({
       <div className="h-[300px] bg-gray-50 rounded-md">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 6, right: 10, left: 10, bottom: 2 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.border.grid} />
             <XAxis 
               dataKey="t" 
               tickFormatter={timeFmt} 
@@ -177,7 +178,7 @@ export default function CTGChartSimple({
             />
             <Tooltip labelFormatter={(v) => timeFmt(v as number)} />
             <Legend 
-              wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }}
+              wrapperStyle={{ fontSize: typography.fontSize.xs, paddingTop: typography.spacing.xs }}
               iconSize={12}
             />
             
@@ -187,22 +188,22 @@ export default function CTGChartSimple({
                 key={index}
                 x1={zone.start}
                 x2={zone.end}
-                fill={zone.type === 'critical' ? '#ff4d4f' : zone.type === 'warning' ? '#faad14' : '#1890ff'}
+                fill={zone.type === 'critical' ? colors.status.danger : zone.type === 'warning' ? colors.status.warning : colors.status.info}
                 fillOpacity={0.2}
               />
             ))}
             
             {/* Reference lines for normal ranges */}
-            <ReferenceLine yAxisId="left" y={110} stroke="#ff4d4f" strokeDasharray="2 2" strokeWidth={1} />
-            <ReferenceLine yAxisId="left" y={160} stroke="#ff4d4f" strokeDasharray="2 2" strokeWidth={1} />
-            <ReferenceLine yAxisId="right" y={70} stroke="#faad14" strokeDasharray="2 2" strokeWidth={1} />
+            <ReferenceLine yAxisId="left" y={110} stroke={colors.status.danger} strokeDasharray="2 2" strokeWidth={1} />
+            <ReferenceLine yAxisId="left" y={160} stroke={colors.status.danger} strokeDasharray="2 2" strokeWidth={1} />
+            <ReferenceLine yAxisId="right" y={70} stroke={colors.status.warning} strokeDasharray="2 2" strokeWidth={1} />
             
             <Line 
               type="monotone" 
               yAxisId="left" 
               dataKey="fhr" 
               name="FHR (ЧСС плода)" 
-              stroke="#6a4162" 
+              stroke={colors.chart.fhr} 
               dot={false} 
               strokeWidth={1.5} 
             />
@@ -211,7 +212,7 @@ export default function CTGChartSimple({
               yAxisId="right" 
               dataKey="uc" 
               name="UC (Схватки)" 
-              stroke="#f39db6" 
+              stroke={colors.chart.uc} 
               dot={false} 
               strokeWidth={1.5} 
             />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, List, Tag, Typography, Space } from 'antd';
 import { UserOutlined, HeartOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { colors, typography } from '../theme';
 
 const { Text } = Typography;
 
@@ -75,8 +76,8 @@ const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
     <Card 
       title="Последние пациентки" 
       className="h-full"
-      bodyStyle={{ padding: '8px', height: 'calc(100% - 40px)', overflowY: 'auto' }}
-      headStyle={{ padding: '8px 12px', minHeight: '40px' }}
+      bodyStyle={{ padding: typography.spacing.sm, height: `calc(100% - ${typography.sizes.cardHeight.header})`, overflowY: 'auto' }}
+      headStyle={{ padding: typography.sizes.cardPadding.combined, minHeight: typography.sizes.cardHeight.header }}
     >
       <List
         itemLayout="horizontal"

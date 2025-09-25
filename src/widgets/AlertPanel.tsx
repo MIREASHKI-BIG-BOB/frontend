@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Alert, Badge, Button, List, Typography, Space, Tag, Collapse } from 'antd';
 import { ExclamationCircleOutlined, CheckCircleOutlined, ClockCircleOutlined, BellOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { Alert as AlertType, AlertLevel, AlertSystem } from '../utils/AlertSystem';
+import { colors, typography } from '../theme';
 
 const { Text, Title } = Typography;
 const { Panel } = Collapse;
@@ -78,27 +79,27 @@ export default function AlertPanel({ alertSystem, className }: AlertPanelProps) 
           onClick={() => setStatsCollapsed(!statsCollapsed)}
         >
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="text-center min-w-[60px]">
-                <Text className="text-xs text-gray-500 block">Критичные</Text>
-                <Text className={`text-base font-bold ${criticalCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+            <div className="flex items-center space-x-1 flex-1 mr-2">
+              <div className="text-center flex-1 min-w-0">
+                <Text className="block truncate" style={typography.styles.caption}>Критичные</Text>
+                <Text className={`text-sm font-bold ${criticalCount > 0 ? 'text-red-600' : 'text-gray-400'}`}>
                   {criticalCount}
                 </Text>
               </div>
-              <div className="text-center min-w-[80px]">
-                <Text className="text-xs text-gray-500 block">Предупреждения</Text>
-                <Text className={`text-base font-bold ${warningCount > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
+              <div className="text-center flex-1 min-w-0">
+                <Text className="block truncate" style={typography.styles.caption}>Предупр.</Text>
+                <Text className={`text-sm font-bold ${warningCount > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
                   {warningCount}
                 </Text>
               </div>
-              <div className="text-center min-w-[70px]">
-                <Text className="text-xs text-gray-500 block">Всего активных</Text>
-                <Text className={`text-base font-bold ${activeAlerts.length > 0 ? 'text-blue-600' : 'text-gray-400'}`}>
+              <div className="text-center flex-1 min-w-0">
+                <Text className="block truncate" style={typography.styles.caption}>Всего</Text>
+                <Text className={`text-sm font-bold ${activeAlerts.length > 0 ? 'text-blue-600' : 'text-gray-400'}`}>
                   {activeAlerts.length}
                 </Text>
               </div>
             </div>
-            {statsCollapsed ? <DownOutlined className="text-gray-400" /> : <UpOutlined className="text-gray-400" />}
+            {statsCollapsed ? <DownOutlined className="text-gray-400 flex-shrink-0" /> : <UpOutlined className="text-gray-400 flex-shrink-0" />}
           </div>
         </Button>
         

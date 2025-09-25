@@ -1,5 +1,6 @@
 import { Card, Typography, Progress, Tag, Space, Statistic, Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import { colors, typography } from '../theme';
 
 function fmtTime(totalSec: number) {
   const s = Math.max(0, Math.floor(totalSec || 0));
@@ -34,7 +35,7 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
           <div className="flex items-center space-x-2">
             <Avatar 
               size={28}
-              style={{ backgroundColor: '#e91e63' }}
+              style={{ backgroundColor: colors.risk.high }}
               icon={<UserOutlined />}
             />
             <span>Пациентка</span>
@@ -48,8 +49,8 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
         </div>
       } 
       className="h-full"
-      bodyStyle={{ padding: '16px' }}
-      headStyle={{ fontSize: '14px', fontWeight: '600' }}
+      bodyStyle={{ padding: typography.spacing.md }}
+      headStyle={{ ...typography.styles.h4, margin: 0 }}
       aria-label="Карточка пациентки"
     >
       <Space direction="vertical" size="middle" className="w-full">
@@ -77,12 +78,12 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
         <div className="grid grid-cols-3 gap-1.5">
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
             <div className="text-xs text-gray-600 font-medium mb-0.5">SpO₂ мамы</div>
-            <div className="text-base font-bold" style={{ color: '#6a4162' }}>{typeof spo2 === 'number' ? spo2 : 98}%</div>
+            <div className="text-base font-bold" style={{ color: colors.text.accent }}>{typeof spo2 === 'number' ? spo2 : 98}%</div>
             <div className="text-xs text-gray-400">сатурация O₂</div>
           </div>
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
             <div className="text-xs text-gray-600 font-medium mb-0.5">Д. п.</div>
-            <div className="text-base font-bold" style={{ color: '#e91e63' }}>{typeof movements === 'number' ? movements : 12}</div>
+            <div className="text-base font-bold" style={{ color: colors.risk.high }}>{typeof movements === 'number' ? movements : 12}</div>
                         <div className="text-xs text-gray-400">За посл. час</div>
           </div>
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
@@ -100,16 +101,16 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
           <Progress 
             percent={risk} 
             strokeColor={
-              risk < 30 ? '#10b981' :  // Зеленый - низкий риск (норма)
-              risk < 60 ? '#f59e0b' :  // Желтый - умеренный риск (подозрение)
-              '#e91e63'                // Красный - высокий риск (критично)
+              risk < 30 ? colors.risk.low :    // Зеленый - низкий риск (норма)
+              risk < 60 ? colors.risk.medium : // Желтый - умеренный риск (подозрение)
+              colors.risk.high                 // Красный - высокий риск (критично)
             }
-            trailColor="#e5e7eb"
+            trailColor={colors.background.gray}
             strokeWidth={6}
             format={() => `${risk}%`}
             className="text-xs"
           />
-          <div className="text-xs text-gray-500 leading-tight">
+          <div style={typography.styles.caption}>
             • 0-30% — Норма (низкий риск осложнений)
             <br />
             • 30-60% — Подозрение (требует наблюдения) 

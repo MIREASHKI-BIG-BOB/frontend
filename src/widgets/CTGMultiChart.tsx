@@ -1,4 +1,5 @@
 import { Card, Typography, Segmented, Space, Statistic, Row, Col, Badge, Progress, Alert } from 'antd';
+import { colors, typography } from '../theme';
 import { 
   HeartOutlined, 
   UserOutlined, 
@@ -399,7 +400,7 @@ export default function CTGMultiChart({
               labelFormatter={(v) => timeFmt(v as number)}
               formatter={(value: number, name: string) => [Math.round(value), name]}
             />
-            <Legend wrapperStyle={{ fontSize: '11px' }} />
+            <Legend wrapperStyle={{ fontSize: typography.fontSize['11px'] }} />
             
             {/* Референсные линии */}
             {config.referenceLines.map((line, index) => (
@@ -436,10 +437,10 @@ export default function CTGMultiChart({
         <Row justify="space-between" align="middle">
           <Col>
             <Space>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
+              <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
                 Окно: {windowLengthSec}с
               </Text>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
+              <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
                 Обновление: {fpsMs}мс
               </Text>
             </Space>
@@ -450,7 +451,7 @@ export default function CTGMultiChart({
               size="small"
               strokeColor={riskColor}
               showInfo={false}
-              style={{ width: '100px' }}
+              style={{ width: typography.sizes.components.width100 }}
             />
           </Col>
         </Row>

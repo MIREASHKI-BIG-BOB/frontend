@@ -2,6 +2,7 @@ import { Space, Row, Col, Card, Statistic, Typography, Select, DatePicker, TimeP
 import CTGMultiChart from '../widgets/CTGMultiChart';
 import StatusIndicators from '../widgets/StatusIndicators';
 import { useState, useEffect } from 'react';
+import { colors, typography } from '../theme';
 import { 
   HeartOutlined, 
   UserOutlined, 
@@ -213,7 +214,7 @@ export default function CTGPage() {
                   title="Общий статус"
                   value={risk === 'ok' ? 'Норма' : risk === 'warn' ? 'Внимание' : 'Критично'}
                   valueStyle={{ 
-                    color: risk === 'ok' ? '#52c41a' : risk === 'warn' ? '#faad14' : '#ff4d4f' 
+                    color: risk === 'ok' ? colors.status.success : risk === 'warn' ? colors.status.warning : colors.status.danger 
                   }}
                   prefix={<CheckCircleOutlined />}
                 />
@@ -226,7 +227,7 @@ export default function CTGPage() {
                   value={score}
                   suffix="/ 100"
                   valueStyle={{ 
-                    color: score < 30 ? '#52c41a' : score < 60 ? '#faad14' : '#ff4d4f' 
+                    color: score < 30 ? colors.status.success : score < 60 ? colors.status.warning : colors.status.danger 
                   }}
                   prefix={<ExclamationCircleOutlined />}
                 />
@@ -240,7 +241,7 @@ export default function CTGPage() {
                   suffix={`/ ${sessionDuration} мин`}
                   prefix={<ClockCircleOutlined />}
                   valueStyle={{
-                    color: isRecording ? '#1890ff' : '#999'
+                    color: isRecording ? colors.status.info : colors.utility.inactive
                   }}
                 />
               </Card>
@@ -253,7 +254,7 @@ export default function CTGPage() {
                   suffix="%"
                   prefix={<HeartOutlined />}
                   valueStyle={{
-                    color: isRecording ? '#52c41a' : '#999'
+                    color: isRecording ? colors.status.success : colors.utility.inactive
                   }}
                 />
               </Card>

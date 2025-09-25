@@ -1,5 +1,6 @@
 import { Layout, Button, Typography, Space } from 'antd';
 import { HeartOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { colors } from './theme';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import Technologies from './components/Technologies';
@@ -65,7 +66,7 @@ export default function App() {
             <Typography.Title level={3} className="!text-white !mb-0">HeraBEAT</Typography.Title>
           </Space>
           <Space>
-            <Button type="primary" size="large" className="bg-white text-accent hover:!bg-[#fde7ef]" aria-label="Открыть дешборд" onClick={() => (location.hash = '#/dashboard') }>
+            <Button type="primary" size="large" style={{backgroundColor: 'white', color: colors.text.accent}} onMouseOver={(e) => {e.currentTarget.style.backgroundColor = colors.utility.hover}} onMouseOut={(e) => {e.currentTarget.style.backgroundColor = 'white'}} aria-label="Открыть дешборд" onClick={() => (location.hash = '#/dashboard') }>
               Дешборд <ArrowRightOutlined />
             </Button>
           </Space>

@@ -1,6 +1,7 @@
 import { Card, List, Badge, Button, Space, Typography, Tag, Divider, Segmented, Empty, Input, Tooltip, Modal, Descriptions } from 'antd';
 import { BellOutlined, CheckOutlined, DeleteOutlined, ExclamationCircleOutlined, WarningOutlined, InfoCircleOutlined, SearchOutlined, ClockCircleOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { useState, useMemo } from 'react';
+import { colors, typography } from '../theme';
 
 const { Title, Text } = Typography;
 
@@ -267,7 +268,7 @@ export default function Notifications() {
                   : 'bg-white hover:bg-gray-50'
                 }
               `}
-              bodyStyle={{ padding: '16px' }}
+              bodyStyle={{ padding: typography.spacing.md }}
               onClick={() => openNotificationDetail(notification)}
             >
               <div className="flex items-start justify-between">

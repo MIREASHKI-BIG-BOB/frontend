@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Statistic, Row, Col } from 'antd';
 import { HeartOutlined, UserOutlined, ClockCircleOutlined, AlertOutlined } from '@ant-design/icons';
+import { colors, typography } from '../theme';
 
 interface QuickStatsProps {
   patientsTotal?: number;
@@ -16,14 +17,14 @@ const QuickStats: React.FC<QuickStatsProps> = ({
   alertsToday = 3
 }) => {
   return (
-    <Card title="Быстрая статистика" className="h-full" bodyStyle={{ padding: '8px' }}>
+    <Card title="Быстрая статистика" className="h-full" bodyStyle={{ padding: typography.spacing.sm }}>
       <Row gutter={[4, 8]}>
         <Col span={12}>
           <Statistic
             title="Пациенток"
             value={patientsTotal}
-            prefix={<UserOutlined style={{ color: '#e91e63', fontSize: '14px' }} />}
-            valueStyle={{ fontSize: '16px', color: '#e91e63', fontWeight: 'bold' }}
+            prefix={<UserOutlined style={{ color: colors.risk.high, fontSize: typography.fontSize.sm }} />}
+            valueStyle={{ fontSize: typography.fontSize.base, color: colors.risk.high, fontWeight: typography.fontWeight.bold }}
             className="text-center"
           />
         </Col>
@@ -31,8 +32,8 @@ const QuickStats: React.FC<QuickStatsProps> = ({
           <Statistic
             title="Активно"
             value={activeMonitoring}
-            prefix={<ClockCircleOutlined style={{ color: '#52c41a', fontSize: '14px' }} />}
-            valueStyle={{ fontSize: '16px', color: '#52c41a', fontWeight: 'bold' }}
+            prefix={<ClockCircleOutlined style={{ color: colors.status.success, fontSize: typography.fontSize.sm }} />}
+            valueStyle={{ fontSize: typography.fontSize.base, color: colors.status.success, fontWeight: typography.fontWeight.bold }}
             className="text-center"
           />
         </Col>
@@ -41,8 +42,8 @@ const QuickStats: React.FC<QuickStatsProps> = ({
             title="ЧСС ср."
             value={avgHeartRate}
             suffix="уд/мин"
-            prefix={<HeartOutlined style={{ color: '#1890ff', fontSize: '14px' }} />}
-            valueStyle={{ fontSize: '14px', color: '#1890ff', fontWeight: 'bold' }}
+            prefix={<HeartOutlined style={{ color: colors.status.info, fontSize: typography.fontSize.sm }} />}
+            valueStyle={{ fontSize: typography.fontSize.sm, color: colors.status.info, fontWeight: typography.fontWeight.bold }}
             className="text-center"
           />
         </Col>
@@ -50,8 +51,8 @@ const QuickStats: React.FC<QuickStatsProps> = ({
           <Statistic
             title="Тревоги"
             value={alertsToday}
-            prefix={<AlertOutlined style={{ color: '#fa8c16', fontSize: '14px' }} />}
-            valueStyle={{ fontSize: '16px', color: '#fa8c16', fontWeight: 'bold' }}
+            prefix={<AlertOutlined style={{ color: colors.chart.warning, fontSize: typography.fontSize.sm }} />}
+            valueStyle={{ fontSize: typography.fontSize.base, color: colors.chart.warning, fontWeight: typography.fontWeight.bold }}
             className="text-center"
           />
         </Col>

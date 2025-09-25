@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { colors, typography } from '../theme';
 import { 
   Card, 
   Typography, 
@@ -502,7 +503,7 @@ export default function ReportsPage() {
                   title="Базальный ЧСС" 
                   value={142} 
                   suffix="уд/мин"
-                  valueStyle={{ color: '#3f8600' }}
+                  valueStyle={{ color: colors.utility.positive }}
                 />
               </Col>
               <Col span={12}>
@@ -510,7 +511,7 @@ export default function ReportsPage() {
                   title="Вариабельность" 
                   value={15} 
                   suffix="уд/мин"
-                  valueStyle={{ color: '#cf1322' }}
+                  valueStyle={{ color: colors.utility.negative }}
                 />
               </Col>
             </Row>
@@ -540,22 +541,22 @@ export default function ReportsPage() {
                       key={zone.id}
                       x1={zone.startTime}
                       x2={zone.endTime}
-                      fill={zone.severity === 'moderate' ? '#ff4d4f' : '#faad14'}
+                      fill={zone.severity === 'moderate' ? colors.status.danger : colors.status.warning}
                       fillOpacity={0.3}
                       onClick={() => handleAnomalyClick(zone)}
                       style={{ cursor: 'pointer' }}
                     />
                   ))}
                   
-                  <ReferenceLine y={110} stroke="red" strokeDasharray="5 5" />
-                  <ReferenceLine y={160} stroke="red" strokeDasharray="5 5" />
+                  <ReferenceLine y={110} stroke={colors.status.danger} strokeDasharray="5 5" />
+                  <ReferenceLine y={160} stroke={colors.status.danger} strokeDasharray="5 5" />
                   
                   <Line 
                     type="monotone" 
                     dataKey="fhr" 
-                    stroke="#2196F3" 
+                    stroke={colors.chart.materialBlue} 
                     strokeWidth={2}
-                    dot={{ fill: '#2196F3', r: 3 }}
+                    dot={{ fill: colors.chart.materialBlue, r: 3 }}
                   />
                 </LineChart>
               </ResponsiveContainer>

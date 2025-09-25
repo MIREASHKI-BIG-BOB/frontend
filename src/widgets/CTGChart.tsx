@@ -1,6 +1,7 @@
 import { Card, Typography } from 'antd';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { colors, typography } from '../theme';
 
 type Point = { t: number; fhr: number; uc: number };
 
@@ -199,17 +200,17 @@ export default function CTGChart({ fpsMs = 250, windowLengthSec = 180, onRiskCha
       <div className="h-[360px] bg-chartBg rounded-md">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.border.grid} />
             <XAxis dataKey="t" tickFormatter={timeFmt} minTickGap={24} />
             <YAxis yAxisId="left" domain={[100, 180]} tickCount={5} label={{ value: 'FHR', position: 'insideLeft' }} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickCount={5} label={{ value: 'UC', position: 'insideRight' }} />
             <Tooltip labelFormatter={(v) => timeFmt(v as number)} />
             <Legend />
             {markers.map(m => (
-              <ReferenceLine key={m.t} x={m.t} stroke={m.minute ? '#d46a92' : '#ddd'} strokeDasharray={m.minute ? undefined : '3 3'} strokeWidth={m.minute ? 2 : 1} label={m.minute ? { value: new Date(m.t).toLocaleTimeString('ru-RU', { minute: '2-digit' }), position: 'top', fill: '#6a4162' } : undefined} />
+              <ReferenceLine key={m.t} x={m.t} stroke={m.minute ? colors.primary : colors.border.divider} strokeDasharray={m.minute ? undefined : '3 3'} strokeWidth={m.minute ? 2 : 1} label={m.minute ? { value: new Date(m.t).toLocaleTimeString('ru-RU', { minute: '2-digit' }), position: 'top', fill: colors.text.accent } : undefined} />
             ))}
-            <Line type="monotone" yAxisId="left" dataKey="fhr" name="FHR" stroke="#6a4162" dot={false} strokeWidth={2} />
-            <Line type="monotone" yAxisId="right" dataKey="uc" name="UC" stroke="#f39db6" dot={false} strokeWidth={2} />
+            <Line type="monotone" yAxisId="left" dataKey="fhr" name="FHR" stroke={colors.chart.fhr} dot={false} strokeWidth={2} />
+            <Line type="monotone" yAxisId="right" dataKey="uc" name="UC" stroke={colors.chart.uc} dot={false} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>

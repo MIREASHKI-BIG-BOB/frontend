@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Button, Avatar, Badge, Dropdown, Space, Typography } from 'antd';
 import NotificationBell from './NotificationBell';
+import { colors, typography } from '../theme';
 import {
   HeartOutlined,
   DashboardOutlined,
@@ -242,8 +243,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
                   opacity: isDragging ? 0.5 : 1,
                   transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
                   transition: 'all 0.2s ease',
-                  borderLeft: isDragOver ? '3px solid #1890ff' : 'none',
-                  backgroundColor: isDragOver ? 'rgba(24, 144, 255, 0.1)' : undefined,
+                  borderLeft: isDragOver ? `3px solid ${colors.status.info}` : 'none',
+                  backgroundColor: isDragOver ? `rgba(24, 144, 255, 0.1)` : undefined,
                   cursor: isDragging ? 'move' : 'pointer'
                 }}
               >
@@ -309,7 +310,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
                 <Space size="small" align="center">
                   <Avatar 
                     size={36}
-                    style={{ backgroundColor: '#e91e63' }}
+                    style={{ backgroundColor: colors.risk.high }}
                     icon={<UserOutlined />}
                   />
                   {!isMobile && (

@@ -9,3 +9,33 @@ body { @apply bg-bg text-text antialiased; }
 :root {
   color-scheme: light;
 }
+
+/* Унификация размеров шрифтов */
+.ant-typography {
+  font-size: 14px !important;
+}
+
+.ant-card-head-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+
+.ant-card-body {
+  font-size: 14px !important;
+}
+
+.ant-btn {
+  font-size: 14px !important;
+}
+
+.ant-select-selection-item {
+  font-size: 14px !important;
+}
+
+.ant-picker-input input {
+  font-size: 14px !important;
+}
+
+.ant-space-item {
+  font-size: 14px !important;
+}

@@ -10,6 +10,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { AlertSystem } from '../utils/AlertSystem';
 import { NotificationService } from '../utils/NotificationService';
 import { Responsive, WidthProvider, Layout as RGLLayout } from 'react-grid-layout';
+import { colors, typography } from '../theme';
 import dayjs from 'dayjs';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -202,7 +203,7 @@ export default function Dashboard() {
       borderRadius: '8px',
       overflow: 'hidden' as const,
       boxShadow: isEditMode ? '0 4px 12px rgba(233, 30, 99, 0.15)' : '0 2px 8px rgba(0,0,0,0.1)',
-      border: isEditMode ? '2px dashed #e91e63' : '1px solid #f0f0f0',
+      border: isEditMode ? `2px dashed ${colors.risk.high}` : `1px solid ${colors.border.light}`,
       transition: 'all 0.2s ease',
       height: '100%',
       display: 'flex',
@@ -241,7 +242,8 @@ export default function Dashboard() {
             type={isEditMode ? "primary" : "default"}
             icon={<SettingOutlined />}
             onClick={() => setIsEditMode(!isEditMode)}
-            style={isEditMode ? { backgroundColor: '#e91e63', borderColor: '#e91e63' } : {}}
+            size="middle"
+            style={isEditMode ? { backgroundColor: colors.risk.high, borderColor: colors.risk.high, ...typography.styles.button } : typography.styles.button}
           >
             {isEditMode ? 'Режим редактирования' : 'Настроить виджеты'}
           </Button>
@@ -253,7 +255,8 @@ export default function Dashboard() {
                   type="primary" 
                   icon={<SaveOutlined />} 
                   onClick={saveLayout}
-                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                  size="middle"
+                  style={{ backgroundColor: colors.status.success, borderColor: colors.status.success, ...typography.styles.button }}
                 >
                   Сохранить
                 </Button>
@@ -263,6 +266,8 @@ export default function Dashboard() {
                 <Button 
                   icon={<UndoOutlined />} 
                   onClick={resetLayout}
+                  size="middle"
+                  style={typography.styles.button}
                   danger
                 >
                   Сбросить
@@ -286,38 +291,40 @@ export default function Dashboard() {
         borderRadius: '8px', 
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
         marginBottom: '16px',
-        border: '1px solid #f0f0f0'
+        border: `1px solid ${colors.border.light}`
       }}>
         <Space size="large" wrap>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CalendarOutlined style={{ color: '#1890ff' }} />
-            <Text type="secondary">Дата:</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+            <CalendarOutlined style={{ color: colors.status.info, fontSize: typography.fontSize.sm }} />
+            <Text type="secondary" style={typography.styles.body}>Дата:</Text>
             <DatePicker 
               value={selectedDate}
               onChange={(date) => setSelectedDate(date || dayjs())}
               format="DD.MM.YYYY"
-              size="small"
+              size="middle"
+              style={{ fontSize: typography.fontSize.sm }}
             />
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ClockCircleOutlined style={{ color: '#52c41a' }} />
-            <Text type="secondary">Время:</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+            <ClockCircleOutlined style={{ color: colors.status.success, fontSize: typography.fontSize.sm }} />
+            <Text type="secondary" style={typography.styles.body}>Время:</Text>
             <TimePicker 
               value={selectedTime}
               onChange={(time) => setSelectedTime(time || dayjs())}
               format="HH:mm"
-              size="small"
+              size="middle"
+              style={{ fontSize: typography.fontSize.sm }}
             />
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Text type="secondary">Тип сеанса:</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+            <Text type="secondary" style={typography.styles.body}>Тип сеанса:</Text>
             <Select
               value={sessionType}
               onChange={setSessionType}
-              size="small"
-              style={{ width: 200 }}
+              size="middle"
+              style={{ width: 200, fontSize: typography.fontSize.sm }}
               options={[
                 { value: 'monitoring', label: 'Мониторинг плода' },
                 { value: 'stress', label: 'Стресс-тест' },
@@ -327,7 +334,7 @@ export default function Dashboard() {
             />
           </div>
           
-          <Text style={{ color: '#666' }}>
+          <Text style={{ ...typography.styles.body, color: colors.text.muted }}>
             Сеанс: {selectedDate.format('DD.MM.YYYY')} в {selectedTime.format('HH:mm')}
           </Text>
         </Space>
@@ -363,13 +370,13 @@ export default function Dashboard() {
         __html: `
         .react-grid-item.react-grid-placeholder {
           background: rgba(233, 30, 99, 0.1) !important;
-          border: 2px dashed #e91e63 !important;
+          border: 2px dashed ${colors.risk.high} !important;
           border-radius: 8px !important;
         }
         
         .react-grid-item > .react-resizable-handle {
           opacity: ${isEditMode ? '1' : '0'} !important;
-          background-color: #e91e63 !important;
+          background-color: ${colors.risk.high} !important;
           z-index: 60 !important;
         }
         
