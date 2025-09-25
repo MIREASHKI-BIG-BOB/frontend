@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-text antialiased; }
+
+/* Ant Design overrides (light pink/white accent feel) */
+:root {
+  color-scheme: light;
+}
