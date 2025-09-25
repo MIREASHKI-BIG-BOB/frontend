@@ -12,7 +12,6 @@ import Settings from './pages/Settings';
 import CTGPage from './pages/CTG';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
-import AIAssistant from './pages/AIAssistant';
 import { useEffect, useState } from 'react';
 
 const { Header, Content, Footer } = Layout;
@@ -32,9 +31,8 @@ export default function App() {
   const isSettings = route.startsWith('#/settings');
   const isNotifications = route.startsWith('#/notifications');
   const isReports = route.startsWith('#/reports');
-  const isAIAssistant = route.startsWith('#/ai-assistant');
   
-  const isAppRoute = isDashboard || isPatients || isCTG || isSettings || isNotifications || isReports || isAIAssistant;
+  const isAppRoute = isDashboard || isPatients || isCTG || isSettings || isNotifications || isReports;
 
   const handleNavigate = (newRoute: string) => {
     location.hash = newRoute;
@@ -49,7 +47,6 @@ export default function App() {
     else if (isSettings) content = <Settings />;
     else if (isNotifications) content = <Notifications />;
     else if (isReports) content = <Reports />;
-    else if (isAIAssistant) content = <AIAssistant />;
 
     return (
       <AppLayout currentRoute={route} onNavigate={handleNavigate}>

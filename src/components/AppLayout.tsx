@@ -62,11 +62,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
       label: 'Отчетность',
     },
     {
-      key: '#/ai-assistant',
-      icon: <RobotOutlined />,
-      label: 'ИИ Ассистент',
-    },
-    {
       key: 'divider-3',
       type: 'divider' as const,
     },
