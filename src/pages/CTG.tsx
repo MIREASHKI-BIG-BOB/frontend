@@ -2,7 +2,7 @@ import { Space, Row, Col, Card, Statistic, Typography, Select, DatePicker, TimeP
 import CTGMultiChart from '../widgets/CTGMultiChart';
 import StatusIndicators from '../widgets/StatusIndicators';
 import { useState, useEffect } from 'react';
-import { colors, typography } from '../theme';
+import { colors } from '../theme';
 import { 
   HeartOutlined, 
   UserOutlined, 
@@ -16,7 +16,7 @@ import {
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 
-const { Title, Text } = Typography;
+const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 export default function CTGPage() {
@@ -69,15 +69,29 @@ export default function CTGPage() {
     };
   }, [isRecording]);
 
+  // Отладка - выводим стили в консоль (убираем, так как typography больше нет)
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        <Title level={2} className="mb-2">
+        <Title 
+          level={1}
+          style={{ 
+            marginBottom: '8px',
+            marginTop: 0,
+          }}
+        >
           КТГ Мониторинг
         </Title>
-        <Text type="secondary">
+        <Paragraph 
+          type="secondary"
+          style={{ 
+            marginBottom: 0,
+            lineHeight: 1.5,
+          }}
+        >
           Комплексный мониторинг состояния плода, матери и маточной активности
-        </Text>
+        </Paragraph>
       </div>
 
       {/* Панель управления временем приема */}

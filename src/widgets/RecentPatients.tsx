@@ -77,7 +77,7 @@ const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
       title="Последние пациентки" 
       className="h-full"
       bodyStyle={{ padding: typography.spacing.sm, height: `calc(100% - ${typography.sizes.cardHeight.header})`, overflowY: 'auto' }}
-      headStyle={{ padding: typography.sizes.cardPadding.combined, minHeight: typography.sizes.cardHeight.header }}
+      headStyle={{ padding: typography.sizes.cardPadding, minHeight: typography.sizes.cardHeight.header }}
     >
       <List
         itemLayout="horizontal"

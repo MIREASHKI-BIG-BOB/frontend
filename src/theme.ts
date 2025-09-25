@@ -1,6 +1,6 @@
 import type { ThemeConfig } from 'antd';
 
-// Палитра цветов приложения
+// Палитра цветов приложения (остается ваша)
 export const colors = {
   // Основные цвета
   primary: '#d46a92',
@@ -50,181 +50,166 @@ export const colors = {
     success: '#52c41a',      // Положительные значения
     warning: '#fa8c16',      // Предупреждающие значения
     danger: '#ff4d4f',       // Критические значения
-    neutral: '#999999',      // Нейтральные значения
-    fhr: '#6a4162',          // Цвет для FHR (частота сердцебиения плода)
-    uc: '#f39db6',           // Цвет для UC (маточные сокращения)
-    materialBlue: '#2196F3', // Material Design синий
+    fhr: '#6a4162',          // Частота сердечных сокращений плода
+    uc: '#1890ff',           // Маточные сокращения
+    materialBlue: '#2196F3', // Material Design Blue
+    materialGreen: '#4CAF50', // Material Design Green
+    materialOrange: '#FF9800', // Material Design Orange
+    materialRed: '#F44336',  // Material Design Red
   },
-
-  // Цвета для фонов и границ
+  
+  // Цвета границ
   border: {
-    light: '#f0f0f0',        // Светлая граница
-    medium: '#e5e7eb',       // Средняя граница  
-    dark: '#d1d5db',         // Темная граница
-    grid: '#eee',            // Сетка графиков
-    divider: '#ddd',         // Разделительные линии
+    primary: '#d9d9d9',      // Основные границы
+    secondary: '#f0f0f0',    // Вторичные границы
+    light: '#f0f0f0',        // Светлые границы
+    grid: '#eee',            // Границы сетки
+    divider: '#e8e8e8',      // Разделители
   },
-
-  // Дополнительные служебные цвета
+  
+  // Утилитарные цвета
   utility: {
-    hover: '#fde7ef',        // Розовый для hover эффектов
-    inactive: '#999999',     // Неактивные элементы
-    recording: '#52c41a',    // Запись активна
-    notRecording: '#999999', // Запись не активна
-    positive: '#3f8600',     // Положительная статистика
-    negative: '#cf1322',     // Отрицательная статистика
-    notification: '#e91e63', // Цвет уведомлений
+    hover: '#fde7ef',        // Цвет при наведении
+    active: '#f8b5c9',       // Активное состояние
+    focus: '#e879a6',        // Фокус
+    inactive: '#f5f5f5',     // Неактивное состояние
+    positive: '#f6ffed',     // Положительный фон
+    negative: '#fff2f0',     // Отрицательный фон
+    warning: '#fffbe6',      // Предупреждающий фон
   }
 };
 
-// Типографическая система
-export const typography = {
-  // Размеры шрифтов
-  fontSize: {
-    xxs: '10px',             // Очень мелкий текст
-    xs: '12px',              // Мелкий текст, подписи
-    sm: '14px',              // Базовый текст
-    base: '16px',            // Основной размер
-    lg: '18px',              // Крупный текст
-    xl: '20px',              // Заголовки
-    '2xl': '24px',           // Большие заголовки
-    '3xl': '30px',           // Главные заголовки
-    '11px': '11px',          // Специфичный размер для легенд графиков
-  },
-  
-  // Толщина шрифта
-  fontWeight: {
-    normal: 400,             // Обычный текст
-    medium: 500,             // Средний (подзаголовки)
-    semibold: 600,           // Полужирный (важный текст)
-    bold: 700,               // Жирный (заголовки)
-  },
-  
-  // Межстрочный интервал
-  lineHeight: {
-    tight: 1.25,             // Плотный (1.25)
-    normal: 1.5,             // Нормальный (1.5)
-    relaxed: 1.75,           // Свободный (1.75)
-  },
-  
-  // Отступы между элементами
-  spacing: {
-    xs: '4px',               // Минимальные отступы
-    sm: '8px',               // Малые отступы
-    base: '12px',            // Базовые отступы
-    md: '16px',              // Средние отступы
-    lg: '20px',              // Большие отступы
-    xl: '24px',              // Очень большие отступы
-  },
-
-  // Размеры компонентов
-  sizes: {
-    cardPadding: {
-      xs: '4px',
-      sm: '8px',
-      md: '16px',
-      combined: '8px 12px',    // Комбинированные отступы
-    },
-    cardHeight: {
-      header: '40px',          // Высота заголовка карточки
-    },
-    components: {
-      width100: '100px',       // Ширина 100px для мелких компонентов
-    }
-  },
-  
-  // Готовые стили для разных типов текста
-  styles: {
-    // Заголовки
-    h1: {
-      fontSize: '24px',
-      fontWeight: 700,
-      lineHeight: 1.25,
-      color: colors.text.primary,
-      marginBottom: '16px',
-    },
-    h2: {
-      fontSize: '20px',
-      fontWeight: 600,
-      lineHeight: 1.25,
-      color: colors.text.primary,
-      marginBottom: '12px',
-    },
-    h3: {
-      fontSize: '18px',
-      fontWeight: 600,
-      lineHeight: 1.25,
-      color: colors.text.primary,
-      marginBottom: '8px',
-    },
-    h4: {
-      fontSize: '16px',
-      fontWeight: 600,
-      lineHeight: 1.25,
-      color: colors.text.primary,
-      marginBottom: '8px',
-    },
-    
-    // Основной текст
-    body: {
-      fontSize: '14px',
-      fontWeight: 400,
-      lineHeight: 1.5,
-      color: colors.text.primary,
-    },
-    
-    // Мелкий текст (подписи, описания)
-    caption: {
-      fontSize: '12px',
-      fontWeight: 400,
-      lineHeight: 1.25,
-      color: colors.text.secondary,
-    },
-    
-    // Подписи с увеличенным интерлиньяжем
-    description: {
-      fontSize: '12px',
-      fontWeight: 400,
-      lineHeight: 1.5,
-      color: colors.text.secondary,
-    },
-    
-    // Мелкий приглушенный текст
-    muted: {
-      fontSize: '12px',
-      fontWeight: 400,
-      lineHeight: 1.25,
-      color: colors.text.muted,
-    },
-    
-    // Важный текст
-    emphasis: {
-      fontSize: '14px',
-      fontWeight: 600,
-      lineHeight: 1.5,
-      color: colors.text.primary,
-    },
-    
-    // Кнопки
-    button: {
-      fontSize: '14px',
-      fontWeight: 500,
-      lineHeight: 1.25,
-    },
-  }
-};
-
+// Конфигурация темы Ant Design
 export const theme: ThemeConfig = {
   token: {
-    // New pink palette
+    // Основные цвета (ваша палитра)
     colorPrimary: colors.primary,
     colorInfo: colors.primary,
     colorSuccess: colors.success,
     colorWarning: colors.warning,
     colorError: colors.error,
     colorText: colors.text.primary,
+    colorTextSecondary: colors.text.secondary,
+    colorTextTertiary: colors.text.muted,
+    colorTextDisabled: colors.text.disabled,
+    
+    // Фоны (ваша палитра)
     colorBgBase: colors.background.primary,
-    borderRadius: 12,
-    fontSize: parseInt(typography.fontSize.sm),
+    colorBgContainer: colors.background.card,
+    colorBgElevated: colors.background.card,
+    
+    // Границы (ваша палитра)
+    colorBorder: colors.border.primary,
+    colorBorderSecondary: colors.border.secondary,
+    
+    // Типографика (Ant Design система)
+    fontSize: 14,                    // Базовый размер шрифта
+    fontSizeHeading1: 38,            // h1 - очень большой
+    fontSizeHeading2: 30,            // h2 - большой  
+    fontSizeHeading3: 24,            // h3 - средний
+    fontSizeHeading4: 20,            // h4 - обычный заголовок
+    fontSizeHeading5: 16,            // h5 - маленький заголовок
+    fontSizeSM: 12,                  // Маленький текст
+    fontSizeLG: 16,                  // Большой текст
+    fontSizeXL: 20,                  // Очень большой текст
+    
+    // Отступы и размеры (Ant Design система)
+    borderRadius: 6,                 // Скругление углов
+    padding: 16,                     // Базовые отступы
+    margin: 16,                      // Базовые отступы
+    paddingSM: 12,                   // Маленькие отступы
+    paddingLG: 24,                   // Большие отступы
+    paddingXS: 8,                    // Очень маленькие отступы
+    
+    // Высота строк (Ant Design система)  
+    lineHeight: 1.5715,              // Базовая высота строки
+    lineHeightHeading1: 1.2105,      // Для больших заголовков
+    lineHeightHeading2: 1.2667,      // Для средних заголовков  
+    lineHeightHeading3: 1.3333,      // Для обычных заголовков
+    lineHeightHeading4: 1.4,         // Для маленьких заголовков
+    lineHeightHeading5: 1.5,         // Для самых маленьких заголовков
+    
+    // Семейства шрифтов (Ant Design система)
+    fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'`,
+    fontFamilyCode: `'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace`,
+    
+    // Веса шрифтов (стандартные)
+    fontWeightStrong: 600,           // Жирный текст
   },
+  components: {
+    Typography: {
+      titleMarginBottom: '0.5em',     // Отступ снизу у заголовков
+      titleMarginTop: 0,              // Без отступа сверху
+    },
+  },
+};
+
+// Дополнительные утилиты для работы с цветами
+export const colorUtils = {
+  // Часто используемые цвета для быстрого доступа
+  text: colors.text,
+  chart: colors.chart,
+  status: colors.status,
+  risk: colors.risk,
+  border: colors.border,
+  background: colors.background,
+};
+
+// Временная совместимость со старой системой typography
+// TODO: Постепенно заменить на использование Ant Design компонентов
+export const typography = {
+  fontSize: {
+    xxs: '10px',
+    xs: '12px',
+    sm: '14px',
+    base: '16px',
+    lg: '18px',
+    xl: '20px',
+    '2xl': '24px',
+    '3xl': '30px',
+    '11px': '11px',
+  },
+  fontWeight: {
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
+  },
+  sizes: {
+    cardPadding: '16px',
+    cardHeight: {
+      header: '54px',
+    },
+    components: {
+      width100: '100%',
+    },
+  },
+  styles: {
+    h4: {
+      fontSize: '16px',
+      fontWeight: 600,
+      color: colors.text.primary,
+    },
+    body: {
+      fontSize: '14px',
+      fontWeight: 400,
+      color: colors.text.primary,
+    },
+    caption: {
+      fontSize: '12px',
+      fontWeight: 400,
+      color: colors.text.secondary,
+    },
+    button: {
+      fontSize: '14px',
+      fontWeight: 500,
+    },
+  }
 };

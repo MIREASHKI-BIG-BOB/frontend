@@ -33,7 +33,7 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ data, height = 200 }) => {
       title="Динамика показателей" 
       className="h-full" 
       bodyStyle={{ padding: typography.spacing.xs, height: `calc(100% - ${typography.sizes.cardHeight.header})` }}
-      headStyle={{ padding: typography.sizes.cardPadding.combined, minHeight: typography.sizes.cardHeight.header }}
+      headStyle={{ padding: typography.sizes.cardPadding, minHeight: typography.sizes.cardHeight.header }}
     >
       <div className="h-full">
         <ResponsiveContainer width="100%" height="100%">
