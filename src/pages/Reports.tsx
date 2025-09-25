@@ -1,334 +1,637 @@
-import React, { useState } from 'react';
-import { Row, Col, Card, Table, Select, DatePicker, Statistic, Progress, Tag } from 'antd';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { RiseOutlined, HeartOutlined, UserOutlined, AlertOutlined } from '@ant-design/icons';
-import dayjs, { Dayjs } from 'dayjs';
+import React, { useState, useEffect } from 'react';
+import { 
+  Card, 
+  Typography, 
+  Row, 
+  Col, 
+  Button, 
+  Space, 
+  Alert,
+  Tag,
+  Statistic,
+  Modal,
+  Avatar,
+  Divider,
+  Timeline,
+  DatePicker,
+  TimePicker,
+  Select,
+  Badge
+} from 'antd';
+import dayjs from 'dayjs';
+import { 
+  PrinterOutlined, 
+  DownloadOutlined,
+  UserOutlined,
+  MedicineBoxOutlined,
+  ExclamationCircleOutlined,
+  CheckCircleOutlined,
+  InfoCircleOutlined,
+  RobotOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+  StopOutlined,
+  ReloadOutlined,
+  UpOutlined,
+  DownOutlined
+} from '@ant-design/icons';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  ReferenceLine, 
+  ReferenceArea 
+} from 'recharts';
 
-const { RangePicker } = DatePicker;
+const { Title, Text } = Typography;
 
-// Моковые данные пациенток
-const patientsData = [
+// Фиксированные данные КТГ
+const ctgData = [
+  { time: '10:00', fhr: 140, uc: 10, movement: 0 },
+  { time: '10:05', fhr: 145, uc: 15, movement: 1 },
+  { time: '10:10', fhr: 142, uc: 8, movement: 0 },
+  { time: '10:15', fhr: 138, uc: 25, movement: 0 },
+  { time: '10:20', fhr: 135, uc: 30, movement: 1 },
+  { time: '10:25', fhr: 132, uc: 35, movement: 0 },
+  { time: '10:30', fhr: 145, uc: 20, movement: 1 },
+  { time: '10:35', fhr: 148, uc: 12, movement: 0 },
+  { time: '10:40', fhr: 165, uc: 15, movement: 1 },
+  { time: '10:45', fhr: 170, uc: 18, movement: 0 },
+  { time: '10:50', fhr: 168, uc: 22, movement: 1 },
+  { time: '10:55', fhr: 145, uc: 16, movement: 0 },
+  { time: '11:00', fhr: 142, uc: 12, movement: 1 }
+];
+
+// Зоны аномалий
+const anomalyZones = [
   {
     id: 1,
-    name: 'Анна Петрова',
-    age: 28,
-    gestation: '32 недели',
-    lastUpdate: '2024-09-20 09:30',
-    metrics: {
-      heartRate: 72,
-      bloodPressure: '120/80',
-      weight: 67.5,
-      temperature: 36.6,
-      bloodSugar: 5.2
-    },
-    trends: [
-      { date: '2024-09-15', heartRate: 70, weight: 66.8, bloodPressure: 118 },
-      { date: '2024-09-16', heartRate: 71, weight: 67.0, bloodPressure: 119 },
-      { date: '2024-09-17', heartRate: 73, weight: 67.2, bloodPressure: 122 },
-      { date: '2024-09-18', heartRate: 72, weight: 67.3, bloodPressure: 121 },
-      { date: '2024-09-19', heartRate: 74, weight: 67.4, bloodPressure: 120 },
-      { date: '2024-09-20', heartRate: 72, weight: 67.5, bloodPressure: 120 }
-    ],
-    alerts: [
-      { type: 'info', message: 'Показатели в норме', severity: 'low' },
-      { type: 'warning', message: 'Незначительное повышение ЧСС', severity: 'medium' }
-    ]
+    startTime: '10:15',
+    endTime: '10:25',
+    type: 'bradycardia',
+    severity: 'moderate',
+    description: 'Брадикардия плода',
+    recommendation: 'Требуется наблюдение, возможна гипоксия плода'
   },
   {
     id: 2,
-    name: 'Мария Иванова',
-    age: 24,
-    gestation: '28 недель',
-    lastUpdate: '2024-09-20 10:15',
-    metrics: {
-      heartRate: 78,
-      bloodPressure: '125/85',
-      weight: 72.1,
-      temperature: 36.8,
-      bloodSugar: 5.8
-    },
-    trends: [
-      { date: '2024-09-15', heartRate: 75, weight: 71.2, bloodPressure: 122 },
-      { date: '2024-09-16', heartRate: 76, weight: 71.4, bloodPressure: 123 },
-      { date: '2024-09-17', heartRate: 79, weight: 71.7, bloodPressure: 126 },
-      { date: '2024-09-18', heartRate: 77, weight: 71.9, bloodPressure: 124 },
-      { date: '2024-09-19', heartRate: 78, weight: 72.0, bloodPressure: 125 },
-      { date: '2024-09-20', heartRate: 78, weight: 72.1, bloodPressure: 125 }
-    ],
-    alerts: [
-      { type: 'warning', message: 'Повышенное давление', severity: 'medium' },
-      { type: 'success', message: 'Стабильный вес', severity: 'low' }
-    ]
+    startTime: '10:40',
+    endTime: '10:50',
+    type: 'tachycardia',
+    severity: 'mild',
+    description: 'Тахикардия плода',
+    recommendation: 'Умеренная тахикардия, контролировать динамику'
   }
 ];
 
-// Столбцы для таблицы
-const columns = [
-  {
-    title: 'Пациентка',
-    dataIndex: 'name',
-    key: 'name',
-    render: (text: string) => (
-      <div className="flex items-center gap-2">
-        <UserOutlined className="text-gray-400" />
-        <span className="font-medium">{text}</span>
-      </div>
-    ),
-  },
-  {
-    title: 'Возраст',
-    dataIndex: 'age',
-    key: 'age',
-    width: 80,
-  },
-  {
-    title: 'Срок',
-    dataIndex: 'gestation',
-    key: 'gestation',
-    width: 100,
-  },
-  {
-    title: 'ЧСС',
-    dataIndex: ['metrics', 'heartRate'],
-    key: 'heartRate',
-    width: 80,
-    render: (rate: number) => (
-      <span className={`font-medium ${rate > 75 ? 'text-orange-600' : 'text-green-600'}`}>
-        {rate} уд/мин
-      </span>
-    ),
-  },
-  {
-    title: 'Давление',
-    dataIndex: ['metrics', 'bloodPressure'],
-    key: 'bloodPressure',
-    width: 100,
-    render: (pressure: string) => {
-      const systolic = parseInt(pressure.split('/')[0]);
-      const color = systolic > 120 ? 'text-orange-600' : 'text-green-600';
-      return <span className={`font-medium ${color}`}>{pressure}</span>;
-    },
-  },
-  {
-    title: 'Вес',
-    dataIndex: ['metrics', 'weight'],
-    key: 'weight',
-    width: 80,
-    render: (weight: number) => <span>{weight} кг</span>,
-  },
-  {
-    title: 'Сахар',
-    dataIndex: ['metrics', 'bloodSugar'],
-    key: 'bloodSugar',
-    width: 80,
-    render: (sugar: number) => (
-      <span className={`font-medium ${sugar > 5.5 ? 'text-orange-600' : 'text-green-600'}`}>
-        {sugar} ммоль/л
-      </span>
-    ),
-  },
-  {
-    title: 'Статус',
-    key: 'status',
-    width: 120,
-    render: (_: any, record: any) => {
-      const hasWarnings = record.alerts.some((alert: any) => alert.type === 'warning');
-      return (
-        <Tag color={hasWarnings ? 'orange' : 'green'}>
-          {hasWarnings ? 'Требует внимания' : 'В норме'}
-        </Tag>
-      );
-    },
-  },
-];
+// Данные пациента
+const patientData = {
+  name: 'Иванова Мария Петровна',
+  age: 28,
+  gestationalWeek: 36,
+  diagnosis: 'Беременность 36 недель',
+  bloodType: 'A(II) Rh+',
+  weight: 72
+};
 
-const Reports: React.FC = () => {
-  const [selectedPatient, setSelectedPatient] = useState<number>(1);
-  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+// Данные врача
+const doctorData = {
+  name: 'Др. Петрова Елена Александровна',
+  specialization: 'Акушер-гинеколог',
+  license: 'МЗ РФ №12345678',
+  department: 'Родильное отделение №1'
+};
 
-  const currentPatient = patientsData.find(p => p.id === selectedPatient) || patientsData[0];
+export default function ReportsPage() {
+  const [selectedAnomaly, setSelectedAnomaly] = useState<any>(null);
+  const [showAIModal, setShowAIModal] = useState(false);
+  
+  // Состояние для управления временем приема
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedTime, setSelectedTime] = useState(dayjs());
+  const [sessionType, setSessionType] = useState('monitoring');
+  const [sessionDuration, setSessionDuration] = useState(60);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [isSessionPanelCollapsed, setIsSessionPanelCollapsed] = useState(false);
 
-  const summaryStats = {
-    totalPatients: patientsData.length,
-    activeMonitoring: patientsData.length,
-    alertsCount: patientsData.reduce((acc, p) => acc + p.alerts.length, 0),
-    avgHeartRate: Math.round(patientsData.reduce((acc, p) => acc + p.metrics.heartRate, 0) / patientsData.length)
+  // Таймер записи
+  useEffect(() => {
+    let interval: any;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleStartRecording = () => {
+    setIsRecording(true);
+    setRecordingTime(0);
+  };
+
+  const handleStopRecording = () => {
+    setIsRecording(false);
+  };
+
+  const handleResetRecording = () => {
+    setIsRecording(false);
+    setRecordingTime(0);
+  };
+
+  const handleAnomalyClick = (anomaly: any) => {
+    setSelectedAnomaly(anomaly);
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch(severity) {
+      case 'severe': return 'red';
+      case 'moderate': return 'orange';
+      case 'mild': return 'yellow';
+      default: return 'green';
+    }
+  };
   return (
-    <div className="space-y-6 p-6">
-      {/* Заголовок */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Отчетность и аналитика</h1>
-          <p className="text-gray-600">Собираемые данные и показатели пациенток</p>
-        </div>
-        <RangePicker
-          onChange={(dates) => setDateRange(dates as [Dayjs, Dayjs] | null)}
-          className="shadow-sm"
-        />
-      </div>
-
-      {/* Общая статистика */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Всего пациенток"
-              value={summaryStats.totalPatients}
-              prefix={<UserOutlined style={{ color: '#e91e63' }} />}
-              valueStyle={{ color: '#e91e63' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Активный мониторинг"
-              value={summaryStats.activeMonitoring}
-              prefix={<HeartOutlined style={{ color: '#52c41a' }} />}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Уведомления"
-              value={summaryStats.alertsCount}
-              prefix={<AlertOutlined style={{ color: '#fa8c16' }} />}
-              valueStyle={{ color: '#fa8c16' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Средний пульс"
-              value={summaryStats.avgHeartRate}
-              suffix="уд/мин"
-              prefix={<RiseOutlined style={{ color: '#1890ff' }} />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Таблица пациенток */}
-      <Card title="Сводная таблица пациенток" className="shadow-sm">
-        <Table
-          columns={columns}
-          dataSource={patientsData}
-          rowKey="id"
-          pagination={false}
-          size="middle"
-          className="border rounded-lg"
-        />
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Заголовок отчета */}
+      <Card className="mb-4">
+        <Row justify="space-between" align="middle">
+          <Col>
+            <Title level={2} className="mb-2">Отчет КТГ исследования</Title>
+            <Space>
+              <Text type="secondary">
+                <CalendarOutlined /> {selectedDate.format('DD MMMM YYYY')}, {selectedTime.format('HH:mm')}-{selectedTime.add(sessionDuration, 'minute').format('HH:mm')}
+              </Text>
+              <Text type="secondary">•</Text>
+              <Text type="secondary">Длительность: {sessionDuration} минут</Text>
+              {isRecording && (
+                <>
+                  <Text type="secondary">•</Text>
+                  <Text type="secondary" className="text-red-500">
+                    ● ЗАПИСЬ ИДЕТ ({formatTime(recordingTime)})
+                  </Text>
+                </>
+              )}
+            </Space>
+          </Col>
+          <Col>
+            <Space>
+              <Button 
+                icon={<RobotOutlined />} 
+                onClick={() => setShowAIModal(true)}
+                type="default"
+              >
+                ИИ Анализ
+              </Button>
+              <Button icon={<PrinterOutlined />} type="default">Печать</Button>
+              <Button icon={<DownloadOutlined />} type="primary">Экспорт PDF</Button>
+            </Space>
+          </Col>
+        </Row>
       </Card>
 
-      {/* Детальная аналитика выбранной пациентки */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={16}>
-          <Card title="Детальный анализ пациентки" className="shadow-sm">
-            <div className="mb-4">
-              <Select
-                value={selectedPatient}
-                onChange={setSelectedPatient}
-                className="w-full max-w-xs"
-                placeholder="Выберите пациентку"
-              >
-                {patientsData.map(patient => (
-                  <Select.Option key={patient.id} value={patient.id}>
-                    {patient.name} - {patient.gestation}
-                  </Select.Option>
-                ))}
-              </Select>
-            </div>
-            
-            {/* График динамики показателей */}
-            <div style={{ height: '300px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={currentPatient.trends}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="heartRate" 
-                    stroke="#e91e63" 
-                    name="ЧСС (уд/мин)"
-                    strokeWidth={2}
+      {/* Панель управления временем приема */}
+      <Card 
+        className="mb-4" 
+        title="Параметры сеанса КТГ"
+        extra={
+          <Button
+            type="text"
+            icon={isSessionPanelCollapsed ? <DownOutlined /> : <UpOutlined />}
+            onClick={() => setIsSessionPanelCollapsed(!isSessionPanelCollapsed)}
+            className="text-gray-500 hover:text-blue-500"
+          >
+            {isSessionPanelCollapsed ? 'Развернуть' : 'Свернуть'}
+          </Button>
+        }
+      >
+        {!isSessionPanelCollapsed && (
+          <>
+            <Row gutter={24} align="middle">
+              <Col xs={24} sm={6}>
+                <Space direction="vertical" size="small" className="w-full">
+                  <Text type="secondary">Дата приема</Text>
+                  <DatePicker 
+                    value={selectedDate}
+                    onChange={(date) => setSelectedDate(date || dayjs())}
+                    className="w-full"
+                    format="DD.MM.YYYY"
                   />
+                </Space>
+              </Col>
+              
+              <Col xs={24} sm={6}>
+                <Space direction="vertical" size="small" className="w-full">
+                  <Text type="secondary">Время начала</Text>
+                  <TimePicker 
+                    value={selectedTime}
+                    onChange={(time) => setSelectedTime(time || dayjs())}
+                    className="w-full"
+                    format="HH:mm"
+                  />
+                </Space>
+              </Col>
+              
+              <Col xs={24} sm={6}>
+                <Space direction="vertical" size="small" className="w-full">
+                  <Text type="secondary">Тип сеанса</Text>
+                  <Select
+                    value={sessionType}
+                    onChange={setSessionType}
+                    className="w-full"
+                    options={[
+                      { value: 'monitoring', label: 'Мониторинг плода' },
+                      { value: 'stress', label: 'Стресс-тест' },
+                      { value: 'nst', label: 'НСТ (нестрессовый тест)' },
+                      { value: 'cst', label: 'КСТ (контрактильный стресс-тест)' }
+                    ]}
+                  />
+                </Space>
+              </Col>
+              
+              <Col xs={24} sm={6}>
+                <Space direction="vertical" size="small" className="w-full">
+                  <Text type="secondary">Длительность (мин)</Text>
+                  <Select
+                    value={sessionDuration}
+                    onChange={setSessionDuration}
+                    className="w-full"
+                    options={[
+                      { value: 20, label: '20 минут' },
+                      { value: 30, label: '30 минут' },
+                      { value: 40, label: '40 минут' },
+                      { value: 60, label: '60 минут' },
+                      { value: 90, label: '90 минут' },
+                      { value: 120, label: '120 минут' }
+                    ]}
+                  />
+                </Space>
+              </Col>
+            </Row>
+            
+            <Divider />
+            
+            {/* Контроллы записи */}
+            <Row justify="space-between" align="middle">
+              <Col>
+                <Space size="large">
+                  <div className="flex items-center gap-2">
+                    <ClockCircleOutlined className="text-blue-500" />
+                    <Text strong>
+                      Время записи: {formatTime(recordingTime)}
+                    </Text>
+                    {isRecording && (
+                      <Badge status="processing" text="Идет запись" />
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <CalendarOutlined className="text-green-500" />
+                    <Text>
+                      Сеанс: {selectedDate.format('DD.MM.YYYY')} в {selectedTime.format('HH:mm')}
+                    </Text>
+                  </div>
+                </Space>
+              </Col>
+              
+              <Col>
+                <Space>
+                  {!isRecording ? (
+                    <Button 
+                      type="primary" 
+                      icon={<PlayCircleOutlined />}
+                      onClick={handleStartRecording}
+                      className="bg-green-500 hover:bg-green-600"
+                    >
+                      Начать запись
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="default" 
+                      icon={<PauseCircleOutlined />}
+                      onClick={handleStopRecording}
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      Пауза
+                    </Button>
+                  )}
+                  
+                  <Button 
+                    type="default" 
+                    icon={<StopOutlined />}
+                    onClick={handleStopRecording}
+                    disabled={!isRecording && recordingTime === 0}
+                    danger
+                  >
+                    Стоп
+                  </Button>
+                  
+                  <Button 
+                    type="default" 
+                    icon={<ReloadOutlined />}
+                    onClick={handleResetRecording}
+                    disabled={isRecording}
+                  >
+                    Сброс
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+          </>
+        )}
+        
+        {/* Компактная информация в свернутом виде */}
+        {isSessionPanelCollapsed && (
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Space size="large">
+                <div className="flex items-center gap-2">
+                  <CalendarOutlined className="text-blue-500" />
+                  <Text>
+                    {selectedDate.format('DD.MM.YYYY')} в {selectedTime.format('HH:mm')}
+                  </Text>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <ClockCircleOutlined className="text-green-500" />
+                  <Text>
+                    {formatTime(recordingTime)} / {sessionDuration}мин
+                  </Text>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {isRecording ? (
+                    <Badge status="processing" text="Запись идет" />
+                  ) : recordingTime > 0 ? (
+                    <Badge status="warning" text="На паузе" />
+                  ) : (
+                    <Badge status="default" text="Остановлено" />
+                  )}
+                </div>
+              </Space>
+            </Col>
+            
+            <Col>
+              <Space>
+                {!isRecording ? (
+                  <Button 
+                    type="primary" 
+                    icon={<PlayCircleOutlined />}
+                    onClick={handleStartRecording}
+                    size="small"
+                    className="bg-green-500 hover:bg-green-600"
+                  >
+                    Старт
+                  </Button>
+                ) : (
+                  <Button 
+                    type="default" 
+                    icon={<PauseCircleOutlined />}
+                    onClick={handleStopRecording}
+                    size="small"
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    Пауза
+                  </Button>
+                )}
+                
+                <Button 
+                  type="default" 
+                  icon={<StopOutlined />}
+                  onClick={handleStopRecording}
+                  disabled={!isRecording && recordingTime === 0}
+                  size="small"
+                  danger
+                >
+                  Стоп
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        )}
+      </Card>
+
+      <Row gutter={24}>
+        {/* Левая панель */}
+        <Col xs={24} lg={8}>
+          <Card title="Информация о пациенте" className="mb-4">
+            <Space direction="vertical" size="small" className="w-full">
+              <div className="flex items-center gap-2">
+                <Avatar size={40} icon={<UserOutlined />} />
+                <div>
+                  <Text strong>{patientData.name}</Text>
+                  <br />
+                  <Text type="secondary">{patientData.age} лет</Text>
+                </div>
+              </div>
+              <Divider className="my-3" />
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Text type="secondary">Срок:</Text>
+                  <br />
+                  <Text strong>{patientData.gestationalWeek} недель</Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Вес:</Text>
+                  <br />
+                  <Text strong>{patientData.weight} кг</Text>
+                </Col>
+              </Row>
+            </Space>
+          </Card>
+
+          <Card title="Параметры сеанса" className="mb-4">
+            <Space direction="vertical" size="small" className="w-full">
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Text type="secondary">Тип сеанса:</Text>
+                  <br />
+                  <Text strong>
+                    {sessionType === 'monitoring' && 'Мониторинг плода'}
+                    {sessionType === 'stress' && 'Стресс-тест'}
+                    {sessionType === 'nst' && 'НСТ'}
+                    {sessionType === 'cst' && 'КСТ'}
+                  </Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Статус:</Text>
+                  <br />
+                  {isRecording ? (
+                    <Tag color="red">● Запись идет</Tag>
+                  ) : recordingTime > 0 ? (
+                    <Tag color="orange">⏸ На паузе</Tag>
+                  ) : (
+                    <Tag color="default">⏹ Остановлено</Tag>
+                  )}
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Text type="secondary">Время записи:</Text>
+                  <br />
+                  <Text strong className={isRecording ? 'text-red-500' : ''}>
+                    {formatTime(recordingTime)}
+                  </Text>
+                </Col>
+                <Col span={12}>
+                  <Text type="secondary">Плановая длительность:</Text>
+                  <br />
+                  <Text strong>{sessionDuration} мин</Text>
+                </Col>
+              </Row>
+            </Space>
+          </Card>
+
+          <Card title="Показатели КТГ">
+            <Row gutter={16}>
+              <Col span={12}>
+                <Statistic 
+                  title="Базальный ЧСС" 
+                  value={142} 
+                  suffix="уд/мин"
+                  valueStyle={{ color: '#3f8600' }}
+                />
+              </Col>
+              <Col span={12}>
+                <Statistic 
+                  title="Вариабельность" 
+                  value={15} 
+                  suffix="уд/мин"
+                  valueStyle={{ color: '#cf1322' }}
+                />
+              </Col>
+            </Row>
+            <Divider />
+            <div className="text-center">
+              <Tag color="green" className="text-lg px-4 py-1">
+                <CheckCircleOutlined /> Удовлетворительное
+              </Tag>
+            </div>
+          </Card>
+        </Col>
+
+        {/* Правая панель - график */}
+        <Col xs={24} lg={16}>
+          <Card title="Кардиотокограмма" className="mb-4">
+            <div style={{ width: '100%', height: 400 }}>
+              <ResponsiveContainer>
+                <LineChart data={ctgData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis domain={[110, 180]} />
+                  <Tooltip />
+                  
+                  {/* Зоны аномалий */}
+                  {anomalyZones.map((zone) => (
+                    <ReferenceArea
+                      key={zone.id}
+                      x1={zone.startTime}
+                      x2={zone.endTime}
+                      fill={zone.severity === 'moderate' ? '#ff4d4f' : '#faad14'}
+                      fillOpacity={0.3}
+                      onClick={() => handleAnomalyClick(zone)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                  
+                  <ReferenceLine y={110} stroke="red" strokeDasharray="5 5" />
+                  <ReferenceLine y={160} stroke="red" strokeDasharray="5 5" />
+                  
                   <Line 
                     type="monotone" 
-                    dataKey="bloodPressure" 
-                    stroke="#1890ff" 
-                    name="Давление (сист.)"
+                    dataKey="fhr" 
+                    stroke="#2196F3" 
                     strokeWidth={2}
+                    dot={{ fill: '#2196F3', r: 3 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            
+            <div className="mt-4">
+              <Title level={4}>Выявленные отклонения:</Title>
+              <Space wrap>
+                {anomalyZones.map((anomaly) => (
+                  <Tag
+                    key={anomaly.id}
+                    color={getSeverityColor(anomaly.severity)}
+                    className="cursor-pointer"
+                    onClick={() => handleAnomalyClick(anomaly)}
+                  >
+                    <ExclamationCircleOutlined /> {anomaly.description}
+                  </Tag>
+                ))}
+              </Space>
+            </div>
           </Card>
         </Col>
-
-        <Col xs={24} lg={8}>
-          <div className="space-y-4">
-            {/* Текущие показатели */}
-            <Card title="Текущие показатели" className="shadow-sm">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">ЧСС:</span>
-                  <span className="font-medium">{currentPatient.metrics.heartRate} уд/мин</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Давление:</span>
-                  <span className="font-medium">{currentPatient.metrics.bloodPressure}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Вес:</span>
-                  <span className="font-medium">{currentPatient.metrics.weight} кг</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Температура:</span>
-                  <span className="font-medium">{currentPatient.metrics.temperature}°C</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Сахар:</span>
-                  <span className="font-medium">{currentPatient.metrics.bloodSugar} ммоль/л</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Уведомления и рекомендации */}
-            <Card title="Уведомления" className="shadow-sm">
-              <div className="space-y-2">
-                {currentPatient.alerts.map((alert, index) => (
-                  <div 
-                    key={index}
-                    className={`p-3 rounded-lg border-l-4 ${
-                      alert.type === 'warning' ? 'bg-orange-50 border-orange-400' :
-                      alert.type === 'success' ? 'bg-green-50 border-green-400' :
-                      'bg-blue-50 border-blue-400'
-                    }`}
-                  >
-                    <p className={`text-sm font-medium ${
-                      alert.type === 'warning' ? 'text-orange-800' :
-                      alert.type === 'success' ? 'text-green-800' :
-                      'text-blue-800'
-                    }`}>
-                      {alert.message}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        </Col>
       </Row>
+
+      {/* Модальные окна */}
+      <Modal
+        title="Детали отклонения"
+        open={!!selectedAnomaly}
+        onCancel={() => setSelectedAnomaly(null)}
+        footer={null}
+      >
+        {selectedAnomaly && (
+          <Space direction="vertical" size="large" className="w-full">
+            <Title level={4}>{selectedAnomaly.description}</Title>
+            <Alert
+              message="Рекомендации"
+              description={selectedAnomaly.recommendation}
+              type="warning"
+              showIcon
+            />
+          </Space>
+        )}
+      </Modal>
+
+      <Modal
+        title="ИИ Анализ КТГ"
+        open={showAIModal}
+        onCancel={() => setShowAIModal(false)}
+        footer={null}
+        width={700}
+      >
+        <Alert
+          message="Анализ завершен"
+          description="ИИ-система проанализировала КТГ"
+          type="info"
+          showIcon
+          className="mb-4"
+        />
+        
+        <Timeline
+          items={[
+            {
+              color: 'red',
+              children: 'Брадикардия плода (10:15-10:25): требуется контроль'
+            },
+            {
+              color: 'orange', 
+              children: 'Тахикардия плода (10:40-10:50): умеренная степень'
+            },
+            {
+              color: 'green',
+              children: 'Общее состояние: удовлетворительное'
+            }
+          ]}
+        />
+      </Modal>
     </div>
   );
-};
-
-export default Reports;
+}
