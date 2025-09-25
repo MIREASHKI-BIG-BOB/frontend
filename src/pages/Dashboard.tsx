@@ -1,5 +1,5 @@
-import { Segmented, Button, Tooltip, Dropdown, Menu } from 'antd';
-import { SettingOutlined, SaveOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
+import { Segmented, Button, Tooltip, Dropdown, Menu, DatePicker, TimePicker, Select, Space, Typography } from 'antd';
+import { SettingOutlined, SaveOutlined, UndoOutlined, PlusOutlined, CalendarOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import PatientCard from '../widgets/PatientCard';
 import CTGChartSimple from '../widgets/CTGChartSimple';
 import AlertPanel from '../widgets/AlertPanel';
@@ -10,6 +10,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { AlertSystem } from '../utils/AlertSystem';
 import { NotificationService } from '../utils/NotificationService';
 import { Responsive, WidthProvider, Layout as RGLLayout } from 'react-grid-layout';
+import dayjs from 'dayjs';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -56,6 +57,8 @@ const defaultLayouts = {
   ]
 };
 
+const { Text } = Typography;
+
 export default function Dashboard() {
   const [fps, setFps] = useState<number>(250);
   const [winSec, setWinSec] = useState<number>(180);
@@ -64,6 +67,11 @@ export default function Dashboard() {
   const [recSec, setRecSec] = useState<number>(0);
   const [layouts, setLayouts] = useState(defaultLayouts);
   const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Простые поля для выбора сеанса
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedTime, setSelectedTime] = useState(dayjs());
+  const [sessionType, setSessionType] = useState('monitoring');
 
   const alertSystem = useMemo(() => new AlertSystem(), []);
   const notificationService = useMemo(() => new NotificationService(), []);
@@ -269,6 +277,60 @@ export default function Dashboard() {
             💡 Перетащите виджеты, измените размер или добавьте новые. Настройки сохраняются автоматически.
           </div>
         )}
+      </div>
+
+      {/* Простой выбор сеанса */}
+      <div style={{ 
+        background: 'white', 
+        padding: '16px', 
+        borderRadius: '8px', 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
+        marginBottom: '16px',
+        border: '1px solid #f0f0f0'
+      }}>
+        <Space size="large" wrap>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CalendarOutlined style={{ color: '#1890ff' }} />
+            <Text type="secondary">Дата:</Text>
+            <DatePicker 
+              value={selectedDate}
+              onChange={(date) => setSelectedDate(date || dayjs())}
+              format="DD.MM.YYYY"
+              size="small"
+            />
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ClockCircleOutlined style={{ color: '#52c41a' }} />
+            <Text type="secondary">Время:</Text>
+            <TimePicker 
+              value={selectedTime}
+              onChange={(time) => setSelectedTime(time || dayjs())}
+              format="HH:mm"
+              size="small"
+            />
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Text type="secondary">Тип сеанса:</Text>
+            <Select
+              value={sessionType}
+              onChange={setSessionType}
+              size="small"
+              style={{ width: 200 }}
+              options={[
+                { value: 'monitoring', label: 'Мониторинг плода' },
+                { value: 'stress', label: 'Стресс-тест' },
+                { value: 'nst', label: 'НСТ (нестрессовый тест)' },
+                { value: 'cst', label: 'КСТ (контрактильный стресс-тест)' }
+              ]}
+            />
+          </div>
+          
+          <Text style={{ color: '#666' }}>
+            Сеанс: {selectedDate.format('DD.MM.YYYY')} в {selectedTime.format('HH:mm')}
+          </Text>
+        </Space>
       </div>
 
       {/* Responsive Grid Layout */}
