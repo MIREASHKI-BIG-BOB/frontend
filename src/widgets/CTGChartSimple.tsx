@@ -9,7 +9,6 @@ type Point = { t: number; fhr: number; uc: number };
 
 // Simple data generation with more realistic patterns
 function initSimpleData(n = 100): Point[] {
-  const now = Date.now();
   const data: Point[] = [];
   
   let baseline = 140;
@@ -40,7 +39,7 @@ function initSimpleData(n = 100): Point[] {
     }
     
     data.push({
-      t: now - (n - i) * 1000,
+      t: i, // используем индекс как относительное время в секундах
       fhr: Math.max(90, Math.min(180, fhr)),
       uc: Math.max(0, Math.min(100, uc))
     });
@@ -64,90 +63,165 @@ export default function CTGChartSimple({
 }: CTGChartSimpleProps) {
   const [data, setData] = useState<Point[]>(initSimpleData(100));
   const [anomalyZones, setAnomalyZones] = useState<Array<{start: number, end: number, type: string}>>([]);
+  const [wsStatus, setWsStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  const [wsError, setWsError] = useState<string>('');
+  const [startTime, setStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prev => {
-        const lastTime = prev[prev.length - 1]?.t || Date.now();
-        const nextTime = lastTime + 1000;
+    let ws: WebSocket | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    
+    const connectWebSocket = () => {
+      try {
+        setWsStatus('connecting');
+        setWsError('');
+        ws = new WebSocket('ws://localhost:8081/ws');
         
-        // More realistic generation
-        const lastFhr = prev[prev.length - 1]?.fhr || 140;
-        const lastUc = prev[prev.length - 1]?.uc || 10;
+        ws.onopen = () => {
+          console.log('WebSocket connected to generator');
+          setWsStatus('connected');
+          setStartTime(Date.now()); // Сбрасываем время начала при подключении
+          setData([]); // Очищаем данные при новом подключении
+          reconnectAttempts = 0;
+        };
         
-        let fhr = lastFhr + (Math.random() - 0.5) * 6;
-        let uc = lastUc + (Math.random() - 0.5) * 4;
-        
-        // Occasional events for testing alerts
-        if (Math.random() < 0.005) {
-          fhr = Math.max(90, fhr - 25); // bradycardia event
-        }
-        if (Math.random() < 0.003) {
-          fhr = Math.min(180, fhr + 30); // tachycardia event
-        }
-        if (Math.random() < 0.008) {
-          uc = Math.min(100, uc + 40); // strong contraction
-        }
-        
-        fhr = Math.max(90, Math.min(180, fhr));
-        uc = Math.max(0, Math.min(100, uc));
-        
-        const newPoint = { t: nextTime, fhr, uc };
-        const newData = [...prev, newPoint];
-        const maxPoints = windowLengthSec || 180;
-        const finalData = newData.length > maxPoints ? newData.slice(-maxPoints) : newData;
-        
-        // Check for alerts if system provided
-        if (alertSystem) {
-          const fhrValues = finalData.map(p => p.fhr);
-          const ucValues = finalData.map(p => p.uc);
-          
-          const newAlerts = alertSystem.checkForAlerts(fhrValues, ucValues);
-          
-          // Create anomaly zones for visualization
-          if (newAlerts.length > 0) {
-            const now = Date.now();
-            const newZones = newAlerts.map(alert => ({
-              start: now - 30000, // last 30 seconds
-              end: now,
-              type: alert.level
-            }));
-            setAnomalyZones(prev => [...prev, ...newZones].slice(-10)); // keep last 10 zones
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+            
+            // Ожидаем формат: { timestamp: number, data: { bpm: number, uterus: number } }
+            if (message.data && typeof message.data.bpm === 'number' && typeof message.data.uterus === 'number') {
+              const currentTime = Date.now();
+              const relativeTime = Math.round((currentTime - startTime) / 1000); // секунды с начала
+              
+              const newPoint: Point = {
+                t: relativeTime, // используем относительное время в секундах
+                fhr: Math.max(90, Math.min(180, message.data.bpm)), // ограничиваем диапазон ЧСС
+                uc: Math.max(0, Math.min(100, message.data.uterus)) // ограничиваем диапазон UC
+              };
+              
+              setData(prev => {
+                const newData = [...prev, newPoint];
+                const maxPoints = windowLengthSec || 180;
+                const finalData = newData.length > maxPoints ? newData.slice(-maxPoints) : newData;
+                
+                // Check for alerts if system provided
+                if (alertSystem) {
+                  const fhrValues = finalData.map(p => p.fhr);
+                  const ucValues = finalData.map(p => p.uc);
+                  
+                  const newAlerts = alertSystem.checkForAlerts(fhrValues, ucValues);
+                  
+                  // Create anomaly zones for visualization
+                  if (newAlerts.length > 0) {
+                    const now = relativeTime;
+                    const newZones = newAlerts.map(alert => ({
+                      start: now - 30, // last 30 seconds
+                      end: now,
+                      type: alert.level
+                    }));
+                    setAnomalyZones(prevZones => [...prevZones, ...newZones].slice(-10)); // keep last 10 zones
+                  }
+                }
+                
+                // Risk calculation based on real data
+                if (onRiskChange) {
+                  const avgFhr = finalData.slice(-10).reduce((sum, p) => sum + p.fhr, 0) / 10;
+                  const maxUc = Math.max(...finalData.slice(-10).map(p => p.uc));
+                  
+                  let risk: 'ok' | 'warn' | 'danger' = 'ok';
+                  let score = 0;
+                  
+                  if (avgFhr < 110 || avgFhr > 170) score += 40;
+                  else if (avgFhr < 120 || avgFhr > 160) score += 20;
+                  
+                  if (maxUc > 80) score += 30;
+                  else if (maxUc > 60) score += 15;
+                  
+                  if (score < 25) risk = 'ok';
+                  else if (score < 50) risk = 'warn';
+                  else risk = 'danger';
+                  
+                  onRiskChange(risk, score);
+                }
+                
+                return finalData;
+              });
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
           }
-        }
+        };
         
-        // Simple risk calculation
-        if (onRiskChange) {
-          const avgFhr = finalData.slice(-10).reduce((sum, p) => sum + p.fhr, 0) / 10;
-          const maxUc = Math.max(...finalData.slice(-10).map(p => p.uc));
+        ws.onclose = (event) => {
+          console.log('WebSocket connection closed:', event.code, event.reason);
+          setWsStatus('disconnected');
           
-          let risk: 'ok' | 'warn' | 'danger' = 'ok';
-          let score = 0;
-          
-          if (avgFhr < 110 || avgFhr > 170) score += 40;
-          else if (avgFhr < 120 || avgFhr > 160) score += 20;
-          
-          if (maxUc > 80) score += 30;
-          else if (maxUc > 60) score += 15;
-          
-          if (score < 25) risk = 'ok';
-          else if (score < 50) risk = 'warn';
-          else risk = 'danger';
-          
-          onRiskChange(risk, score);
-        }
+          // Попытка переподключения
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+            setTimeout(connectWebSocket, 3000); // повторная попытка через 3 секунды
+          } else {
+            setWsError(`Failed to connect after ${maxReconnectAttempts} attempts`);
+            setWsStatus('error');
+          }
+        };
         
-        return finalData;
-      });
-    }, fpsMs);
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setWsStatus('error');
+          setWsError('WebSocket connection error');
+        };
+        
+      } catch (error) {
+        console.error('Failed to create WebSocket connection:', error);
+        setWsStatus('error');
+        setWsError('Failed to create WebSocket connection');
+      }
+    };
+    
+    // Инициализация подключения
+    connectWebSocket();
+    
+    // Cleanup
+    return () => {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    };
+  }, [windowLengthSec, onRiskChange, alertSystem]);
 
-    return () => clearInterval(interval);
-  }, [fpsMs, windowLengthSec, onRiskChange, alertSystem]);
-
-  const timeFmt = (t: number) => new Date(t).toLocaleTimeString('ru-RU', { minute: '2-digit', second: '2-digit' });
+  const timeFmt = (t: number) => {
+    // t теперь в секундах с начала сеанса
+    const minutes = Math.floor(t / 60);
+    const seconds = t % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <Card title="КТГ мониторинг" aria-label="График КТГ">
+    <Card 
+      title={
+        <div className="flex justify-between items-center">
+          <span>КТГ мониторинг</span>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              wsStatus === 'connected' ? 'bg-green-500' : 
+              wsStatus === 'connecting' ? 'bg-yellow-500' : 
+              wsStatus === 'error' ? 'bg-red-500' : 'bg-gray-400'
+            }`}></div>
+            <span className="text-xs text-gray-500">
+              {wsStatus === 'connected' ? 'Подключено' :
+               wsStatus === 'connecting' ? 'Подключение...' :
+               wsStatus === 'error' ? 'Ошибка' : 'Отключено'}
+            </span>
+          </div>
+        </div>
+      } 
+      aria-label="График КТГ"
+    >
       <div className="h-[300px] bg-gray-50 rounded-md">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 6, right: 10, left: 10, bottom: 2 }}>
@@ -221,7 +295,10 @@ export default function CTGChartSimple({
       </div>
       <div className="!mt-2 text-gray-600 text-xs px-2 py-1 bg-gray-50 rounded border-t border-gray-200">
         <div className="flex justify-between items-center">
-          <span>Окно: {windowLengthSec}с • {fpsMs}мс</span>
+          <span>
+            {wsStatus === 'connected' ? 'Данные в реальном времени' : `Окно: ${windowLengthSec}с`}
+            {wsStatus === 'error' && wsError && ` • ${wsError}`}
+          </span>
           {anomalyZones.length > 0 && (
             <span className="text-orange-600 font-medium flex items-center gap-1">
               <ExclamationCircleOutlined className="text-orange-500" />
