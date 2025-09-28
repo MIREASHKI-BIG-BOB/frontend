@@ -1,13 +1,12 @@
 import { Segmented, Button, Tooltip, Dropdown, Menu, DatePicker, TimePicker, Select, Space, Typography } from 'antd';
 import { SettingOutlined, SaveOutlined, UndoOutlined, PlusOutlined, CalendarOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import PatientCard from '../widgets/PatientCard';
-import CTGChartSimple from '../widgets/CTGChartSimple';
+import HomeCTGMonitor from '../widgets/HomeCTGMonitor';
+import DeviceStatus from '../widgets/DeviceStatus';
 import AlertPanel from '../widgets/AlertPanel';
-import QuickStats from '../widgets/QuickStats';
 import RecentPatients from '../widgets/RecentPatients';
 import TrendsChart from '../widgets/TrendsChart';
 import { useEffect, useState, useMemo } from 'react';
-import { AlertSystem } from '../utils/AlertSystem';
 import { NotificationService } from '../utils/NotificationService';
 import { Responsive, WidthProvider, Layout as RGLLayout } from 'react-grid-layout';
 import { colors, typography } from '../theme';
@@ -26,35 +25,35 @@ interface DashboardLayout extends RGLLayout {
 const defaultLayouts = {
   lg: [
     { i: 'patient', x: 0, y: 0, w: 3, h: 6.5, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'ctg', x: 3, y: 0, w: 6, h: 7, component: 'CTGChart', title: 'КТГ Мониторинг' },
-    { i: 'alerts', x: 9, y: 0, w: 3, h: 6, component: 'AlertPanel', title: 'Уведомления' },
-    { i: 'quickstats', x: 0, y: 7, w: 3, h: 3.5, component: 'QuickStats', title: 'Статистика' },
-    { i: 'trends', x: 3, y: 7, w: 6, h: 3, component: 'TrendsChart', title: 'Тренды' },
-    { i: 'recent', x: 9, y: 7, w: 3, h: 4, component: 'RecentPatients', title: 'Последние пациентки' },
+    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 9, y: 0, w: 3, h: 10.5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'alerts', x: 0, y: 7, w: 3, h: 3.5, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 3, y: 7, w: 3, h: 3.5, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'recent', x: 6, y: 7, w: 3, h: 3.5, component: 'RecentPatients', title: 'История сеансов' },
   ],
   md: [
     { i: 'patient', x: 0, y: 0, w: 4, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'ctg', x: 4, y: 0, w: 8, h: 7, component: 'CTGChart', title: 'КТГ Мониторинг' },
-    { i: 'alerts', x: 0, y: 6, w: 4, h: 5, component: 'AlertPanel', title: 'Уведомления' },
-    { i: 'quickstats', x: 4, y: 7, w: 4, h: 3, component: 'QuickStats', title: 'Статистика' },
-    { i: 'trends', x: 8, y: 7, w: 4, h: 4, component: 'TrendsChart', title: 'Тренды' },
-    { i: 'recent', x: 0, y: 11, w: 4, h: 4, component: 'RecentPatients', title: 'Последние пациентки' },
+    { i: 'homemonitor', x: 4, y: 0, w: 8, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 0, y: 6, w: 4, h: 9, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'alerts', x: 4, y: 7, w: 4, h: 3, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 8, y: 7, w: 4, h: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'recent', x: 4, y: 10, w: 8, h: 5, component: 'RecentPatients', title: 'История сеансов' },
   ],
   sm: [
     { i: 'patient', x: 0, y: 0, w: 6, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'ctg', x: 0, y: 6, w: 6, h: 7, component: 'CTGChart', title: 'КТГ Мониторинг' },
-    { i: 'alerts', x: 0, y: 13, w: 6, h: 5, component: 'AlertPanel', title: 'Уведомления' },
-    { i: 'quickstats', x: 0, y: 18, w: 6, h: 3, component: 'QuickStats', title: 'Статистика' },
-    { i: 'trends', x: 0, y: 21, w: 6, h: 4, component: 'TrendsChart', title: 'Тренды' },
-    { i: 'recent', x: 0, y: 25, w: 6, h: 4, component: 'RecentPatients', title: 'Последние пациентки' },
+    { i: 'homemonitor', x: 0, y: 6, w: 6, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 0, y: 13, w: 6, h: 8, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'alerts', x: 0, y: 21, w: 6, h: 3, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 0, y: 24, w: 6, h: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'recent', x: 0, y: 28, w: 6, h: 4, component: 'RecentPatients', title: 'История сеансов' },
   ],
   xs: [
     { i: 'patient', x: 0, y: 0, w: 4, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'ctg', x: 0, y: 6, w: 4, h: 7, component: 'CTGChart', title: 'КТГ Мониторинг' },
-    { i: 'alerts', x: 0, y: 13, w: 4, h: 5, component: 'AlertPanel', title: 'Уведомления' },
-    { i: 'quickstats', x: 0, y: 18, w: 4, h: 3, component: 'QuickStats', title: 'Статистика' },
-    { i: 'trends', x: 0, y: 21, w: 4, h: 4, component: 'TrendsChart', title: 'Тренды' },
-    { i: 'recent', x: 0, y: 25, w: 4, h: 4, component: 'RecentPatients', title: 'Последние пациентки' },
+    { i: 'homemonitor', x: 0, y: 6, w: 4, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 0, y: 13, w: 4, h: 8, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'alerts', x: 0, y: 21, w: 4, h: 3, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 0, y: 24, w: 4, h: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'recent', x: 0, y: 28, w: 4, h: 4, component: 'RecentPatients', title: 'История сеансов' },
   ]
 };
 
@@ -72,9 +71,8 @@ export default function Dashboard() {
   // Простые поля для выбора сеанса
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedTime, setSelectedTime] = useState(dayjs());
-  const [sessionType, setSessionType] = useState('monitoring');
+  const [sessionType, setSessionType] = useState('home_monitoring');
 
-  const alertSystem = useMemo(() => new AlertSystem(), []);
   const notificationService = useMemo(() => new NotificationService(), []);
 
   useEffect(() => {
@@ -86,19 +84,6 @@ export default function Dashboard() {
     }
     return () => clearInterval(interval);
   }, [recSec]);
-
-  // Subscribe to alerts and show notifications
-  useEffect(() => {
-    const unsubscribe = alertSystem.subscribe((alerts) => {
-      alerts.forEach(alert => {
-        notificationService.showNotification(
-          alert.title + ': ' + (alert.reasons ? alert.reasons.join(', ') : 'Медицинская тревога')
-        );
-      });
-    });
-
-    return unsubscribe;
-  }, [alertSystem, notificationService]);
 
   // Load saved layouts from localStorage
   useEffect(() => {
@@ -143,34 +128,24 @@ export default function Dashboard() {
         return (
           <PatientCard 
             risk={riskScore} 
-            spo2={98}
-            movements={12}
+            deviceConnected={true}
+            lastMovement={8}
             recordingSec={recSec}
           />
         );
-      case 'ctg':
+      case 'homemonitor':
         return (
-          <CTGChartSimple 
-            fpsMs={fps} 
-            windowLengthSec={winSec} 
-            onRiskChange={(risk, score) => {
+          <HomeCTGMonitor 
+            onRiskChange={(risk: 'ok' | 'warn' | 'danger', score: number) => {
               setRisk(risk);
               setRiskScore(score);
             }}
-            alertSystem={alertSystem}
           />
         );
+      case 'device':
+        return <DeviceStatus />;
       case 'alerts':
-        return <AlertPanel alertSystem={alertSystem} />;
-      case 'quickstats':
-        return (
-          <QuickStats 
-            patientsTotal={8}
-            activeMonitoring={6}
-            avgHeartRate={Math.round(75 + Math.sin(recSec / 10) * 5)}
-            alertsToday={3}
-          />
-        );
+        return <AlertPanel />;
       case 'trends':
         return <TrendsChart height={120} />;
       case 'recent':
@@ -188,11 +163,11 @@ export default function Dashboard() {
   const getTitleById = (id: string) => {
     const titles: { [key: string]: string } = {
       'patient': 'Пациентка',
-      'ctg': 'КТГ Мониторинг',
+      'homemonitor': 'Домашний мониторинг',
+      'device': 'Устройство "Шайба"',
       'alerts': 'Уведомления',
-      'quickstats': 'Статистика',
-      'trends': 'Тренды',
-      'recent': 'Последние пациентки'
+      'trends': 'Анализ мониторинга',
+      'recent': 'История сеансов'
     };
     return titles[id] || 'Неизвестный виджет';
   };
@@ -212,9 +187,10 @@ export default function Dashboard() {
 
     const labelColors: { [key: string]: string } = {
       'patient': 'bg-blue-500',
-      'ctg': 'bg-green-500',
+      'homemonitor': 'bg-green-500',
+      'device': 'bg-purple-500',
       'alerts': 'bg-orange-500',
-      'quickstats': 'bg-purple-500',
+      'quickstats': 'bg-cyan-500',
       'trends': 'bg-indigo-500',
       'recent': 'bg-pink-500',
     };
@@ -326,10 +302,10 @@ export default function Dashboard() {
               size="middle"
               style={{ width: 200, fontSize: typography.fontSize.sm }}
               options={[
-                { value: 'monitoring', label: 'Мониторинг плода' },
-                { value: 'stress', label: 'Стресс-тест' },
-                { value: 'nst', label: 'НСТ (нестрессовый тест)' },
-                { value: 'cst', label: 'КСТ (контрактильный стресс-тест)' }
+                { value: 'home_monitoring', label: 'Домашний мониторинг' },
+                { value: 'movement_count', label: 'Подсчет движений' },
+                { value: 'rest_monitoring', label: 'Мониторинг покоя' },
+                { value: 'active_monitoring', label: 'Активный мониторинг' }
               ]}
             />
           </div>

@@ -12,21 +12,22 @@ function fmtTime(totalSec: number) {
 
 interface PatientCardProps {
   risk?: number; // 0..100
-  spo2?: number; // mother's SpO2
-  movements?: number; // fetal movements count
-  recordingSec?: number; // recording timer
+  deviceConnected?: boolean; // статус подключения домашнего устройства
+  lastMovement?: number; // минут назад было последнее движение
+  recordingSec?: number; // время записи
 }
 
-export default function PatientCard({ risk: riskProp, spo2, movements, recordingSec }: PatientCardProps) {
+export default function PatientCard({ risk: riskProp, deviceConnected, lastMovement, recordingSec }: PatientCardProps) {
   // demo data
   const patient = {
     name: 'Иванова Анна',
     age: 29,
-    gestation: '34 нед.',
-    anamnesis: 'Преэклампсия в анамнезе',
+    gestation: '34 нед. 5 дн.',
+    location: 'Домашний мониторинг',
+    deviceModel: 'MoniPuck v2.1'
   };
-  const risk = typeof riskProp === 'number' ? Math.round(riskProp) : 70; // %
-  const status = risk < 30 ? 'Норма' : risk < 60 ? 'Подозрение' : 'Критично';
+  const risk = typeof riskProp === 'number' ? Math.round(riskProp) : 45; // %
+  const status = risk < 30 ? 'Норма' : risk < 60 ? 'Наблюдение' : 'Тревога';
 
   return (
     <Card 
@@ -69,41 +70,53 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
             <span className="text-sm font-medium text-blue-600">{patient.gestation}</span>
           </div>
           <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">Анамнез:</span>
-            <span className="text-xs text-gray-600 leading-tight">{patient.anamnesis}</span>
+            <span className="text-xs font-medium text-gray-500 w-16">Место:</span>
+            <span className="text-xs text-gray-600 leading-tight">{patient.location}</span>
+          </div>
+          <div className="flex">
+            <span className="text-xs font-medium text-gray-500 w-16">Устр-во:</span>
+            <span className="text-xs text-blue-600 leading-tight">{patient.deviceModel}</span>
           </div>
         </div>
 
-        {/* Показатели мониторинга - ключевые медицинские данные */}
+        {/* Показатели домашнего мониторинга */}
         <div className="grid grid-cols-3 gap-1.5">
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">SpO₂ мамы</div>
-            <div className="text-base font-bold" style={{ color: colors.text.accent }}>{typeof spo2 === 'number' ? spo2 : 98}%</div>
-            <div className="text-xs text-gray-400">сатурация O₂</div>
+            <div className="text-xs text-gray-600 font-medium mb-0.5">Подключение</div>
+            <div className="text-base font-bold" style={{ 
+              color: deviceConnected !== false ? '#52c41a' : '#f5222d' 
+            }}>
+              {deviceConnected !== false ? '✓' : '✗'}
+            </div>
+            <div className="text-xs text-gray-400">устройство</div>
           </div>
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">Д. п.</div>
-            <div className="text-base font-bold" style={{ color: colors.risk.high }}>{typeof movements === 'number' ? movements : 12}</div>
-                        <div className="text-xs text-gray-400">За посл. час</div>
+            <div className="text-xs text-gray-600 font-medium mb-0.5">Посл. движ.</div>
+            <div className="text-base font-bold" style={{ 
+              color: (lastMovement || 8) > 30 ? '#f5222d' : (lastMovement || 8) > 15 ? '#fa8c16' : '#52c41a'
+            }}>
+              {lastMovement || 8}м
+            </div>
+            <div className="text-xs text-gray-400">назад</div>
           </div>
           <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">Запись</div>
-            <div className="text-sm font-bold text-gray-700 font-mono">{fmtTime(recordingSec ?? 189)}</div>
-            <div className="text-xs text-gray-400">время КТГ</div>
+            <div className="text-xs text-gray-600 font-medium mb-0.5">Сеанс</div>
+            <div className="text-sm font-bold text-gray-700 font-mono">{fmtTime(recordingSec ?? 247)}</div>
+            <div className="text-xs text-gray-400">длится</div>
           </div>
         </div>
 
-        {/* Риск осложнений - прогресс-бар показывает вероятность осложнений в % */}
+        {/* Риск осложнений для домашнего мониторинга */}
         <div className="space-y-2">
           <div className="text-xs text-gray-600 font-medium">
-            Риск осложнений: {status} ({risk}%)
+            Оценка состояния: {status} ({risk}%)
           </div>
           <Progress 
             percent={risk} 
             strokeColor={
-              risk < 30 ? colors.risk.low :    // Зеленый - низкий риск (норма)
-              risk < 60 ? colors.risk.medium : // Желтый - умеренный риск (подозрение)
-              colors.risk.high                 // Красный - высокий риск (критично)
+              risk < 30 ? colors.risk.low :    // Зеленый - норма (все хорошо)
+              risk < 60 ? colors.risk.medium : // Желтый - наблюдение (требует внимания)
+              colors.risk.high                 // Красный - тревога (нужна консультация)
             }
             trailColor={colors.background.gray}
             strokeWidth={6}
@@ -111,11 +124,11 @@ export default function PatientCard({ risk: riskProp, spo2, movements, recording
             className="text-xs"
           />
           <div style={typography.styles.caption}>
-            • 0-30% — Норма (низкий риск осложнений)
+            • 0-30% — Норма (спокойное состояние)
             <br />
-            • 30-60% — Подозрение (требует наблюдения) 
+            • 30-60% — Наблюдение (контроль параметров) 
             <br />
-            • 60-100% — Критично (немедленная помощь)
+            • 60-100% — Тревога (обратиться к врачу)
           </div>
         </div>
       </Space>
