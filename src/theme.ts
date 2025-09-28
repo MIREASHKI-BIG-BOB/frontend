@@ -102,16 +102,16 @@ export const theme: ThemeConfig = {
     colorBorder: colors.border.primary,
     colorBorderSecondary: colors.border.secondary,
     
-    // Типографика (Ant Design система)
-    fontSize: 14,                    // Базовый размер шрифта
-    fontSizeHeading1: 38,            // h1 - очень большой
-    fontSizeHeading2: 30,            // h2 - большой  
-    fontSizeHeading3: 24,            // h3 - средний
-    fontSizeHeading4: 20,            // h4 - обычный заголовок
-    fontSizeHeading5: 16,            // h5 - маленький заголовок
-    fontSizeSM: 12,                  // Маленький текст
-    fontSizeLG: 16,                  // Большой текст
-    fontSizeXL: 20,                  // Очень большой текст
+    // Типографика (более компактная система)
+    fontSize: 12,                    // Базовый размер шрифта (уменьшен с 14 до 12)
+    fontSizeHeading1: 32,            // h1 - очень большой (уменьшен)
+    fontSizeHeading2: 26,            // h2 - большой (уменьшен)
+    fontSizeHeading3: 20,            // h3 - средний (уменьшен)
+    fontSizeHeading4: 16,            // h4 - обычный заголовок (уменьшен)
+    fontSizeHeading5: 14,            // h5 - маленький заголовок (уменьшен)
+    fontSizeSM: 11,                  // Маленький текст (уменьшен)
+    fontSizeLG: 14,                  // Большой текст (уменьшен)
+    fontSizeXL: 16,                  // Очень большой текст (уменьшен)
     
     // Отступы и размеры (Ant Design система)
     borderRadius: 6,                 // Скругление углов
