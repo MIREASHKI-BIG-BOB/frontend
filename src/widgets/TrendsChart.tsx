@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Select, Space } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { colors, typography } from '../theme';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import { BarChartOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -70,34 +69,42 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
     return data;
   };
 
-  const [chartData, setChartData] = useState<DeviceTrendsData[]>(generateDeviceTrends('today'));
+  const [chartData, setChartData] = useState<DeviceTrendsData[]>([]);
 
+  // Инициализация данных при монтировании
   useEffect(() => {
-    setChartData(generateDeviceTrends(timeRange));
+    const initialData = generateDeviceTrends('today');
+    setChartData(initialData);
+  }, []);
+
+  // Обновление данных при смене периода
+  useEffect(() => {
+    const newData = generateDeviceTrends(timeRange);
+    setChartData(newData);
   }, [timeRange]);
 
   const metricConfig = {
     battery: { 
       name: 'Батарея (%)', 
-      color: '#fa8c16', 
+      color: '#ec4899', 
       yAxis: 'left',
       domain: [0, 100]
     },
     signalQuality: { 
       name: 'Качество сигнала (%)', 
-      color: '#1890ff', 
+      color: '#be185d', 
       yAxis: 'left',
       domain: [0, 100]
     },
     fetalActivity: { 
       name: 'Активность плода (дв/ч)', 
-      color: '#52c41a', 
+      color: '#a21caf', 
       yAxis: 'right',
       domain: [0, 20]
     },
     deviceTemp: { 
       name: 'Температура устройства (°C)', 
-      color: '#f5222d', 
+      color: '#831843', 
       yAxis: 'right',
       domain: [35, 38]
     }
@@ -107,20 +114,21 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
     if (active && payload && payload.length) {
       return (
         <div style={{
-          backgroundColor: 'white',
-          border: '1px solid #d9d9d9',
-          borderRadius: '6px',
+          backgroundColor: '#fdf2f8',
+          border: '1px solid #f3e8ff',
+          borderRadius: '8px',
           padding: '8px',
-          fontSize: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          fontSize: '11px',
+          boxShadow: '0 4px 12px rgba(236, 72, 153, 0.15)',
+          lineHeight: '1.3'
         }}>
-          <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>
+          <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#831843' }}>
             {timeRange === 'today' ? `Время: ${label}` : 
              timeRange === 'week' ? `День: ${label}` : 
              `День ${label}`}
           </p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ margin: '2px 0', color: entry.color }}>
+            <p key={index} style={{ margin: '2px 0', color: entry.color, fontSize: '10px' }}>
               {entry.name}: <strong>{entry.value}</strong>
             </p>
           ))}
@@ -133,44 +141,60 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
   return (
     <Card 
       title={
-        <Space>
-          <ClockCircleOutlined style={{ color: colors.primary }} />
-          <span>Анализ мониторинга</span>
-        </Space>
-      }
-      className="h-full"
-      extra={
-        <Space>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-6 h-6 rounded-full flex items-center justify-center text-white"
+              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
+            >
+              <BarChartOutlined style={{ fontSize: '12px' }} />
+            </div>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+              Анализ мониторинга
+            </span>
+          </div>
           <Select
             size="small"
             value={timeRange}
             onChange={setTimeRange}
-            style={{ width: 80 }}
+            style={{ 
+              width: 80,
+              fontSize: '11px'
+            }}
+            dropdownStyle={{ fontSize: '11px' }}
           >
             <Option value="today">День</Option>
             <Option value="week">Неделя</Option>
             <Option value="month">Месяц</Option>
           </Select>
-        </Space>
+        </div>
       }
-      bodyStyle={{ 
-        padding: typography.spacing.xs, 
-        height: `calc(100% - ${typography.sizes.cardHeight.header})` 
-      }}
+      className="h-full"
+      size="small"
+      bodyStyle={{ padding: '10px' }}
       headStyle={{ 
-        padding: typography.sizes.cardPadding, 
-        minHeight: typography.sizes.cardHeight.header 
+        padding: '6px 12px', 
+        minHeight: 'auto',
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+        borderBottom: '1px solid #f3e8ff'
       }}
     >
-      {/* Селектор метрик */}
-      <div style={{ marginBottom: '8px' }}>
+      {/* Селектор метрик в розовом стиле */}
+      <div className="mb-2 p-2 rounded-lg" style={{ 
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+        border: '1px solid #f3e8ff'
+      }}>
         <Select
           mode="multiple"
           size="small"
           placeholder="Выберите параметры"
           value={selectedMetrics}
           onChange={setSelectedMetrics}
-          style={{ width: '100%' }}
+          style={{ 
+            width: '100%',
+            fontSize: '11px'
+          }}
+          dropdownStyle={{ fontSize: '11px' }}
           maxTagCount="responsive"
         >
           <Option value="battery">🔋 Батарея</Option>
@@ -180,24 +204,34 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
         </Select>
       </div>
 
-      <div style={{ height: 'calc(100% - 40px)' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 4, right: 20, left: 8, bottom: 4 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+      {/* График в розово-белом стиле */}
+      <div 
+        className="rounded-lg border"
+        style={{ 
+          height: '280px',
+          background: 'linear-gradient(135deg, #fef7ff 0%, #ffffff 100%)',
+          borderColor: '#f3e8ff',
+          padding: '8px'
+        }}
+      >
+        {chartData && chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 8, right: 15, left: 10, bottom: 8 }}
+            >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3e8ff" />
             <XAxis 
               dataKey="time" 
-              tick={{ fontSize: 10 }} 
-              stroke="#666"
+              tick={{ fontSize: 9, fill: '#831843' }} 
+              stroke="#ec4899"
               height={16}
               tickMargin={2}
             />
             <YAxis 
               yAxisId="left"
-              tick={{ fontSize: 10 }} 
-              stroke="#666"
+              tick={{ fontSize: 9, fill: '#831843' }} 
+              stroke="#ec4899"
               width={35}
               domain={[0, 100]}
               tickMargin={2}
@@ -205,16 +239,16 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
             <YAxis 
               yAxisId="right"
               orientation="right"
-              tick={{ fontSize: 10 }} 
-              stroke="#666"
+              tick={{ fontSize: 9, fill: '#831843' }} 
+              stroke="#ec4899"
               width={35}
               domain={[0, 25]}
               tickMargin={2}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend 
-              wrapperStyle={{ fontSize: '10px' }}
-              iconSize={8}
+              wrapperStyle={{ fontSize: '9px', color: '#831843' }}
+              iconSize={6}
             />
             
             {selectedMetrics.includes('battery') && (
@@ -272,18 +306,15 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
             )}
           </LineChart>
         </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div style={{ fontSize: '12px', color: '#831843', opacity: 0.7 }}>
+              Загрузка данных...
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Подсказки */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: '4px', 
-        left: '8px', 
-        fontSize: '9px', 
-        color: '#999' 
-      }}>
-        💡 Выберите период и параметры для анализа
-      </div>
     </Card>
   );
 };

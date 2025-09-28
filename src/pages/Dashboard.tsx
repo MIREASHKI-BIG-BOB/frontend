@@ -25,19 +25,19 @@ interface DashboardLayout extends RGLLayout {
 const defaultLayouts = {
   lg: [
     { i: 'patient', x: 0, y: 0, w: 3, h: 6.5, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 6, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
     { i: 'device', x: 9, y: 0, w: 3, h: 6.5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
     { i: 'recent', x: 0, y: 7, w: 3, h: 3.5, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 7, w: 3, h: 3.5, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 6, y: 7, w: 6, h: 3.5, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 3, y: 7, w: 6, h: 3.5, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 7, w: 3, h: 3.5, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
     { i: 'patient', x: 0, y: 0, w: 4, h: 6, component: 'PatientCard', title: 'Пациентка' },
     { i: 'homemonitor', x: 4, y: 0, w: 5, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
     { i: 'device', x: 9, y: 0, w: 3, h: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
     { i: 'recent', x: 0, y: 7, w: 3, h: 3, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 7, w: 3, h: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 6, y: 7, w: 6, h: 3, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 3, y: 7, w: 6, h: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 7, w: 3, h: 3, component: 'AlertPanel', title: 'Уведомления' },
   ],
   sm: [
     { i: 'patient', x: 0, y: 0, w: 6, h: 6, component: 'PatientCard', title: 'Пациентка' },
