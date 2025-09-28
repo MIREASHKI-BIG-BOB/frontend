@@ -32,6 +32,7 @@ import {
   UpOutlined,
   DownOutlined
 } from '@ant-design/icons';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 
@@ -39,7 +40,7 @@ const { Text, Title } = Typography;
 const { Option } = Select;
 const { Panel } = Collapse;
 
-// Компонент для отдельного графика КТГ
+// Компонент для интерактивного графика КТГ
 interface CTGChartProps {
   title: string;
   unit: string;
@@ -48,6 +49,7 @@ interface CTGChartProps {
   maxValue: number;
   height: string;
   data: number[];
+  dangerRanges?: { min: number; max: number }[];
 }
 
 const CTGChart: React.FC<CTGChartProps> = ({ 
@@ -57,116 +59,69 @@ const CTGChart: React.FC<CTGChartProps> = ({
   minValue, 
   maxValue, 
   height, 
-  data 
+  data,
+  dangerRanges = []
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Преобразуем данные для Recharts
+  const chartData = data.map((value, index) => ({
+    time: index,
+    value: value,
+    timestamp: `${Math.floor(index / 60)}:${(index % 60).toString().padStart(2, '0')}`
+  }));
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Функция для определения опасности значения
+  const isDangerValue = (value: number) => {
+    return dangerRanges.some(range => value < range.min || value > range.max);
+  };
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Обновляем размеры canvas
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    const width = canvas.width;
-    const canvasHeight = canvas.height;
-
-    // Очистка canvas
-    ctx.clearRect(0, 0, width, canvasHeight);
-
-    // Отрисовка сетки
-    ctx.strokeStyle = '#e8e8e8';
-    ctx.lineWidth = 0.5;
-
-    // Вертикальные линии (время)
-    for (let i = 0; i <= 12; i++) {
-      const x = (i / 12) * width;
-      ctx.strokeStyle = i % 4 === 0 ? '#d0d0d0' : '#e8e8e8';
-      ctx.lineWidth = i % 4 === 0 ? 1 : 0.5;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvasHeight);
-      ctx.stroke();
+  // Кастомный Tooltip
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const isDanger = isDangerValue(data.value);
+      return (
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          border: `2px solid ${isDanger ? '#ff4d4f' : color}`,
+          borderRadius: '6px',
+          padding: '8px 12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          <p style={{ margin: 0, fontWeight: 'bold', color: isDanger ? '#ff4d4f' : color }}>
+            {title}
+          </p>
+          <p style={{ margin: '4px 0 0 0', fontSize: '14px' }}>
+            <strong>{Math.round(data.value)}</strong> {unit}
+          </p>
+          <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#666' }}>
+            Время: {data.payload.timestamp}
+          </p>
+          {isDanger && (
+            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#ff4d4f', fontWeight: 'bold' }}>
+              ⚠️ ВНИМАНИЕ!
+            </p>
+          )}
+        </div>
+      );
     }
-
-    // Горизонтальные линии (значения)
-    for (let i = 0; i <= 8; i++) {
-      const y = (i / 8) * canvasHeight;
-      ctx.strokeStyle = i % 2 === 0 ? '#d0d0d0' : '#e8e8e8';
-      ctx.lineWidth = i % 2 === 0 ? 1 : 0.5;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    // Отрисовка данных
-    if (data.length > 1) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 1;
-      ctx.beginPath();
-
-      for (let i = 0; i < data.length; i++) {
-        const x = (i / Math.max(data.length - 1, 1)) * width;
-        const normalizedValue = Math.max(0, Math.min(1, (data[i] - minValue) / (maxValue - minValue)));
-        const y = canvasHeight - (normalizedValue * canvasHeight);
-        
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
-
-    // Подписи по оси Y
-    ctx.fillStyle = '#666';
-    ctx.font = '11px Arial';
-    ctx.textAlign = 'left';
-    for (let i = 0; i <= 4; i++) {
-      const value = minValue + ((maxValue - minValue) * (4 - i) / 4);
-      const y = (i / 4) * canvasHeight + 4;
-      ctx.fillText(Math.round(value).toString(), 4, y);
-    }
-
-    // Текущее значение в правом углу
-    if (data.length > 0) {
-      const currentValue = data[data.length - 1];
-      ctx.fillStyle = color;
-      ctx.font = 'bold 14px Arial';
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(width - 35, 5, 30, 18);
-      ctx.strokeStyle = color;
-      ctx.strokeRect(width - 35, 5, 30, 18);
-      ctx.fillStyle = color;
-      ctx.fillText(Math.round(currentValue).toString(), width - 7, 18);
-    }
-  }, [data, color, minValue, maxValue]);
+    return null;
+  };
 
   return (
     <div style={{ 
       height, 
-      position: 'relative', 
-      border: '1px solid #e8e8e8',
+      position: 'relative',
       background: '#fafafa',
-      borderRadius: '6px'
+      border: '1px solid #e8e8e8',
+      borderRadius: '6px',
+      padding: '8px'
     }}>
       <div style={{
         position: 'absolute',
-        top: '6px',
-        left: '6px',
+        top: '12px',
+        left: '12px',
         background: 'rgba(255,255,255,0.95)',
-        padding: '3px 8px',
+        padding: '4px 8px',
         borderRadius: '4px',
         zIndex: 10,
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -178,15 +133,92 @@ const CTGChart: React.FC<CTGChartProps> = ({
           ({unit})
         </Text>
       </div>
-      <canvas
-        ref={canvasRef}
-        style={{ 
-          width: '100%', 
-          height: '100%', 
-          display: 'block',
-          borderRadius: '6px'
-        }}
-      />
+      
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={chartData} margin={{ top: 35, right: 20, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" />
+          <XAxis 
+            dataKey="time" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: '#666' }}
+            tickFormatter={(value) => `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, '0')}`}
+          />
+          <YAxis 
+            domain={[minValue, maxValue]}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: '#666' }}
+            width={35}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          
+          {/* Опасные зоны как фоновая заливка */}
+          {dangerRanges.map((range, index) => (
+            <React.Fragment key={index}>
+              <ReferenceArea 
+                y1={minValue} 
+                y2={range.min} 
+                fill="#ff4d4f" 
+                fillOpacity={0.1}
+              />
+              <ReferenceArea 
+                y1={range.max} 
+                y2={maxValue} 
+                fill="#ff4d4f" 
+                fillOpacity={0.1}
+              />
+            </React.Fragment>
+          ))}
+          
+          <Line 
+            type="monotone" 
+            dataKey="value" 
+            stroke={color}
+            strokeWidth={2.5}
+            dot={(props: any) => {
+              const isDanger = isDangerValue(props.payload.value);
+              return (
+                <circle 
+                  cx={props.cx} 
+                  cy={props.cy} 
+                  r={isDanger ? 4 : 2}
+                  fill={isDanger ? '#ff4d4f' : color}
+                  stroke={isDanger ? '#fff' : 'none'}
+                  strokeWidth={isDanger ? 2 : 0}
+                />
+              );
+            }}
+            activeDot={{ 
+              r: 6, 
+              fill: color,
+              stroke: '#fff',
+              strokeWidth: 2
+            }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      
+      {/* Текущее значение */}
+      {data.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: isDangerValue(data[data.length - 1]) ? '#fff2f0' : '#fff',
+          border: `2px solid ${isDangerValue(data[data.length - 1]) ? '#ff4d4f' : color}`,
+          borderRadius: '6px',
+          padding: '4px 8px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          color: isDangerValue(data[data.length - 1]) ? '#ff4d4f' : color
+        }}>
+          {Math.round(data[data.length - 1])}
+          {isDangerValue(data[data.length - 1]) && (
+            <span style={{ marginLeft: '4px', animation: 'blink 1s infinite' }}>⚠️</span>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -444,6 +476,7 @@ export default function CTGPage() {
                 maxValue={180}
                 height="calc(33.33% - 3px)"
                 data={fetalHeartRate}
+                dangerRanges={[{ min: 110, max: 160 }]} // Норма: 110-160 bpm
               />
 
               {/* График тонуса матки */}
@@ -455,6 +488,7 @@ export default function CTGPage() {
                 maxValue={100}
                 height="calc(33.33% - 3px)"
                 data={uterineContractions}
+                dangerRanges={[{ min: 0, max: 80 }]} // Опасно свыше 80 mmHg
               />
 
               {/* График схваток */}
@@ -466,6 +500,7 @@ export default function CTGPage() {
                 maxValue={80}
                 height="calc(33.34% - 3px)"
                 data={contractions}
+                dangerRanges={[{ min: 0, max: 60 }]} // Опасно свыше 60 mmHg
               />
             </div>
           </Card>
