@@ -35,95 +35,121 @@ export default function PatientCard({ risk: riskProp, deviceConnected, lastMovem
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Avatar 
-              size={28}
-              style={{ backgroundColor: colors.risk.high }}
+              size={24}
+              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
               icon={<UserOutlined />}
             />
-            <span>Пациентка</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>Пациентка</span>
           </div>
           <Tag 
             color={risk < 30 ? 'success' : risk < 60 ? 'warning' : 'error'}
             className="text-xs"
+            style={{ 
+              fontSize: '10px',
+              padding: '2px 6px',
+              background: risk < 30 ? '#f0f9ff' : risk < 60 ? '#fffbeb' : '#fef2f2',
+              color: risk < 30 ? '#0c4a6e' : risk < 60 ? '#92400e' : '#991b1b',
+              border: `1px solid ${risk < 30 ? '#bae6fd' : risk < 60 ? '#fed7aa' : '#fecaca'}`
+            }}
           >
             {status}
           </Tag>
         </div>
       } 
       className="h-full"
-      bodyStyle={{ padding: typography.spacing.md }}
-      headStyle={{ ...typography.styles.h4, margin: 0 }}
+      bodyStyle={{ padding: '10px' }}
+      headStyle={{ 
+        padding: '6px 12px', 
+        minHeight: 'auto',
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+        borderBottom: '1px solid #f3e8ff'
+      }}
       aria-label="Карточка пациентки"
     >
-      <Space direction="vertical" size="middle" className="w-full">
-        {/* Основная информация - компактно */}
-        <div className="space-y-2">
-          <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">ФИО:</span>
-            <span className="text-sm font-semibold text-gray-900">{patient.name}</span>
+      <Space direction="vertical" size="small" className="w-full">
+        {/* Основная информация - компактно в розовой палитре */}
+        <div className="space-y-1.5 p-2 rounded-lg" style={{ 
+          background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+          border: '1px solid #f3e8ff'
+        }}>
+          <div className="flex items-center">
+            <span className="text-xs font-medium w-12" style={{ color: '#831843' }}>ФИО:</span>
+            <span className="text-sm font-semibold" style={{ color: '#a21caf' }}>{patient.name}</span>
           </div>
-          <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">Возраст:</span>
-            <span className="text-sm text-gray-700">{patient.age}</span>
+          <div className="flex items-center">
+            <span className="text-xs font-medium w-12" style={{ color: '#831843' }}>Возраст:</span>
+            <span className="text-sm" style={{ color: '#831843' }}>{patient.age}</span>
           </div>
-          <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">Срок:</span>
-            <span className="text-sm font-medium text-blue-600">{patient.gestation}</span>
+          <div className="flex items-center">
+            <span className="text-xs font-medium w-12" style={{ color: '#831843' }}>Срок:</span>
+            <span className="text-sm font-medium" style={{ color: '#ec4899' }}>{patient.gestation}</span>
           </div>
-          <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">Место:</span>
-            <span className="text-xs text-gray-600 leading-tight">{patient.location}</span>
+          <div className="flex items-center">
+            <span className="text-xs font-medium w-12" style={{ color: '#831843' }}>Место:</span>
+            <span className="text-xs" style={{ color: '#831843', opacity: 0.8 }}>{patient.location}</span>
           </div>
-          <div className="flex">
-            <span className="text-xs font-medium text-gray-500 w-16">Устр-во:</span>
-            <span className="text-xs text-blue-600 leading-tight">{patient.deviceModel}</span>
+          <div className="flex items-center">
+            <span className="text-xs font-medium w-12" style={{ color: '#831843' }}>Устр-во:</span>
+            <span className="text-xs" style={{ color: '#ec4899' }}>{patient.deviceModel}</span>
           </div>
         </div>
 
-        {/* Показатели домашнего мониторинга */}
+        {/* Показатели домашнего мониторинга - компактно */}
         <div className="grid grid-cols-3 gap-1.5">
-          <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">Подключение</div>
-            <div className="text-base font-bold" style={{ 
-              color: deviceConnected !== false ? '#52c41a' : '#f5222d' 
+          <div className="text-center px-1.5 py-1.5 rounded" style={{ 
+            backgroundColor: '#fef7ff', 
+            border: '1px solid #f3e8ff' 
+          }}>
+            <div className="text-xs font-medium mb-1" style={{ color: '#831843' }}>Подключение</div>
+            <div className="text-lg font-bold" style={{ 
+              color: deviceConnected !== false ? '#22c55e' : '#ef4444' 
             }}>
               {deviceConnected !== false ? '✓' : '✗'}
             </div>
-            <div className="text-xs text-gray-400">устройство</div>
+            <div className="text-xs" style={{ color: '#831843', opacity: 0.7 }}>устройство</div>
           </div>
-          <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">Посл. движ.</div>
-            <div className="text-base font-bold" style={{ 
-              color: (lastMovement || 8) > 30 ? '#f5222d' : (lastMovement || 8) > 15 ? '#fa8c16' : '#52c41a'
+          <div className="text-center px-1.5 py-1.5 rounded" style={{ 
+            backgroundColor: '#fef7ff', 
+            border: '1px solid #f3e8ff' 
+          }}>
+            <div className="text-xs font-medium mb-1" style={{ color: '#831843' }}>Посл. движ.</div>
+            <div className="text-lg font-bold" style={{ 
+              color: (lastMovement || 8) > 30 ? '#ef4444' : (lastMovement || 8) > 15 ? '#f59e0b' : '#22c55e'
             }}>
               {lastMovement || 8}м
             </div>
-            <div className="text-xs text-gray-400">назад</div>
+            <div className="text-xs" style={{ color: '#831843', opacity: 0.7 }}>назад</div>
           </div>
-          <div className="text-center px-1 py-0.5 bg-gray-50 rounded border border-gray-100">
-            <div className="text-xs text-gray-600 font-medium mb-0.5">Сеанс</div>
-            <div className="text-sm font-bold text-gray-700 font-mono">{fmtTime(recordingSec ?? 247)}</div>
-            <div className="text-xs text-gray-400">длится</div>
+          <div className="text-center px-1.5 py-1.5 rounded" style={{ 
+            backgroundColor: '#fef7ff', 
+            border: '1px solid #f3e8ff' 
+          }}>
+            <div className="text-xs font-medium mb-1" style={{ color: '#831843' }}>Сеанс</div>
+            <div className="text-sm font-bold font-mono" style={{ color: '#a21caf' }}>
+              {fmtTime(recordingSec ?? 247)}
+            </div>
+            <div className="text-xs" style={{ color: '#831843', opacity: 0.7 }}>длится</div>
           </div>
         </div>
 
-        {/* Риск осложнений для домашнего мониторинга */}
+        {/* Риск осложнений - компактно в розовой палитре */}
         <div className="space-y-2">
-          <div className="text-xs text-gray-600 font-medium">
-            Оценка состояния: {status} ({risk}%)
+          <div className="text-xs font-medium" style={{ color: '#831843' }}>
+            Оценка состояния: <span style={{ color: '#ec4899' }}>{status} ({risk}%)</span>
           </div>
           <Progress 
             percent={risk} 
             strokeColor={
-              risk < 30 ? colors.risk.low :    // Зеленый - норма (все хорошо)
-              risk < 60 ? colors.risk.medium : // Желтый - наблюдение (требует внимания)
-              colors.risk.high                 // Красный - тревога (нужна консультация)
+              risk < 30 ? '#22c55e' :    // Зеленый - норма
+              risk < 60 ? '#f59e0b' :    // Желтый - наблюдение
+              '#ef4444'                   // Красный - тревога
             }
-            trailColor={colors.background.gray}
+            trailColor="#f3e8ff"
             strokeWidth={6}
             format={() => `${risk}%`}
             className="text-xs"
           />
-          <div style={typography.styles.caption}>
+          <div className="text-xs leading-tight" style={{ color: '#831843', opacity: 0.8 }}>
             • 0-30% — Норма (спокойное состояние)
             <br />
             • 30-60% — Наблюдение (контроль параметров) 

@@ -124,7 +124,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
             >
               <SettingOutlined style={{ fontSize: '12px' }} />
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: '#831843' }}>MoniPuck v2.1</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>MoniPuck v2.1</span>
           </Space>
           <div className="flex items-center gap-2">
             <div className={`w-1.5 h-1.5 rounded-full ${
@@ -149,9 +149,9 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
         </div>
       }
       className="h-full"
-      bodyStyle={{ padding: '8px' }}
+      bodyStyle={{ padding: '12px' }}
       headStyle={{ 
-        padding: '8px 12px', 
+        padding: '6px 12px', 
         minHeight: 'auto',
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         borderBottom: '1px solid #f3e8ff'
@@ -159,20 +159,20 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
     >
       <Space direction="vertical" size="small" className="w-full">
         {/* Компактные основные параметры в одну строку */}
-        <div className="grid grid-cols-3 gap-2 p-2 rounded-lg" style={{ 
+        <div className="grid grid-cols-3 gap-3 p-3 rounded-lg" style={{ 
           background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
           border: '1px solid #f3e8ff'
         }}>
           {/* Батарея */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '9px', color: '#831843', fontWeight: 'bold' }}>БАТ</span>
+            <div className="flex items-center justify-center gap-1 mb-2">
+              <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Батарея</span>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: batteryStatus.color }}>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: batteryStatus.color }}>
               {Math.round(battery)}%
             </div>
-            <div className="h-1 bg-pink-100 rounded-full mt-1 overflow-hidden">
+            <div className="h-1.5 bg-pink-100 rounded-full mt-2 overflow-hidden">
               <div 
                 className="h-full transition-all duration-500 rounded-full"
                 style={{ 
@@ -181,41 +181,47 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
                 }}
               />
             </div>
+            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+              {batteryStatus.status}
+            </div>
           </div>
 
           {/* Сигнал */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <WifiOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '9px', color: '#831843', fontWeight: 'bold' }}>BT</span>
+            <div className="flex items-center justify-center gap-1 mb-2">
+              <WifiOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Bluetooth</span>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: signalStatus.color }}>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: signalStatus.color }}>
               {Math.round(signalQuality)}%
             </div>
-            <div className="flex justify-center gap-1 mt-1">
+            <div className="flex justify-center gap-1 mt-2">
               {Array.from({ length: 4 }, (_, i) => (
                 <div
                   key={i}
-                  className="w-1 rounded-full transition-all duration-300"
+                  className="w-1.5 rounded-full transition-all duration-300"
                   style={{
-                    height: `${(i + 1) * 2 + 2}px`,
+                    height: `${(i + 1) * 3 + 4}px`,
                     backgroundColor: i < signalStatus.bars ? '#ec4899' : '#f3e8ff'
                   }}
                 />
               ))}
             </div>
+            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+              {signalStatus.status}
+            </div>
           </div>
 
           {/* Температура */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <FireOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '9px', color: '#831843', fontWeight: 'bold' }}>T°</span>
+            <div className="flex items-center justify-center gap-1 mb-2">
+              <FireOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Температура</span>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: tempStatus.color }}>
-              {temperature.toFixed(1)}°
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: tempStatus.color }}>
+              {temperature.toFixed(1)}°C
             </div>
-            <div className="h-1 bg-pink-100 rounded-full mt-1 overflow-hidden">
+            <div className="h-1.5 bg-pink-100 rounded-full mt-2 overflow-hidden">
               <div 
                 className="h-full transition-all duration-500 rounded-full"
                 style={{ 
@@ -224,42 +230,45 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
                 }}
               />
             </div>
+            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+              {tempStatus.status}
+            </div>
           </div>
         </div>
 
         {/* Компактная статистика в 2 строки */}
-        <div className="grid grid-cols-4 gap-1">
-          <div className="p-1 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#a21caf' }}>
+        <div className="grid grid-cols-4 gap-2">
+          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
               {sessionsToday}
             </div>
-            <div style={{ fontSize: '8px', color: '#831843' }}>сеансов</div>
+            <div style={{ fontSize: '10px', color: '#831843' }}>сеансов</div>
           </div>
 
-          <div className="p-1 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#a21caf' }}>
+          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
               {formatUptime(deviceUptime)}
             </div>
-            <div style={{ fontSize: '8px', color: '#831843' }}>работы</div>
+            <div style={{ fontSize: '10px', color: '#831843' }}>работы</div>
           </div>
 
-          <div className="p-1 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: dataQuality > 90 ? '#a21caf' : '#d97706' }}>
+          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: dataQuality > 90 ? '#a21caf' : '#d97706' }}>
               {dataQuality}%
             </div>
-            <div style={{ fontSize: '8px', color: '#831843' }}>качество</div>
+            <div style={{ fontSize: '10px', color: '#831843' }}>качество</div>
           </div>
 
-          <div className="p-1 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: alertsToday > 0 ? '#dc2626' : '#a21caf' }}>
+          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: alertsToday > 0 ? '#dc2626' : '#a21caf' }}>
               {alertsToday}
             </div>
-            <div style={{ fontSize: '8px', color: '#831843' }}>уведомл.</div>
+            <div style={{ fontSize: '10px', color: '#831843' }}>уведомл.</div>
           </div>
         </div>
 
         {/* Компактный статус подключения */}
-        <div className="flex items-center justify-between px-2 py-1 rounded" style={{ 
+        <div className="flex items-center justify-between px-3 py-2 rounded" style={{ 
           backgroundColor: isConnected ? '#fef7ff' : '#fef2f2',
           border: `1px solid ${isConnected ? '#f3e8ff' : '#fecaca'}`
         }}>
@@ -267,11 +276,11 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
             <div className={`w-2 h-2 rounded-full ${
               isConnected ? 'bg-pink-500' : 'bg-red-500'
             } ${isConnected ? 'animate-pulse' : ''}`}></div>
-            <span style={{ fontSize: '9px', color: isConnected ? '#831843' : '#991b1b', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '11px', color: isConnected ? '#831843' : '#991b1b', fontWeight: 'bold' }}>
               {deviceName} • {isConnected ? 'Подключено' : 'Отключено'}
             </span>
           </div>
-          <span style={{ fontSize: '8px', color: '#64748b' }}>
+          <span style={{ fontSize: '10px', color: '#64748b' }}>
             {new Date(lastUpdate).toLocaleTimeString('ru-RU', { 
               hour: '2-digit', 
               minute: '2-digit' 
@@ -280,7 +289,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
         </div>
 
         {/* Компактные предупреждения */}
-        {(battery < 30 || signalQuality < 50 || !isConnected) && (
+        {(battery < 30 || signalQuality < 50) && isConnected && (
           <div className="px-2 py-1 rounded-md" style={{ 
             backgroundColor: '#fef2f2', 
             border: '1px solid #fecaca' 
@@ -288,10 +297,9 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
             <div className="flex items-center gap-2">
               <ExclamationCircleOutlined style={{ color: '#dc2626', fontSize: '10px' }} />
               <div style={{ fontSize: '8px', color: '#991b1b', fontWeight: 'bold' }}>
-                {!isConnected ? 'Не подключено' : 
-                 battery < 30 ? 'Разряжается' : 
-                 signalQuality < 50 ? 'Слабый сигнал' : ''}
-                {(battery < 30 && isConnected) && (signalQuality < 50) && ' • Слабый сигнал'}
+                {battery < 30 ? 'Разряжается' : ''}
+                {battery < 30 && signalQuality < 50 ? ' • ' : ''}
+                {signalQuality < 50 ? 'Слабый сигнал' : ''}
               </div>
             </div>
           </div>
