@@ -33,11 +33,14 @@ import {
   UpOutlined,
   DownOutlined,
   ThunderboltOutlined,
-  WifiOutlined
+  WifiOutlined,
+  ExclamationCircleOutlined,
+  WarningOutlined
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
+import AnomalyAnalysisPage from './AnomalyAnalysis';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -147,6 +150,15 @@ const CTGChart: React.FC<CTGChartProps> = ({
         <Text style={{ marginLeft: '4px', fontSize: '11px', color: '#831843', opacity: 0.7 }}>
           ({unit})
         </Text>
+        {/* Индикатор аномалий в заголовке */}
+        {anomalies && anomalies.filter(a => a.type === chartType).length > 0 && (
+          <WarningOutlined style={{ 
+            marginLeft: '6px', 
+            fontSize: '14px',
+            color: '#dc2626',
+            animation: 'blink 1s infinite'
+          }} />
+        )}
       </div>
       
       <ResponsiveContainer width="100%" height="100%">
@@ -186,19 +198,26 @@ const CTGChart: React.FC<CTGChartProps> = ({
             </React.Fragment>
           ))}
           
-          {/* Отображение аномалий */}
+          {/* Отображение аномалий - улучшенная визуализация */}
           {anomalies && anomalies
             .filter(anomaly => anomaly.type === chartType)
             .map((anomaly, index) => (
-              <ReferenceArea
-                key={`anomaly-${index}`}
-                x1={Math.max(0, anomaly.time - 5)}
-                x2={Math.min(data.length - 1, anomaly.time + 5)}
-                fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                fillOpacity={0.15}
-                onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
-                style={{ cursor: 'pointer' }}
-              />
+              <React.Fragment key={`anomaly-${index}`}>
+                {/* Подсветка области аномалии */}
+                <ReferenceArea
+                  x1={Math.max(0, anomaly.time - 8)}
+                  x2={Math.min(data.length - 1, anomaly.time + 8)}
+                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                  fillOpacity={0.25}
+                />
+                {/* Более яркая центральная область */}
+                <ReferenceArea
+                  x1={Math.max(0, anomaly.time - 3)}
+                  x2={Math.min(data.length - 1, anomaly.time + 3)}
+                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                  fillOpacity={0.4}
+                />
+              </React.Fragment>
             ))}
           
           <Line 
@@ -209,36 +228,71 @@ const CTGChart: React.FC<CTGChartProps> = ({
             dot={(props: any) => {
               const isDanger = isDangerValue(props.payload.value);
               const hasAnomaly = anomalies && anomalies.some(
-                anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 2
+                anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 3
               );
               
               if (hasAnomaly) {
                 const anomaly = anomalies.find(
-                  anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 2
+                  anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 3
                 );
+                
+                const handleAnomalyDotClick = (e: any) => {
+                  e.stopPropagation();
+                  if (onAnomalyClick && anomaly) {
+                    onAnomalyClick(anomaly);
+                  }
+                };
+                
                 return (
-                  <g>
+                  <g style={{ cursor: 'pointer' }} onClick={handleAnomalyDotClick}>
+                    {/* Пульсирующий круг для аномалии */}
                     <circle 
                       cx={props.cx} 
                       cy={props.cy} 
-                      r={4}
+                      r={8}
+                      fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                      opacity={0.3}
+                    >
+                      <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    {/* Основная точка */}
+                    <circle 
+                      cx={props.cx} 
+                      cy={props.cy} 
+                      r={5}
                       fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
                       stroke="#fff"
-                      strokeWidth={1}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
+                      strokeWidth={2}
                     />
-                    <text
-                      x={props.cx}
-                      y={props.cy - 10}
-                      textAnchor="middle"
-                      fontSize="12"
-                      fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                      style={{ cursor: 'pointer', fontWeight: 'bold' }}
-                      onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
+                    {/* Восклицательный знак как SVG */}
+                    <foreignObject 
+                      x={props.cx - 8} 
+                      y={props.cy - 25} 
+                      width={16} 
+                      height={16}
+                      style={{ pointerEvents: 'none' }}
                     >
-                      !
-                    </text>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        width: '16px',
+                        height: '16px',
+                        color: anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b',
+                        fontSize: '12px'
+                      }}>
+                        <WarningOutlined />
+                      </div>
+                    </foreignObject>
+                    {/* Невидимая увеличенная область для клика */}
+                    <circle 
+                      cx={props.cx} 
+                      cy={props.cy} 
+                      r={15}
+                      fill="transparent"
+                      stroke="transparent"
+                    />
                   </g>
                 );
               }
@@ -280,7 +334,7 @@ const CTGChart: React.FC<CTGChartProps> = ({
         }}>
           {Math.round(data[data.length - 1])}
           {isDangerValue(data[data.length - 1]) && (
-            <span style={{ marginLeft: '3px', animation: 'blink 1s infinite' }}>⚠️</span>
+            <WarningOutlined style={{ marginLeft: '3px', color: '#dc2626', animation: 'blink 1s infinite' }} />
           )}
         </div>
       )}
@@ -322,6 +376,10 @@ export default function CTGPage() {
     description: string;
   }>>([]);
   const [selectedAnomaly, setSelectedAnomaly] = useState<any>(null);
+  
+  // Состояние для управления видимостью страниц
+  const [showAnalysisPage, setShowAnalysisPage] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
 
   // Типы сеансов КТГ
   const sessionTypes = [
@@ -337,18 +395,24 @@ export default function CTGPage() {
     
     // ЧСС плода (120-160 bpm с вариациями)
     const fhrBase = 140;
-    const fhrVariation = Math.sin(time * 0.1) * 15 + Math.random() * 8 - 4;
-    const newFHR = Math.max(110, Math.min(180, fhrBase + fhrVariation));
+    // Добавляем периодические аномальные ситуации
+    const anomalyChance = Math.sin(time * 0.005) < -0.7 ? 1 : 0; // Аномалия каждые ~10-15 секунд
+    const fhrVariation = anomalyChance ? 
+      (Math.random() > 0.5 ? -40 : 30) : // Брадикардия или тахикардия
+      Math.sin(time * 0.1) * 15 + Math.random() * 8 - 4;
+    const newFHR = Math.max(80, Math.min(200, fhrBase + fhrVariation));
     
     // Тонус матки (0-100 mmHg)
     const ucBase = 20 + Math.sin(time * 0.03) * 25;
+    const ucAnomalyVariation = anomalyChance ? 45 : 0; // Повышенный тонус при аномалии
     const ucVariation = Math.random() * 6 - 3;
-    const newUC = Math.max(0, Math.min(100, ucBase + ucVariation));
+    const newUC = Math.max(0, Math.min(100, ucBase + ucVariation + ucAnomalyVariation));
     
     // Схватки (0-80 mmHg) - более редкие и интенсивные
-    const contractionCycle = Math.sin(time * 0.01) * Math.sin(time * 0.01); // квадрат для более редких пиков
+    const contractionCycle = Math.sin(time * 0.01) * Math.sin(time * 0.01);
+    const contractionAnomaly = anomalyChance ? 30 : 0; // Усиленные схватки при аномалии
     const contractionBase = contractionCycle > 0.5 ? contractionCycle * 60 : 5;
-    const newContraction = Math.max(0, Math.min(80, contractionBase + Math.random() * 4 - 2));
+    const newContraction = Math.max(0, Math.min(80, contractionBase + Math.random() * 4 - 2 + contractionAnomaly));
 
     setFetalHeartRate(prev => {
       const newData = [...prev.slice(-299), newFHR];
@@ -430,11 +494,34 @@ export default function CTGPage() {
     }
   };
 
-  // Обработчик клика по аномалии - переход к отчетам
+  // Обработчик клика по аномалии - переход к детальному анализу
   const handleAnomalyClick = (anomaly: any) => {
     setSelectedAnomaly(anomaly);
-    // Здесь можно добавить навигацию к странице отчетов
-    alert(`Переход к отчету по аномалии:\n${anomaly.description}\nВремя: ${Math.floor(anomaly.time / 60)}:${(anomaly.time % 60).toString().padStart(2, '0')}`);
+    // Создаем объект с данными для анализа
+    const analysisDataObj = {
+      anomaly,
+      timestamp: new Date().toISOString(),
+      patientInfo: {
+        name: patientName,
+        week: pregnancyWeek,
+        day: gestationDay
+      },
+      chartData: {
+        fhr: fetalHeartRate.slice(Math.max(0, anomaly.time - 30), anomaly.time + 30),
+        uc: uterineContractions.slice(Math.max(0, anomaly.time - 30), anomaly.time + 30),
+        contractions: contractions.slice(Math.max(0, anomaly.time - 30), anomaly.time + 30)
+      }
+    };
+    
+    // Переходим к странице анализа
+    setAnalysisData(analysisDataObj);
+    setShowAnalysisPage(true);
+  };
+
+  // Обработчик возврата со страницы анализа
+  const handleBackFromAnalysis = () => {
+    setShowAnalysisPage(false);
+    setAnalysisData(null);
   };
 
   // Управление записью
@@ -512,6 +599,16 @@ export default function CTGPage() {
   };
 
   const risk = getRiskStatus();
+
+  // Если показываем страницу анализа
+  if (showAnalysisPage && analysisData) {
+    return (
+      <AnomalyAnalysisPage 
+        data={analysisData} 
+        onBack={handleBackFromAnalysis}
+      />
+    );
+  }
 
   return (
     <div style={{ 
@@ -675,12 +772,7 @@ export default function CTGPage() {
             }}
             title={
               <div className="flex items-center gap-2">
-                <div 
-                  className="w-4 h-4 rounded-full flex items-center justify-center text-white"
-                  style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}
-                >
-                  🧠
-                </div>
+                <ThunderboltOutlined style={{ color: '#8b5cf6', fontSize: '14px' }} />
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Предсказания ИИ
                 </span>
@@ -732,21 +824,25 @@ export default function CTGPage() {
                 </div>
               </div>
 
-              {/* Прогноз */}
+              {/* Прогноз и достоверность в одной строке */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
                 <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
-                  Прогноз
+                  Прогноз и достоверность
                 </div>
-                <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
-                  {aiPredictions.nextEvent}
-                </div>
-                <div className="flex items-center gap-1 mt-2">
-                  <span style={{ fontSize: '11px', color: '#831843', opacity: 0.7 }}>
-                    Достоверность:
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
-                    {aiPredictions.confidence}%
-                  </span>
+                <div className="flex items-center justify-between gap-2">
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
+                      {aiPredictions.nextEvent}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span style={{ fontSize: '11px', color: '#831843', opacity: 0.7 }}>
+                      Достоверность:
+                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
+                      {aiPredictions.confidence}%
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -860,44 +956,85 @@ export default function CTGPage() {
             </Space>
           </Card>
 
-          {/* Компактная статистика */}
+          {/* Панель обнаруженных аномалий */}
           <Card 
-            size="small"
+            size="small" 
+            style={{ marginBottom: '10px' }}
             bodyStyle={{ padding: '8px' }}
             headStyle={{ 
               padding: '4px 8px', 
               minHeight: 'auto',
-              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-              borderBottom: '1px solid #f3e8ff'
+              background: 'linear-gradient(135deg, #fef2f2 0%, #ffffff 100%)',
+              borderBottom: '1px solid #fecaca'
             }}
             title={
               <div className="flex items-center gap-2">
-                <WifiOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+                <AlertOutlined style={{ color: '#dc2626', fontSize: '14px' }} />
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
-                  Статистика
+                  Аномалии ({anomalies.length})
                 </span>
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
               </div>
             }
           >
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '12px', color: '#831843', fontWeight: 'bold' }}>Базальная</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#ec4899' }}>
-                  {fetalHeartRate.length > 10 ? 
-                    Math.round(fetalHeartRate.slice(-10).reduce((a, b) => a + b, 0) / 10) : 
-                    '--'}
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {anomalies.length > 0 ? (
+                anomalies.slice(-5).map((anomaly, index) => (
+                  <div 
+                    key={index}
+                    onClick={() => handleAnomalyClick(anomaly)}
+                    style={{
+                      padding: '6px 8px',
+                      border: `1px solid ${anomaly.severity === 'critical' ? '#fecaca' : '#fef3c7'}`,
+                      borderRadius: '4px',
+                      background: anomaly.severity === 'critical' ? '#fef2f2' : '#fefce8',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    className="hover:shadow-sm"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {anomaly.severity === 'critical' ? (
+                          <ExclamationCircleOutlined style={{ color: '#dc2626', fontSize: '14px' }} />
+                        ) : (
+                          <WarningOutlined style={{ color: '#d97706', fontSize: '14px' }} />
+                        )}
+                        <span style={{ 
+                          fontSize: '12px', 
+                          fontWeight: 'bold',
+                          color: anomaly.severity === 'critical' ? '#dc2626' : '#d97706'
+                        }}>
+                          {anomaly.description}
+                        </span>
+                      </div>
+                      <Tag 
+                        color={anomaly.severity === 'critical' ? 'error' : 'warning'}
+                        style={{ fontSize: '10px', margin: 0, padding: '1px 4px' }}
+                      >
+                        {Math.floor(anomaly.time / 60)}:{(anomaly.time % 60).toString().padStart(2, '0')}
+                      </Tag>
+                    </div>
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: '#64748b', 
+                      marginTop: '2px',
+                      textAlign: 'center'
+                    }}>
+                      Клик для анализа
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{
+                  padding: '12px',
+                  textAlign: 'center',
+                  color: '#64748b',
+                  fontSize: '12px'
+                }}>
+                  Аномалии не обнаружены
                 </div>
-                <div style={{ fontSize: '10px', color: '#831843', opacity: 0.7 }}>bpm</div>
-              </div>
-              <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '12px', color: '#831843', fontWeight: 'bold' }}>Вариация</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
-                  {fetalHeartRate.length > 10 ? 
-                    Math.round(Math.max(...fetalHeartRate.slice(-10)) - Math.min(...fetalHeartRate.slice(-10))) : 
-                    '--'}
-                </div>
-                <div style={{ fontSize: '10px', color: '#831843', opacity: 0.7 }}>bpm</div>
-              </div>
+              )}
             </div>
           </Card>
 
@@ -969,18 +1106,8 @@ export default function CTGPage() {
               }
             ]}
           />
-          </Col>
+        </Col>
       </Row>
-
-      {/* CSS анимации */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        `
-      }} />
     </div>
   );
 }
