@@ -700,11 +700,31 @@ export default function CTGPage() {
               borderBottom: '1px solid #f3e8ff'
             }}
             title={
-              <div className="flex items-center gap-2">
-                <LineChartOutlined style={{ color: '#ec4899', fontSize: '16px' }} />
-                <span style={{ fontSize: '16px', fontWeight: 600, color: '#831843' }}>
-                  Графики КТГ
-                </span>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <LineChartOutlined style={{ color: '#ec4899', fontSize: '16px' }} />
+                  <span style={{ fontSize: '16px', fontWeight: 600, color: '#831843' }}>
+                    Графики КТГ
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <div style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Базальная</div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#ec4899' }}>
+                      {fetalHeartRate.length > 10 ? 
+                        Math.round(fetalHeartRate.slice(-10).reduce((a, b) => a + b, 0) / 10) : 
+                        '--'} bpm
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Вариация</div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#a21caf' }}>
+                      {fetalHeartRate.length > 10 ? 
+                        Math.round(Math.max(...fetalHeartRate.slice(-10)) - Math.min(...fetalHeartRate.slice(-10))) : 
+                        '--'} bpm
+                    </div>
+                  </div>
+                </div>
               </div>
             }
           >
