@@ -1,4 +1,4 @@
-# HeraBEAT — стартовая страница
+# стартовая страница
 
 Стек: Vite + React + TypeScript, TailwindCSS, Ant Design v5, Recharts.
 
