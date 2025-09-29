@@ -431,6 +431,24 @@ export default function CTGPage() {
     let riskLevel: 'low' | 'medium' | 'high' = 'low';
     let recommendations: string[] = ['Продолжить мониторинг'];
     
+    // Проверяем наличие недавних аномалий (важно!)
+    const recentAnomalies = anomalies.filter(anomaly => 
+      dataLength - anomaly.time < 50 // Аномалии за последние 50 измерений
+    );
+    
+    // Если есть аномалии - увеличиваем риск
+    if (recentAnomalies.length > 0) {
+      riskScore += recentAnomalies.length * 20;
+      const criticalAnomalies = recentAnomalies.filter(a => a.severity === 'critical');
+      
+      if (criticalAnomalies.length > 0) {
+        riskScore += 30;
+        recommendations = ['СРОЧНО: Обратиться к врачу', 'Критические аномалии обнаружены'];
+      } else {
+        recommendations = ['Внимание к аномалиям', 'Усилить мониторинг'];
+      }
+    }
+    
     // Анализ ЧСС
     if (fhr < 110 || fhr > 170) {
       riskScore += 30;
@@ -461,7 +479,14 @@ export default function CTGPage() {
 
     // Предсказание следующего события
     let nextEvent = 'Стабильное состояние';
-    if (riskLevel === 'high') {
+    if (recentAnomalies.length > 0) {
+      const criticalCount = recentAnomalies.filter(a => a.severity === 'critical').length;
+      if (criticalCount > 0) {
+        nextEvent = 'ТРЕВОГА: Критическое состояние';
+      } else {
+        nextEvent = 'Обнаружены аномалии';
+      }
+    } else if (riskLevel === 'high') {
       nextEvent = 'Возможны осложнения';
     } else if (riskLevel === 'medium') {
       nextEvent = 'Требуется наблюдение';
@@ -474,7 +499,9 @@ export default function CTGPage() {
       riskLevel,
       riskScore: Math.round(Math.min(100, riskScore)), // Округляем до целого
       nextEvent,
-      confidence: Math.round(Math.max(85, Math.min(98, 90 + Math.random() * 8))), // Округляем до целого
+      confidence: recentAnomalies.length > 0 ? 
+        Math.round(Math.max(95, Math.min(99, 97 + Math.random() * 2))) : // Высокая уверенность при аномалиях
+        Math.round(Math.max(85, Math.min(98, 90 + Math.random() * 8))), // Округляем до целого
       recommendations: recommendations.slice(0, 3)
     });
 
@@ -599,6 +626,38 @@ export default function CTGPage() {
   };
 
   const risk = getRiskStatus();
+
+  // Читерская функция для принудительной генерации аномалии
+  const generateCheatAnomaly = () => {
+    const currentTime = fetalHeartRate.length;
+    const anomalyTypes = [
+      { type: 'fhr', description: 'Брадикардия плода', severity: 'critical' },
+      { type: 'fhr', description: 'Тахикардия плода', severity: 'warning' },
+      { type: 'uc', description: 'Гипертонус матки', severity: 'critical' },
+      { type: 'contractions', description: 'Патологические схватки', severity: 'warning' }
+    ];
+    
+    const randomAnomaly = anomalyTypes[Math.floor(Math.random() * anomalyTypes.length)];
+    
+    const newAnomaly = {
+      time: currentTime,
+      type: randomAnomaly.type as 'fhr' | 'uc' | 'contractions',
+      severity: randomAnomaly.severity as 'warning' | 'critical',
+      description: randomAnomaly.description
+    };
+    
+    setAnomalies(prev => {
+      const updated = [...prev.slice(-10), newAnomaly];
+      // Принудительно обновляем ИИ анализ после добавления аномалии
+      setTimeout(() => {
+        const currentFHR = fetalHeartRate[fetalHeartRate.length - 1] || 140;
+        const currentUC = uterineContractions[uterineContractions.length - 1] || 20;
+        const currentContractions = contractions[contractions.length - 1] || 10;
+        runAIAnalysis(currentFHR, currentUC, currentContractions, currentTime);
+      }, 100);
+      return updated;
+    });
+  };
 
   // Если показываем страницу анализа
   if (showAnalysisPage && analysisData) {
@@ -846,23 +905,21 @@ export default function CTGPage() {
 
               {/* Прогноз и достоверность в одной строке */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
-                  Прогноз и достоверность
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
-                      {aiPredictions.nextEvent}
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
+                    Прогноз
+                  </span>
                   <div className="flex items-center gap-1">
-                    <span style={{ fontSize: '11px', color: '#831843', opacity: 0.7 }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
                       Достоверность:
                     </span>
                     <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
                       {aiPredictions.confidence}%
                     </span>
                   </div>
+                </div>
+                <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
+                  {aiPredictions.nextEvent}
                 </div>
               </div>
 
@@ -989,7 +1046,17 @@ export default function CTGPage() {
             }}
             title={
               <div className="flex items-center gap-2">
-                <AlertOutlined style={{ color: '#dc2626', fontSize: '14px' }} />
+                <AlertOutlined 
+                  style={{ 
+                    color: '#dc2626', 
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={generateCheatAnomaly}
+                  className="hover:scale-110"
+                  title="Создать тестовую аномалию"
+                />
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Аномалии ({anomalies.length})
                 </span>
@@ -1034,14 +1101,6 @@ export default function CTGPage() {
                       >
                         {Math.floor(anomaly.time / 60)}:{(anomaly.time % 60).toString().padStart(2, '0')}
                       </Tag>
-                    </div>
-                    <div style={{ 
-                      fontSize: '10px', 
-                      color: '#64748b', 
-                      marginTop: '2px',
-                      textAlign: 'center'
-                    }}>
-                      Клик для анализа
                     </div>
                   </div>
                 ))
