@@ -53,6 +53,14 @@ interface CTGChartProps {
   height: string;
   data: number[];
   dangerRanges?: { min: number; max: number }[];
+  chartType?: 'fhr' | 'uc' | 'contractions';
+  anomalies?: Array<{
+    time: number;
+    type: 'fhr' | 'uc' | 'contractions';
+    severity: 'warning' | 'critical';
+    description: string;
+  }>;
+  onAnomalyClick?: (anomaly: any) => void;
 }
 
 const CTGChart: React.FC<CTGChartProps> = ({ 
@@ -63,7 +71,10 @@ const CTGChart: React.FC<CTGChartProps> = ({
   maxValue, 
   height, 
   data,
-  dangerRanges = []
+  dangerRanges = [],
+  chartType = 'fhr',
+  anomalies = [],
+  onAnomalyClick
 }) => {
   // Преобразуем данные для Recharts
   const chartData = data.map((value, index) => ({
@@ -175,6 +186,21 @@ const CTGChart: React.FC<CTGChartProps> = ({
             </React.Fragment>
           ))}
           
+          {/* Отображение аномалий */}
+          {anomalies && anomalies
+            .filter(anomaly => anomaly.type === chartType)
+            .map((anomaly, index) => (
+              <ReferenceArea
+                key={`anomaly-${index}`}
+                x1={Math.max(0, anomaly.time - 5)}
+                x2={Math.min(data.length - 1, anomaly.time + 5)}
+                fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                fillOpacity={0.15}
+                onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
+                style={{ cursor: 'pointer' }}
+              />
+            ))}
+          
           <Line 
             type="monotone" 
             dataKey="value" 
@@ -182,6 +208,41 @@ const CTGChart: React.FC<CTGChartProps> = ({
             strokeWidth={2}
             dot={(props: any) => {
               const isDanger = isDangerValue(props.payload.value);
+              const hasAnomaly = anomalies && anomalies.some(
+                anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 2
+              );
+              
+              if (hasAnomaly) {
+                const anomaly = anomalies.find(
+                  anomaly => anomaly.type === chartType && Math.abs(anomaly.time - props.payload.time) <= 2
+                );
+                return (
+                  <g>
+                    <circle 
+                      cx={props.cx} 
+                      cy={props.cy} 
+                      r={4}
+                      fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                      stroke="#fff"
+                      strokeWidth={1}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
+                    />
+                    <text
+                      x={props.cx}
+                      y={props.cy - 10}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                      style={{ cursor: 'pointer', fontWeight: 'bold' }}
+                      onClick={() => onAnomalyClick && onAnomalyClick(anomaly)}
+                    >
+                      !
+                    </text>
+                  </g>
+                );
+              }
+              
               return (
                 <circle 
                   cx={props.cx} 
@@ -246,6 +307,22 @@ export default function CTGPage() {
   const [uterineContractions, setUterineContractions] = useState<number[]>([]);
   const [contractions, setContractions] = useState<number[]>([]);
 
+  // ИИ предсказания и аномалии
+  const [aiPredictions, setAiPredictions] = useState({
+    riskLevel: 'low' as 'low' | 'medium' | 'high',
+    riskScore: 15,
+    nextEvent: 'Стабильное состояние',
+    confidence: 94,
+    recommendations: ['Продолжить мониторинг', 'Обратить внимание на вариабельность ЧСС']
+  });
+  const [anomalies, setAnomalies] = useState<Array<{
+    time: number;
+    type: 'fhr' | 'uc' | 'contractions';
+    severity: 'warning' | 'critical';
+    description: string;
+  }>>([]);
+  const [selectedAnomaly, setSelectedAnomaly] = useState<any>(null);
+
   // Типы сеансов КТГ
   const sessionTypes = [
     { value: 'routine', label: 'Плановое КТГ', color: 'blue' },
@@ -273,9 +350,91 @@ export default function CTGPage() {
     const contractionBase = contractionCycle > 0.5 ? contractionCycle * 60 : 5;
     const newContraction = Math.max(0, Math.min(80, contractionBase + Math.random() * 4 - 2));
 
-    setFetalHeartRate(prev => [...prev.slice(-299), newFHR]);
+    setFetalHeartRate(prev => {
+      const newData = [...prev.slice(-299), newFHR];
+      // Симуляция ИИ анализа
+      runAIAnalysis(newFHR, newUC, newContraction, newData.length);
+      return newData;
+    });
     setUterineContractions(prev => [...prev.slice(-299), newUC]);
     setContractions(prev => [...prev.slice(-299), newContraction]);
+  };
+
+  // Симуляция работы ИИ модели
+  const runAIAnalysis = (fhr: number, uc: number, contractions: number, dataLength: number) => {
+    // Оценка риска на основе текущих показателей
+    let riskScore = 0;
+    let riskLevel: 'low' | 'medium' | 'high' = 'low';
+    let recommendations: string[] = ['Продолжить мониторинг'];
+    
+    // Анализ ЧСС
+    if (fhr < 110 || fhr > 170) {
+      riskScore += 30;
+      recommendations.push('Критические показатели ЧСС');
+    } else if (fhr < 120 || fhr > 160) {
+      riskScore += 15;
+      recommendations.push('Внимание к ЧСС плода');
+    }
+    
+    // Анализ тонуса матки
+    if (uc > 80) {
+      riskScore += 25;
+      recommendations.push('Повышенный тонус матки');
+    } else if (uc > 60) {
+      riskScore += 10;
+      recommendations.push('Контроль тонуса матки');
+    }
+    
+    // Анализ схваток
+    if (contractions > 60) {
+      riskScore += 20;
+      recommendations.push('Интенсивные схватки');
+    }
+
+    // Определение уровня риска
+    if (riskScore >= 50) riskLevel = 'high';
+    else if (riskScore >= 25) riskLevel = 'medium';
+
+    // Предсказание следующего события
+    let nextEvent = 'Стабильное состояние';
+    if (riskLevel === 'high') {
+      nextEvent = 'Возможны осложнения';
+    } else if (riskLevel === 'medium') {
+      nextEvent = 'Требуется наблюдение';
+    } else if (Math.random() > 0.8) {
+      nextEvent = 'Возможное усиление активности';
+    }
+
+    // Обновление предсказаний ИИ
+    setAiPredictions({
+      riskLevel,
+      riskScore: Math.min(100, riskScore),
+      nextEvent,
+      confidence: Math.max(85, Math.min(98, 90 + Math.random() * 8)),
+      recommendations: recommendations.slice(0, 3)
+    });
+
+    // Детектирование аномалий
+    const currentTime = dataLength;
+    if (riskScore >= 30 && Math.random() > 0.7) {
+      const newAnomaly = {
+        time: currentTime,
+        type: fhr < 110 || fhr > 170 ? 'fhr' : uc > 80 ? 'uc' : 'contractions' as 'fhr' | 'uc' | 'contractions',
+        severity: riskScore >= 50 ? 'critical' : 'warning' as 'warning' | 'critical',
+        description: fhr < 110 ? 'Брадикардия плода' : 
+                    fhr > 170 ? 'Тахикардия плода' :
+                    uc > 80 ? 'Гипертонус матки' : 'Патологические схватки'
+      };
+      
+      setAnomalies(prev => [...prev.slice(-10), newAnomaly]); // Храним последние 10 аномалий
+    }
+  };
+
+  // Обработчик клика по аномалии - переход к отчетам
+  const handleAnomalyClick = (anomaly: any) => {
+    setSelectedAnomaly(anomaly);
+    // Здесь можно добавить навигацию к странице отчетов
+    alert(`Переход к отчету по аномалии:\n${anomaly.description}\nВремя: ${Math.floor(anomaly.time / 60)}:${(anomaly.time % 60).toString().padStart(2, '0')}`);
   };
 
   // Управление записью
@@ -463,6 +622,9 @@ export default function CTGPage() {
                 height="calc(33.33% - 2px)"
                 data={fetalHeartRate}
                 dangerRanges={[{ min: 110, max: 160 }]}
+                chartType="fhr"
+                anomalies={anomalies}
+                onAnomalyClick={handleAnomalyClick}
               />
 
               {/* График тонуса матки - фиолетовый */}
@@ -475,6 +637,9 @@ export default function CTGPage() {
                 height="calc(33.33% - 2px)"
                 data={uterineContractions}
                 dangerRanges={[{ min: 0, max: 80 }]}
+                chartType="uc"
+                anomalies={anomalies}
+                onAnomalyClick={handleAnomalyClick}
               />
 
               {/* График схваток - малиновый */}
@@ -487,6 +652,9 @@ export default function CTGPage() {
                 height="calc(33.34% - 2px)"
                 data={contractions}
                 dangerRanges={[{ min: 0, max: 60 }]}
+                chartType="contractions"
+                anomalies={anomalies}
+                onAnomalyClick={handleAnomalyClick}
               />
             </div>
           </Card>
@@ -494,7 +662,7 @@ export default function CTGPage() {
 
         {/* Правая колонка - компактные виджеты в розовой палитре */}
         <Col span={6}>
-          {/* Текущие показания */}
+          {/* Предсказания ИИ */}
           <Card 
             size="small" 
             style={{ marginBottom: '10px' }}
@@ -507,34 +675,96 @@ export default function CTGPage() {
             }}
             title={
               <div className="flex items-center gap-2">
-                <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+                <div 
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-white"
+                  style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}
+                >
+                  🧠
+                </div>
                 <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
-                  Показания
+                  Предсказания ИИ
                 </span>
+                <div className={`w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse`}></div>
               </div>
             }
           >
-            <div className="grid grid-cols-1 gap-2">
-              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>ЧСС плода</div>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ec4899' }}>
-                  {fetalHeartRate.length > 0 ? Math.round(fetalHeartRate[fetalHeartRate.length - 1]) : 0}
+            <div className="space-y-2">
+              {/* Уровень риска */}
+              <div className="p-2 rounded" style={{ 
+                backgroundColor: aiPredictions.riskLevel === 'high' ? '#fef2f2' : 
+                                aiPredictions.riskLevel === 'medium' ? '#fefce8' : '#f0fdf4',
+                border: `1px solid ${aiPredictions.riskLevel === 'high' ? '#fecaca' : 
+                                     aiPredictions.riskLevel === 'medium' ? '#fef3c7' : '#bbf7d0'}`
+              }}>
+                <div className="flex items-center justify-between mb-1">
+                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>
+                    Оценка риска
+                  </span>
+                  <span style={{ 
+                    fontSize: '10px', 
+                    fontWeight: 'bold',
+                    color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
+                           aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
+                  }}>
+                    {aiPredictions.riskLevel === 'high' ? 'ВЫСОКИЙ' : 
+                     aiPredictions.riskLevel === 'medium' ? 'СРЕДНИЙ' : 'НИЗКИЙ'}
+                  </span>
                 </div>
-                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>bpm</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
+                    <div 
+                      className="h-full transition-all duration-500 rounded-full"
+                      style={{ 
+                        width: `${aiPredictions.riskScore}%`, 
+                        backgroundColor: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
+                                        aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
+                      }}
+                    />
+                  </div>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 'bold',
+                    color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
+                           aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
+                  }}>
+                    {aiPredictions.riskScore}%
+                  </span>
+                </div>
               </div>
+
+              {/* Прогноз */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Тонус матки</div>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#a21caf' }}>
-                  {uterineContractions.length > 0 ? Math.round(uterineContractions[uterineContractions.length - 1]) : 0}
+                <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
+                  Прогноз
                 </div>
-                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>mmHg</div>
+                <div style={{ fontSize: '11px', color: '#a21caf', fontWeight: '500' }}>
+                  {aiPredictions.nextEvent}
+                </div>
+                <div className="flex items-center gap-1 mt-2">
+                  <span style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>
+                    Достоверность:
+                  </span>
+                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#16a34a' }}>
+                    {aiPredictions.confidence}%
+                  </span>
+                </div>
               </div>
+
+              {/* Рекомендации */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Схватки</div>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#be185d' }}>
-                  {contractions.length > 0 ? Math.round(contractions[contractions.length - 1]) : 0}
+                <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
+                  Рекомендации ИИ
                 </div>
-                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>mmHg</div>
+                <div className="space-y-1">
+                  {aiPredictions.recommendations.map((rec, index) => (
+                    <div key={index} className="flex items-start gap-1">
+                      <span style={{ fontSize: '8px', color: '#ec4899' }}>•</span>
+                      <span style={{ fontSize: '9px', color: '#831843', lineHeight: '1.2' }}>
+                        {rec}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </Card>
