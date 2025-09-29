@@ -128,7 +128,7 @@ const CTGChart: React.FC<CTGChartProps> = ({
       background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
       border: '1px solid #f3e8ff',
       borderRadius: '6px',
-      padding: '6px'
+      padding: '8px'
     }}>
       <div style={{
         position: 'absolute',
@@ -141,30 +141,30 @@ const CTGChart: React.FC<CTGChartProps> = ({
         boxShadow: '0 1px 3px rgba(236, 72, 153, 0.1)',
         border: '1px solid #f3e8ff'
       }}>
-        <Text strong style={{ color: '#831843', fontSize: '10px' }}>
+        <Text strong style={{ color: '#831843', fontSize: '12px' }}>
           {title}
         </Text>
-        <Text style={{ marginLeft: '4px', fontSize: '9px', color: '#831843', opacity: 0.7 }}>
+        <Text style={{ marginLeft: '4px', fontSize: '11px', color: '#831843', opacity: 0.7 }}>
           ({unit})
         </Text>
       </div>
       
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 28, right: 15, left: 15, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 32, right: 20, left: 20, bottom: 8 }}>
           <CartesianGrid strokeDasharray="2 2" stroke="#f3e8ff" />
           <XAxis 
             dataKey="time" 
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 9, fill: '#831843' }}
+            tick={{ fontSize: 11, fill: '#831843' }}
             tickFormatter={(value) => `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, '0')}`}
           />
           <YAxis 
             domain={[minValue, maxValue]}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 9, fill: '#831843' }}
-            width={30}
+            tick={{ fontSize: 11, fill: '#831843' }}
+            width={35}
           />
           <Tooltip content={<CustomTooltip />} />
           
@@ -273,8 +273,8 @@ const CTGChart: React.FC<CTGChartProps> = ({
           background: isDangerValue(data[data.length - 1]) ? '#fef2f2' : '#fef7ff',
           border: `1px solid ${isDangerValue(data[data.length - 1]) ? '#fecaca' : '#f3e8ff'}`,
           borderRadius: '4px',
-          padding: '3px 6px',
-          fontSize: '12px',
+          padding: '4px 8px',
+          fontSize: '14px',
           fontWeight: 'bold',
           color: isDangerValue(data[data.length - 1]) ? '#dc2626' : '#a21caf'
         }}>
@@ -408,9 +408,9 @@ export default function CTGPage() {
     // Обновление предсказаний ИИ
     setAiPredictions({
       riskLevel,
-      riskScore: Math.min(100, riskScore),
+      riskScore: Math.round(Math.min(100, riskScore)), // Округляем до целого
       nextEvent,
-      confidence: Math.max(85, Math.min(98, 90 + Math.random() * 8)),
+      confidence: Math.round(Math.max(85, Math.min(98, 90 + Math.random() * 8))), // Округляем до целого
       recommendations: recommendations.slice(0, 3)
     });
 
@@ -534,18 +534,18 @@ export default function CTGPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Avatar 
-                size={20}
+                size={24}
                 style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
                 icon={<HeartOutlined />}
               />
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>КТГ Мониторинг</span>
+              <span style={{ fontSize: '16px', fontWeight: 600, color: '#831843' }}>КТГ Мониторинг</span>
             </div>
             <Tag 
               color={isRecording ? 'error' : 'default'}
-              className="text-xs"
+              className="text-sm"
               style={{ 
-                fontSize: '10px',
-                padding: '2px 6px',
+                fontSize: '12px',
+                padding: '4px 8px',
                 background: isRecording ? '#fef2f2' : '#f8fafc',
                 color: isRecording ? '#dc2626' : '#64748b',
                 border: `1px solid ${isRecording ? '#fecaca' : '#e2e8f0'}`
@@ -559,26 +559,26 @@ export default function CTGPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <UserOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#831843' }}>
+              <UserOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#831843' }}>
                 {patientName}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <ClockCircleOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '11px', color: '#831843' }}>
+              <ClockCircleOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '13px', color: '#831843' }}>
                 {pregnancyWeek}н {gestationDay}д
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <CalendarOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '11px', color: '#831843' }}>
+              <CalendarOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+              <span style={{ fontSize: '13px', color: '#831843' }}>
                 {sessionDate.format('DD.MM.YYYY')}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '14px', color: '#831843', fontWeight: 'bold' }}>
               {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
             </span>
             <div className={`w-2 h-2 rounded-full ${
@@ -590,28 +590,28 @@ export default function CTGPage() {
 
       {/* Основная область с графиками и боковой панелью */}
       <Row gutter={[12, 12]}>
-        {/* Графики КТГ - компактные, без скролла */}
+        {/* Графики КТГ - увеличенные для лучшего анализа */}
         <Col span={18}>
           <Card 
             size="small"
-            style={{ height: '520px' }}
-            bodyStyle={{ height: '490px', padding: '6px' }}
+            style={{ height: '600px' }}
+            bodyStyle={{ height: '570px', padding: '8px' }}
             headStyle={{ 
-              padding: '4px 8px', 
+              padding: '6px 12px', 
               minHeight: 'auto',
               background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
               borderBottom: '1px solid #f3e8ff'
             }}
             title={
               <div className="flex items-center gap-2">
-                <LineChartOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                <LineChartOutlined style={{ color: '#ec4899', fontSize: '16px' }} />
+                <span style={{ fontSize: '16px', fontWeight: 600, color: '#831843' }}>
                   Графики КТГ
                 </span>
               </div>
             }
           >
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {/* График ЧСС плода - розовый */}
               <CTGChart
                 title="ЧСС плода"
@@ -619,7 +619,7 @@ export default function CTGPage() {
                 color="#ec4899"
                 minValue={100}
                 maxValue={180}
-                height="calc(33.33% - 2px)"
+                height="calc(33.33% - 4px)"
                 data={fetalHeartRate}
                 dangerRanges={[{ min: 110, max: 160 }]}
                 chartType="fhr"
@@ -634,7 +634,7 @@ export default function CTGPage() {
                 color="#a21caf"
                 minValue={0}
                 maxValue={100}
-                height="calc(33.33% - 2px)"
+                height="calc(33.33% - 4px)"
                 data={uterineContractions}
                 dangerRanges={[{ min: 0, max: 80 }]}
                 chartType="uc"
@@ -649,7 +649,7 @@ export default function CTGPage() {
                 color="#be185d"
                 minValue={0}
                 maxValue={80}
-                height="calc(33.34% - 2px)"
+                height="calc(33.34% - 4px)"
                 data={contractions}
                 dangerRanges={[{ min: 0, max: 60 }]}
                 chartType="contractions"
@@ -681,7 +681,7 @@ export default function CTGPage() {
                 >
                   🧠
                 </div>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Предсказания ИИ
                 </span>
                 <div className={`w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse`}></div>
@@ -697,11 +697,11 @@ export default function CTGPage() {
                                      aiPredictions.riskLevel === 'medium' ? '#fef3c7' : '#bbf7d0'}`
               }}>
                 <div className="flex items-center justify-between mb-1">
-                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
                     Оценка риска
                   </span>
                   <span style={{ 
-                    fontSize: '10px', 
+                    fontSize: '12px', 
                     fontWeight: 'bold',
                     color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
                            aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
@@ -722,7 +722,7 @@ export default function CTGPage() {
                     />
                   </div>
                   <span style={{ 
-                    fontSize: '11px', 
+                    fontSize: '13px', 
                     fontWeight: 'bold',
                     color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
                            aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
@@ -734,17 +734,17 @@ export default function CTGPage() {
 
               {/* Прогноз */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
                   Прогноз
                 </div>
-                <div style={{ fontSize: '11px', color: '#a21caf', fontWeight: '500' }}>
+                <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
                   {aiPredictions.nextEvent}
                 </div>
                 <div className="flex items-center gap-1 mt-2">
-                  <span style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>
+                  <span style={{ fontSize: '11px', color: '#831843', opacity: 0.7 }}>
                     Достоверность:
                   </span>
-                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#16a34a' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
                     {aiPredictions.confidence}%
                   </span>
                 </div>
@@ -752,14 +752,14 @@ export default function CTGPage() {
 
               {/* Рекомендации */}
               <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
                   Рекомендации ИИ
                 </div>
                 <div className="space-y-1">
                   {aiPredictions.recommendations.map((rec, index) => (
                     <div key={index} className="flex items-start gap-1">
-                      <span style={{ fontSize: '8px', color: '#ec4899' }}>•</span>
-                      <span style={{ fontSize: '9px', color: '#831843', lineHeight: '1.2' }}>
+                      <span style={{ fontSize: '10px', color: '#ec4899' }}>•</span>
+                      <span style={{ fontSize: '11px', color: '#831843', lineHeight: '1.2' }}>
                         {rec}
                       </span>
                     </div>
@@ -782,8 +782,8 @@ export default function CTGPage() {
             }}
             title={
               <div className="flex items-center gap-2">
-                <SettingOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                <SettingOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Управление
                 </span>
               </div>
@@ -802,11 +802,12 @@ export default function CTGPage() {
                     'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)' : 
                     'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
                   border: 'none',
-                  fontSize: '11px',
-                  fontWeight: 'bold'
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  height: '32px'
                 }}
               >
-                {isRecording ? 'СТОП' : 'СТАРТ'}
+                {isRecording ? 'Стоп' : 'Старт'}
               </Button>
 
               <Button
@@ -819,10 +820,11 @@ export default function CTGPage() {
                   background: '#fef7ff',
                   borderColor: '#f3e8ff',
                   color: '#831843',
-                  fontSize: '11px'
+                  fontSize: '13px',
+                  height: '32px'
                 }}
               >
-                СОХРАНИТЬ
+                Сохранить
               </Button>
 
               <Button
@@ -833,10 +835,11 @@ export default function CTGPage() {
                 size="small"
                 danger
                 style={{
-                  fontSize: '11px'
+                  fontSize: '13px',
+                  height: '32px'
                 }}
               >
-                УДАЛИТЬ
+                Удалить
               </Button>
 
               <Button
@@ -848,10 +851,11 @@ export default function CTGPage() {
                 style={{
                   borderColor: '#f3e8ff',
                   color: '#831843',
-                  fontSize: '11px'
+                  fontSize: '13px',
+                  height: '32px'
                 }}
               >
-                НОВОЕ
+                Новое обследование
               </Button>
             </Space>
           </Card>
@@ -868,8 +872,8 @@ export default function CTGPage() {
             }}
             title={
               <div className="flex items-center gap-2">
-                <WifiOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                <WifiOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Статистика
                 </span>
               </div>
@@ -877,22 +881,22 @@ export default function CTGPage() {
           >
             <div className="grid grid-cols-2 gap-2">
               <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Базальная</div>
-                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#ec4899' }}>
+                <div style={{ fontSize: '12px', color: '#831843', fontWeight: 'bold' }}>Базальная</div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#ec4899' }}>
                   {fetalHeartRate.length > 10 ? 
                     Math.round(fetalHeartRate.slice(-10).reduce((a, b) => a + b, 0) / 10) : 
                     '--'}
                 </div>
-                <div style={{ fontSize: '8px', color: '#831843', opacity: 0.7 }}>bpm</div>
+                <div style={{ fontSize: '10px', color: '#831843', opacity: 0.7 }}>bpm</div>
               </div>
               <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Вариация</div>
-                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#a21caf' }}>
+                <div style={{ fontSize: '12px', color: '#831843', fontWeight: 'bold' }}>Вариация</div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
                   {fetalHeartRate.length > 10 ? 
                     Math.round(Math.max(...fetalHeartRate.slice(-10)) - Math.min(...fetalHeartRate.slice(-10))) : 
                     '--'}
                 </div>
-                <div style={{ fontSize: '8px', color: '#831843', opacity: 0.7 }}>bpm</div>
+                <div style={{ fontSize: '10px', color: '#831843', opacity: 0.7 }}>bpm</div>
               </div>
             </div>
           </Card>
@@ -905,7 +909,7 @@ export default function CTGPage() {
               {
                 key: '1',
                 label: (
-                  <span style={{ fontSize: '11px', fontWeight: 500, color: '#831843' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#831843' }}>
                     <SettingOutlined /> Параметры сеанса
                   </span>
                 ),
@@ -915,16 +919,16 @@ export default function CTGPage() {
                     border: '1px solid #f3e8ff'
                   }}>
                     <div>
-                      <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>ФИО:</Text>
+                      <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>ФИО:</Text>
                       <Input 
                         size="small"
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
-                        style={{ fontSize: '11px', marginTop: '2px' }}
+                        style={{ fontSize: '13px', marginTop: '2px' }}
                       />
                     </div>
                     <div>
-                      <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Тип КТГ:</Text>
+                      <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>Тип КТГ:</Text>
                       <Select 
                         size="small" 
                         value={sessionType}
@@ -933,14 +937,14 @@ export default function CTGPage() {
                       >
                         {sessionTypes.map(type => (
                           <Option key={type.value} value={type.value}>
-                            <span style={{ fontSize: '11px' }}>{type.label}</span>
+                            <span style={{ fontSize: '13px' }}>{type.label}</span>
                           </Option>
                         ))}
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Недели:</Text>
+                        <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>Недели:</Text>
                         <Input 
                           size="small" 
                           type="number"
@@ -950,7 +954,7 @@ export default function CTGPage() {
                         />
                       </div>
                       <div>
-                        <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Дни:</Text>
+                        <Text style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>Дни:</Text>
                         <Input 
                           size="small" 
                           type="number"
@@ -965,7 +969,7 @@ export default function CTGPage() {
               }
             ]}
           />
-        </Col>
+          </Col>
       </Row>
 
       {/* CSS анимации */}
