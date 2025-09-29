@@ -29,33 +29,19 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
       minHeight: '100vh'
     }}>
       {/* Заголовок с кнопкой назад */}
-      <Card 
-        size="small"
-        style={{ marginBottom: '16px' }}
-        bodyStyle={{ padding: '12px' }}
-        headStyle={{ 
-          padding: '8px 12px',
-          background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-          borderBottom: '1px solid #f3e8ff'
-        }}
-        title={
-          <div className="flex items-center gap-3">
-            <Button 
-              type="text" 
-              icon={<ArrowLeftOutlined />} 
-              onClick={onBack}
-              style={{ color: '#831843' }}
-            />
-            <span style={{ fontSize: '18px', fontWeight: 600, color: '#831843' }}>
-              Детальный анализ аномалии
-            </span>
-          </div>
-        }
-      >
-        <div style={{ fontSize: '16px', color: '#a21caf', fontWeight: 500 }}>
-          {title}
+      <div style={{ marginBottom: '16px' }}>
+        <div className="flex items-center gap-3">
+          <Button 
+            type="text" 
+            icon={<ArrowLeftOutlined />} 
+            onClick={onBack}
+            style={{ color: '#831843' }}
+          />
+          <span style={{ fontSize: '18px', fontWeight: 600, color: '#831843' }}>
+            Детальный анализ аномалии
+          </span>
         </div>
-      </Card>
+      </div>
 
       <Row gutter={16}>
         {/* Левая колонка - График и дополнительная информация */}
@@ -171,7 +157,7 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
             }}>
               <div className="flex items-center justify-between">
                 <span style={{ color: '#831843' }}>
-                  🔍 Выделенная область показывает период аномалии
+                  Выделенная область показывает период аномалии
                 </span>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
@@ -222,7 +208,6 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
 
         {/* Правая колонка - Детали, анализ и хронология */}
         <Col span={8}>
-          
           {/* Детали */}
           <Card 
             size="small"
@@ -242,7 +227,7 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
               </div>
             }
           >
-            <Descriptions column={2} size="small">
+            <Descriptions column={1} size="small">
               <Descriptions.Item 
                 label={<span style={{ fontSize: '12px', fontWeight: 'bold' }}>Тип</span>}
               >
@@ -262,7 +247,6 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
               </Descriptions.Item>
               <Descriptions.Item 
                 label={<span style={{ fontSize: '12px', fontWeight: 'bold' }}>Описание</span>}
-                span={2}
               >
                 <span style={{ fontSize: '13px' }}>{anomaly.description}</span>
               </Descriptions.Item>
@@ -373,28 +357,6 @@ const DetailedAnomalyAnalysis: React.FC<DetailedAnomalyAnalysisProps> = ({ data,
                 </div>
               </Timeline.Item>
             </Timeline>
-          </Card>
-        </Col>
-
-        {/* Боковая панель - пока пустая, можно добавить дополнительную информацию */}
-        <Col span={8}>
-          <Card 
-            size="small"
-            bodyStyle={{ padding: '12px' }}
-            headStyle={{ 
-              padding: '8px 12px', 
-              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-              borderBottom: '1px solid #f3e8ff'
-            }}
-            title={
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
-                Дополнительная информация
-              </span>
-            }
-          >
-            <div style={{ color: '#64748b', fontSize: '12px', textAlign: 'center', padding: '20px' }}>
-              Здесь может быть дополнительная информация об аномалии
-            </div>
           </Card>
         </Col>
       </Row>
