@@ -13,7 +13,8 @@ import {
   Select, 
   DatePicker, 
   TimePicker,
-  Collapse
+  Collapse,
+  Avatar
 } from 'antd';
 import { colors } from '../theme';
 import { 
@@ -30,7 +31,9 @@ import {
   CalendarOutlined,
   LineChartOutlined,
   UpOutlined,
-  DownOutlined
+  DownOutlined,
+  ThunderboltOutlined,
+  WifiOutlined
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 import dayjs from 'dayjs';
@@ -40,7 +43,7 @@ const { Text, Title } = Typography;
 const { Option } = Select;
 const { Panel } = Collapse;
 
-// Компонент для интерактивного графика КТГ
+// Компонент для интерактивного графика КТГ в розовой палитре
 interface CTGChartProps {
   title: string;
   unit: string;
@@ -74,30 +77,30 @@ const CTGChart: React.FC<CTGChartProps> = ({
     return dangerRanges.some(range => value < range.min || value > range.max);
   };
 
-  // Кастомный Tooltip
+  // Кастомный Tooltip в розовой палитре
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       const isDanger = isDangerValue(data.value);
       return (
         <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          border: `2px solid ${isDanger ? '#ff4d4f' : color}`,
+          background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+          border: `1px solid ${isDanger ? '#f43f5e' : '#ec4899'}`,
           borderRadius: '6px',
           padding: '8px 12px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          boxShadow: '0 4px 12px rgba(236, 72, 153, 0.15)'
         }}>
-          <p style={{ margin: 0, fontWeight: 'bold', color: isDanger ? '#ff4d4f' : color }}>
+          <p style={{ margin: 0, fontWeight: 600, color: '#831843', fontSize: '11px' }}>
             {title}
           </p>
-          <p style={{ margin: '4px 0 0 0', fontSize: '14px' }}>
-            <strong>{Math.round(data.value)}</strong> {unit}
+          <p style={{ margin: '4px 0 0 0', fontSize: '14px', fontWeight: 'bold', color: isDanger ? '#f43f5e' : '#a21caf' }}>
+            {Math.round(data.value)} {unit}
           </p>
-          <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#666' }}>
-            Время: {data.payload.timestamp}
+          <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: '#831843', opacity: 0.8 }}>
+            {data.payload.timestamp}
           </p>
           {isDanger && (
-            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#ff4d4f', fontWeight: 'bold' }}>
+            <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: '#f43f5e', fontWeight: 'bold' }}>
               ⚠️ ВНИМАНИЕ!
             </p>
           )}
@@ -111,62 +114,63 @@ const CTGChart: React.FC<CTGChartProps> = ({
     <div style={{ 
       height, 
       position: 'relative',
-      background: '#fafafa',
-      border: '1px solid #e8e8e8',
+      background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+      border: '1px solid #f3e8ff',
       borderRadius: '6px',
-      padding: '8px'
+      padding: '6px'
     }}>
       <div style={{
         position: 'absolute',
-        top: '12px',
-        left: '12px',
+        top: '8px',
+        left: '10px',
         background: 'rgba(255,255,255,0.95)',
-        padding: '4px 8px',
+        padding: '3px 6px',
         borderRadius: '4px',
         zIndex: 10,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: '0 1px 3px rgba(236, 72, 153, 0.1)',
+        border: '1px solid #f3e8ff'
       }}>
-        <Text strong style={{ color, fontSize: '12px' }}>
+        <Text strong style={{ color: '#831843', fontSize: '10px' }}>
           {title}
         </Text>
-        <Text type="secondary" style={{ marginLeft: '6px', fontSize: '10px' }}>
+        <Text style={{ marginLeft: '4px', fontSize: '9px', color: '#831843', opacity: 0.7 }}>
           ({unit})
         </Text>
       </div>
       
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 35, right: 20, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" />
+        <LineChart data={chartData} margin={{ top: 28, right: 15, left: 15, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="2 2" stroke="#f3e8ff" />
           <XAxis 
             dataKey="time" 
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#666' }}
+            tick={{ fontSize: 9, fill: '#831843' }}
             tickFormatter={(value) => `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, '0')}`}
           />
           <YAxis 
             domain={[minValue, maxValue]}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fill: '#666' }}
-            width={35}
+            tick={{ fontSize: 9, fill: '#831843' }}
+            width={30}
           />
           <Tooltip content={<CustomTooltip />} />
           
-          {/* Опасные зоны как фоновая заливка */}
+          {/* Опасные зоны как фоновая заливка в розовых тонах */}
           {dangerRanges.map((range, index) => (
             <React.Fragment key={index}>
               <ReferenceArea 
                 y1={minValue} 
                 y2={range.min} 
-                fill="#ff4d4f" 
-                fillOpacity={0.1}
+                fill="#f43f5e" 
+                fillOpacity={0.08}
               />
               <ReferenceArea 
                 y1={range.max} 
                 y2={maxValue} 
-                fill="#ff4d4f" 
-                fillOpacity={0.1}
+                fill="#f43f5e" 
+                fillOpacity={0.08}
               />
             </React.Fragment>
           ))}
@@ -175,47 +179,47 @@ const CTGChart: React.FC<CTGChartProps> = ({
             type="monotone" 
             dataKey="value" 
             stroke={color}
-            strokeWidth={2.5}
+            strokeWidth={2}
             dot={(props: any) => {
               const isDanger = isDangerValue(props.payload.value);
               return (
                 <circle 
                   cx={props.cx} 
                   cy={props.cy} 
-                  r={isDanger ? 4 : 2}
-                  fill={isDanger ? '#ff4d4f' : color}
+                  r={isDanger ? 3 : 1.5}
+                  fill={isDanger ? '#f43f5e' : color}
                   stroke={isDanger ? '#fff' : 'none'}
-                  strokeWidth={isDanger ? 2 : 0}
+                  strokeWidth={isDanger ? 1 : 0}
                 />
               );
             }}
             activeDot={{ 
-              r: 6, 
+              r: 4, 
               fill: color,
               stroke: '#fff',
-              strokeWidth: 2
+              strokeWidth: 1
             }}
           />
         </LineChart>
       </ResponsiveContainer>
       
-      {/* Текущее значение */}
+      {/* Текущее значение в розовой палитре */}
       {data.length > 0 && (
         <div style={{
           position: 'absolute',
-          top: '12px',
-          right: '12px',
-          background: isDangerValue(data[data.length - 1]) ? '#fff2f0' : '#fff',
-          border: `2px solid ${isDangerValue(data[data.length - 1]) ? '#ff4d4f' : color}`,
-          borderRadius: '6px',
-          padding: '4px 8px',
-          fontSize: '14px',
+          top: '8px',
+          right: '10px',
+          background: isDangerValue(data[data.length - 1]) ? '#fef2f2' : '#fef7ff',
+          border: `1px solid ${isDangerValue(data[data.length - 1]) ? '#fecaca' : '#f3e8ff'}`,
+          borderRadius: '4px',
+          padding: '3px 6px',
+          fontSize: '12px',
           fontWeight: 'bold',
-          color: isDangerValue(data[data.length - 1]) ? '#ff4d4f' : color
+          color: isDangerValue(data[data.length - 1]) ? '#dc2626' : '#a21caf'
         }}>
           {Math.round(data[data.length - 1])}
           {isDangerValue(data[data.length - 1]) && (
-            <span style={{ marginLeft: '4px', animation: 'blink 1s infinite' }}>⚠️</span>
+            <span style={{ marginLeft: '3px', animation: 'blink 1s infinite' }}>⚠️</span>
           )}
         </div>
       )}
@@ -351,232 +355,210 @@ export default function CTGPage() {
   const risk = getRiskStatus();
 
   return (
-    <div style={{ padding: '16px', background: '#f5f5f5', minHeight: '100vh' }}>
-      {/* Компактные параметры сеанса */}
-      <Collapse 
-        defaultActiveKey={['1']} 
-        ghost 
-        style={{ marginBottom: '16px' }}
-        items={[
-          {
-            key: '1',
-            label: (
-              <span style={{ fontWeight: 500, fontSize: '14px' }}>
-                <SettingOutlined /> Параметры сеанса КТГ
+    <div style={{ 
+      padding: '12px', 
+      background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)', 
+      minHeight: '100vh' 
+    }}>
+      {/* Компактный заголовок страницы в розовой палитре */}
+      <Card 
+        size="small" 
+        style={{ marginBottom: '10px' }}
+        bodyStyle={{ padding: '8px 12px' }}
+        headStyle={{ 
+          padding: '6px 12px', 
+          minHeight: 'auto',
+          background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+          borderBottom: '1px solid #f3e8ff'
+        }}
+        title={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Avatar 
+                size={20}
+                style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
+                icon={<HeartOutlined />}
+              />
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>КТГ Мониторинг</span>
+            </div>
+            <Tag 
+              color={isRecording ? 'error' : 'default'}
+              className="text-xs"
+              style={{ 
+                fontSize: '10px',
+                padding: '2px 6px',
+                background: isRecording ? '#fef2f2' : '#f8fafc',
+                color: isRecording ? '#dc2626' : '#64748b',
+                border: `1px solid ${isRecording ? '#fecaca' : '#e2e8f0'}`
+              }}
+            >
+              {isRecording ? 'ЗАПИСЬ' : 'ОСТАНОВЛЕНО'}
+            </Tag>
+          </div>
+        }
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <UserOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#831843' }}>
+                {patientName}
               </span>
-            ),
-            children: (
-              <Card size="small" style={{ margin: 0 }}>
-                <Row gutter={[12, 8]}>
-                  <Col span={8}>
-                    <Text strong style={{ fontSize: '12px' }}>ФИО пациентки:</Text>
-                    <Input 
-                      size="small"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      placeholder="Иванова Мария Петровна"
-                      prefix={<UserOutlined />}
-                      style={{ marginTop: '4px' }}
-                    />
-                  </Col>
-                  <Col span={4}>
-                    <Text strong style={{ fontSize: '12px' }}>Дата сеанса:</Text>
-                    <DatePicker 
-                      size="small"
-                      style={{ width: '100%', marginTop: '4px' }}
-                      value={sessionDate}
-                      onChange={(date) => date && setSessionDate(date)}
-                      format="DD.MM.YYYY"
-                    />
-                  </Col>
-                  <Col span={4}>
-                    <Text strong style={{ fontSize: '12px' }}>Тип КТГ:</Text>
-                    <Select 
-                      size="small" 
-                      value={sessionType}
-                      onChange={setSessionType}
-                      style={{ width: '100%', marginTop: '4px' }}
-                    >
-                      {sessionTypes.map(type => (
-                        <Option key={type.value} value={type.value}>
-                          {type.label}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Col>
-                  <Col span={3}>
-                    <Text strong style={{ fontSize: '12px' }}>Неделя:</Text>
-                    <Input 
-                      size="small" 
-                      type="number"
-                      value={pregnancyWeek}
-                      onChange={(e) => setPregnancyWeek(Number(e.target.value))}
-                      placeholder="35" 
-                      style={{ marginTop: '4px' }} 
-                    />
-                  </Col>
-                  <Col span={2}>
-                    <Text strong style={{ fontSize: '12px' }}>Дни:</Text>
-                    <Input 
-                      size="small" 
-                      type="number"
-                      value={gestationDay}
-                      onChange={(e) => setGestationDay(Number(e.target.value))}
-                      placeholder="4" 
-                      style={{ marginTop: '4px' }} 
-                    />
-                  </Col>
-                  <Col span={3}>
-                    <Text strong style={{ fontSize: '12px' }}>Время начала:</Text>
-                    <TimePicker 
-                      size="small" 
-                      format="HH:mm" 
-                      value={sessionTime}
-                      onChange={(time) => time && setSessionTime(time)}
-                      style={{ width: '100%', marginTop: '4px' }} 
-                    />
-                  </Col>
-                </Row>
-              </Card>
-            )
-          }
-        ]}
-      />
+            </div>
+            <div className="flex items-center gap-1">
+              <ClockCircleOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+              <span style={{ fontSize: '11px', color: '#831843' }}>
+                {pregnancyWeek}н {gestationDay}д
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <CalendarOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+              <span style={{ fontSize: '11px', color: '#831843' }}>
+                {sessionDate.format('DD.MM.YYYY')}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>
+              {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+            </span>
+            <div className={`w-2 h-2 rounded-full ${
+              isRecording ? 'bg-red-500' : 'bg-gray-400'
+            } ${isRecording ? 'animate-pulse' : ''}`}></div>
+          </div>
+        </div>
+      </Card>
 
-      {/* Основная область с графиками */}
-      <Row gutter={[16, 16]}>
-        {/* Графики КТГ - увеличенная область */}
+      {/* Основная область с графиками и боковой панелью */}
+      <Row gutter={[12, 12]}>
+        {/* Графики КТГ - компактные, без скролла */}
         <Col span={18}>
           <Card 
-            title={
-              <Space>
-                <HeartOutlined style={{ color: colors.primary }} />
-                <span>Мониторинг КТГ</span>
-                <Tag color={isRecording ? 'red' : 'default'}>
-                  {isRecording ? 'Запись' : 'Остановлено'}
-                </Tag>
-              </Space>
-            }
-            extra={
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                <ClockCircleOutlined /> {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
-              </Text>
-            }
             size="small"
-            style={{ height: '600px' }}
-            bodyStyle={{ height: '540px', padding: '8px' }}
+            style={{ height: '520px' }}
+            bodyStyle={{ height: '490px', padding: '6px' }}
+            headStyle={{ 
+              padding: '4px 8px', 
+              minHeight: 'auto',
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+              borderBottom: '1px solid #f3e8ff'
+            }}
+            title={
+              <div className="flex items-center gap-2">
+                <LineChartOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                  Графики КТГ
+                </span>
+              </div>
+            }
           >
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {/* График ЧСС плода */}
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              {/* График ЧСС плода - розовый */}
               <CTGChart
                 title="ЧСС плода"
                 unit="bpm"
-                color="#52c41a"
+                color="#ec4899"
                 minValue={100}
                 maxValue={180}
-                height="calc(33.33% - 3px)"
+                height="calc(33.33% - 2px)"
                 data={fetalHeartRate}
-                dangerRanges={[{ min: 110, max: 160 }]} // Норма: 110-160 bpm
+                dangerRanges={[{ min: 110, max: 160 }]}
               />
 
-              {/* График тонуса матки */}
+              {/* График тонуса матки - фиолетовый */}
               <CTGChart
                 title="Тонус матки"
                 unit="mmHg"
-                color="#fa8c16"
+                color="#a21caf"
                 minValue={0}
                 maxValue={100}
-                height="calc(33.33% - 3px)"
+                height="calc(33.33% - 2px)"
                 data={uterineContractions}
-                dangerRanges={[{ min: 0, max: 80 }]} // Опасно свыше 80 mmHg
+                dangerRanges={[{ min: 0, max: 80 }]}
               />
 
-              {/* График схваток */}
+              {/* График схваток - малиновый */}
               <CTGChart
                 title="Схватки"
                 unit="mmHg"
-                color="#f5222d"
+                color="#be185d"
                 minValue={0}
                 maxValue={80}
-                height="calc(33.34% - 3px)"
+                height="calc(33.34% - 2px)"
                 data={contractions}
-                dangerRanges={[{ min: 0, max: 60 }]} // Опасно свыше 60 mmHg
+                dangerRanges={[{ min: 0, max: 60 }]}
               />
             </div>
           </Card>
         </Col>
 
-        {/* Правая колонка - показания и управление */}
+        {/* Правая колонка - компактные виджеты в розовой палитре */}
         <Col span={6}>
           {/* Текущие показания */}
           <Card 
-            title="Текущие показания" 
             size="small" 
-            style={{ marginBottom: '16px' }}
-            bodyStyle={{ padding: '12px' }}
+            style={{ marginBottom: '10px' }}
+            bodyStyle={{ padding: '8px' }}
+            headStyle={{ 
+              padding: '4px 8px', 
+              minHeight: 'auto',
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+              borderBottom: '1px solid #f3e8ff'
+            }}
+            title={
+              <div className="flex items-center gap-2">
+                <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                  Показания
+                </span>
+              </div>
+            }
           >
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
-              <Statistic
-                title="ЧСС плода"
-                value={fetalHeartRate.length > 0 ? Math.round(fetalHeartRate[fetalHeartRate.length - 1]) : 0}
-                suffix="bpm"
-                valueStyle={{ color: '#52c41a', fontSize: '20px' }}
-              />
-              <Statistic
-                title="Тонус матки"
-                value={uterineContractions.length > 0 ? Math.round(uterineContractions[uterineContractions.length - 1]) : 0}
-                suffix="mmHg"
-                valueStyle={{ color: '#fa8c16', fontSize: '18px' }}
-              />
-              <Statistic
-                title="Схватки"
-                value={contractions.length > 0 ? Math.round(contractions[contractions.length - 1]) : 0}
-                suffix="mmHg"
-                valueStyle={{ color: '#f5222d', fontSize: '18px' }}
-              />
-            </Space>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>ЧСС плода</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ec4899' }}>
+                  {fetalHeartRate.length > 0 ? Math.round(fetalHeartRate[fetalHeartRate.length - 1]) : 0}
+                </div>
+                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>bpm</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Тонус матки</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#a21caf' }}>
+                  {uterineContractions.length > 0 ? Math.round(uterineContractions[uterineContractions.length - 1]) : 0}
+                </div>
+                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>mmHg</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Схватки</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#be185d' }}>
+                  {contractions.length > 0 ? Math.round(contractions[contractions.length - 1]) : 0}
+                </div>
+                <div style={{ fontSize: '9px', color: '#831843', opacity: 0.7 }}>mmHg</div>
+              </div>
+            </div>
           </Card>
 
-          {/* Статистика */}
-          <Collapse 
-            size="small"
-            style={{ marginBottom: '16px' }}
-            items={[
-              {
-                key: '1',
-                label: 'Статистика сеанса',
-                children: (
-                  <div style={{ fontSize: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span>Базальная ЧСС:</span>
-                      <Text strong style={{ color: '#52c41a' }}>
-                        {fetalHeartRate.length > 10 ? 
-                          Math.round(fetalHeartRate.slice(-10).reduce((a, b) => a + b, 0) / 10) : 
-                          '--'} bpm
-                      </Text>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span>Вариабельность:</span>
-                      <Text strong style={{ color: '#fa8c16' }}>
-                        {fetalHeartRate.length > 10 ? 
-                          Math.round(Math.max(...fetalHeartRate.slice(-10)) - Math.min(...fetalHeartRate.slice(-10))) : 
-                          '--'} bpm
-                      </Text>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Длительность:</span>
-                      <Text strong style={{ color: '#1890ff' }}>
-                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
-                      </Text>
-                    </div>
-                  </div>
-                )
-              }
-            ]}
-          />
-
           {/* Управление */}
-          <Card title="Управление" size="small" bodyStyle={{ padding: '12px' }}>
+          <Card 
+            size="small" 
+            style={{ marginBottom: '10px' }}
+            bodyStyle={{ padding: '8px' }}
+            headStyle={{ 
+              padding: '4px 8px', 
+              minHeight: 'auto',
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+              borderBottom: '1px solid #f3e8ff'
+            }}
+            title={
+              <div className="flex items-center gap-2">
+                <SettingOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                  Управление
+                </span>
+              </div>
+            }
+          >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
               <Button
                 type="primary"
@@ -585,6 +567,14 @@ export default function CTGPage() {
                 onClick={handleStartStop}
                 block
                 size="small"
+                style={{
+                  background: isRecording ? 
+                    'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)' : 
+                    'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: 'bold'
+                }}
               >
                 {isRecording ? 'СТОП' : 'СТАРТ'}
               </Button>
@@ -595,6 +585,12 @@ export default function CTGPage() {
                 disabled={!sessionStartTime}
                 block
                 size="small"
+                style={{
+                  background: '#fef7ff',
+                  borderColor: '#f3e8ff',
+                  color: '#831843',
+                  fontSize: '11px'
+                }}
               >
                 СОХРАНИТЬ
               </Button>
@@ -606,6 +602,9 @@ export default function CTGPage() {
                 block
                 size="small"
                 danger
+                style={{
+                  fontSize: '11px'
+                }}
               >
                 УДАЛИТЬ
               </Button>
@@ -616,11 +615,126 @@ export default function CTGPage() {
                 block
                 size="small"
                 type="dashed"
+                style={{
+                  borderColor: '#f3e8ff',
+                  color: '#831843',
+                  fontSize: '11px'
+                }}
               >
-                НОВОЕ ОБСЛЕДОВАНИЕ
+                НОВОЕ
               </Button>
             </Space>
           </Card>
+
+          {/* Компактная статистика */}
+          <Card 
+            size="small"
+            bodyStyle={{ padding: '8px' }}
+            headStyle={{ 
+              padding: '4px 8px', 
+              minHeight: 'auto',
+              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+              borderBottom: '1px solid #f3e8ff'
+            }}
+            title={
+              <div className="flex items-center gap-2">
+                <WifiOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#831843' }}>
+                  Статистика
+                </span>
+              </div>
+            }
+          >
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Базальная</div>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#ec4899' }}>
+                  {fetalHeartRate.length > 10 ? 
+                    Math.round(fetalHeartRate.slice(-10).reduce((a, b) => a + b, 0) / 10) : 
+                    '--'}
+                </div>
+                <div style={{ fontSize: '8px', color: '#831843', opacity: 0.7 }}>bpm</div>
+              </div>
+              <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
+                <div style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Вариация</div>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#a21caf' }}>
+                  {fetalHeartRate.length > 10 ? 
+                    Math.round(Math.max(...fetalHeartRate.slice(-10)) - Math.min(...fetalHeartRate.slice(-10))) : 
+                    '--'}
+                </div>
+                <div style={{ fontSize: '8px', color: '#831843', opacity: 0.7 }}>bpm</div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Параметры сеанса - collapsed */}
+          <Collapse 
+            size="small"
+            ghost
+            items={[
+              {
+                key: '1',
+                label: (
+                  <span style={{ fontSize: '11px', fontWeight: 500, color: '#831843' }}>
+                    <SettingOutlined /> Параметры сеанса
+                  </span>
+                ),
+                children: (
+                  <div className="space-y-2 p-2 rounded" style={{ 
+                    background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+                    border: '1px solid #f3e8ff'
+                  }}>
+                    <div>
+                      <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>ФИО:</Text>
+                      <Input 
+                        size="small"
+                        value={patientName}
+                        onChange={(e) => setPatientName(e.target.value)}
+                        style={{ fontSize: '11px', marginTop: '2px' }}
+                      />
+                    </div>
+                    <div>
+                      <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Тип КТГ:</Text>
+                      <Select 
+                        size="small" 
+                        value={sessionType}
+                        onChange={setSessionType}
+                        style={{ width: '100%', marginTop: '2px' }}
+                      >
+                        {sessionTypes.map(type => (
+                          <Option key={type.value} value={type.value}>
+                            <span style={{ fontSize: '11px' }}>{type.label}</span>
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Недели:</Text>
+                        <Input 
+                          size="small" 
+                          type="number"
+                          value={pregnancyWeek}
+                          onChange={(e) => setPregnancyWeek(Number(e.target.value))}
+                          style={{ marginTop: '2px' }} 
+                        />
+                      </div>
+                      <div>
+                        <Text style={{ fontSize: '10px', fontWeight: 'bold', color: '#831843' }}>Дни:</Text>
+                        <Input 
+                          size="small" 
+                          type="number"
+                          value={gestationDay}
+                          onChange={(e) => setGestationDay(Number(e.target.value))}
+                          style={{ marginTop: '2px' }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+            ]}
+          />
         </Col>
       </Row>
 
