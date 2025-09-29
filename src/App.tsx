@@ -11,6 +11,7 @@ import TestDashboard from './pages/TestDashboard';
 import Patients from './pages/Patients';
 import Settings from './pages/Settings';
 import CTGPage from './pages/CTG';
+import DetailedAnomalyAnalysis from './pages/DetailedAnomalyAnalysis';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
 import { useEffect, useState } from 'react';
@@ -29,11 +30,12 @@ export default function App() {
   const isDashboard = route.startsWith('#/dashboard');
   const isPatients = route.startsWith('#/patients');
   const isCTG = route.startsWith('#/ctg');
+  const isDetailedAnalysis = route.startsWith('#/detailed-analysis');
   const isSettings = route.startsWith('#/settings');
   const isNotifications = route.startsWith('#/notifications');
   const isReports = route.startsWith('#/reports');
   
-  const isAppRoute = isDashboard || isPatients || isCTG || isSettings || isNotifications || isReports;
+  const isAppRoute = isDashboard || isPatients || isCTG || isDetailedAnalysis || isSettings || isNotifications || isReports;
 
   const handleNavigate = (newRoute: string) => {
     location.hash = newRoute;
@@ -45,6 +47,34 @@ export default function App() {
     if (isDashboard) content = <Dashboard />;
     else if (isPatients) content = <Patients />;
     else if (isCTG) content = <CTGPage />;
+    else if (isDetailedAnalysis) {
+      // Заглушка для автономной страницы анализа аномалий
+      const dummyData = {
+        anomaly: {
+          time: 150,
+          type: 'fhr',
+          severity: 'warning',
+          description: 'Тахикардия плода'
+        },
+        timestamp: new Date().toISOString(),
+        patientInfo: {
+          name: 'Иванова Мария Петровна',
+          week: 35,
+          day: 4
+        },
+        chartData: {
+          fhr: Array.from({length: 60}, (_, i) => 140 + Math.sin(i * 0.1) * 15),
+          uc: Array.from({length: 60}, (_, i) => 20 + Math.sin(i * 0.05) * 10),
+          contractions: Array.from({length: 60}, (_, i) => 10 + Math.sin(i * 0.02) * 5)
+        }
+      };
+      content = (
+        <DetailedAnomalyAnalysis 
+          data={dummyData} 
+          onBack={() => handleNavigate('#/ctg')}
+        />
+      );
+    }
     else if (isSettings) content = <Settings />;
     else if (isNotifications) content = <Notifications />;
     else if (isReports) content = <Reports />;

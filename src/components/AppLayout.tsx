@@ -54,6 +54,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
       label: 'КТГ',
     },
     {
+      key: '#/detailed-analysis',
+      icon: <RobotOutlined />,
+      label: 'Анализ аномалий',
+    },
+    {
       key: 'divider-2',
       type: 'divider' as const,
     },

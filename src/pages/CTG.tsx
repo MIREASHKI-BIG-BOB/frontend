@@ -41,6 +41,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import AnomalyAnalysisPage from './AnomalyAnalysis';
+import DetailedAnomalyAnalysis from './DetailedAnomalyAnalysis';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -379,6 +380,8 @@ export default function CTGPage() {
   
   // Состояние для управления видимостью страниц
   const [showAnalysisPage, setShowAnalysisPage] = useState(false);
+  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
+  const [detailedAnalysisData, setDetailedAnalysisData] = useState<any>(null);
   const [analysisData, setAnalysisData] = useState<any>(null);
 
   // Типы сеансов КТГ
@@ -524,8 +527,8 @@ export default function CTGPage() {
   // Обработчик клика по аномалии - переход к детальному анализу
   const handleAnomalyClick = (anomaly: any) => {
     setSelectedAnomaly(anomaly);
-    // Создаем объект с данными для анализа
-    const analysisDataObj = {
+    // Создаем объект с данными для детального анализа
+    const detailedDataObj = {
       anomaly,
       timestamp: new Date().toISOString(),
       patientInfo: {
@@ -540,9 +543,15 @@ export default function CTGPage() {
       }
     };
     
-    // Переходим к странице анализа
-    setAnalysisData(analysisDataObj);
-    setShowAnalysisPage(true);
+    // Переходим к странице детального анализа
+    setDetailedAnalysisData(detailedDataObj);
+    setShowDetailedAnalysis(true);
+  };
+
+  // Обработчик возврата с детального анализа
+  const handleBackFromDetailedAnalysis = () => {
+    setShowDetailedAnalysis(false);
+    setDetailedAnalysisData(null);
   };
 
   // Обработчик возврата со страницы анализа
@@ -658,6 +667,16 @@ export default function CTGPage() {
       return updated;
     });
   };
+
+  // Если показываем детальный анализ аномалии
+  if (showDetailedAnalysis && detailedAnalysisData) {
+    return (
+      <DetailedAnomalyAnalysis 
+        data={detailedAnalysisData} 
+        onBack={handleBackFromDetailedAnalysis}
+      />
+    );
+  }
 
   // Если показываем страницу анализа
   if (showAnalysisPage && analysisData) {
