@@ -9,6 +9,7 @@ import {
   ApiOutlined
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
+import { colors, typography } from '../theme';
 
 const { Text } = Typography;
 

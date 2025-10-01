@@ -43,24 +43,38 @@ const QuickStats: React.FC<QuickStatsProps> = ({
   };
 
   const getBatteryColor = () => {
-    if (batteryLevel > 50) return colors.status.success;
-    if (batteryLevel > 20) return colors.chart.warning;
-    return colors.risk.high;
+    if (batteryLevel > 50) return colors.success;
+    if (batteryLevel > 20) return colors.warning;
+    return colors.error;
   };
 
   const getSignalColor = () => {
-    if (signalQuality > 80) return colors.status.success;
-    if (signalQuality > 60) return colors.chart.warning;
-    return colors.risk.high;
+    if (signalQuality > 80) return colors.success;
+    if (signalQuality > 60) return colors.warning;
+    return colors.error;
   };
 
   return (
     <Card 
-      title="Статистика устройства" 
-      className="h-full" 
-      bodyStyle={{ padding: typography.spacing.sm }}
+      title={
+        <span style={{ 
+          fontSize: typography.fontSize.base, 
+          fontWeight: typography.fontWeight.semibold,
+          color: colors.text.primary,
+        }}>
+          Статистика устройства
+        </span>
+      }
+      style={{ height: '100%' }}
+      bodyStyle={{ padding: typography.spacing.md }}
+      headStyle={{
+        padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+        minHeight: '48px',
+        background: colors.primaryPale,
+        borderBottom: `1px solid ${colors.border.light}`,
+      }}
     >
-      <Row gutter={[4, 12]}>
+      <Row gutter={[12, 12]}>
         {/* Батарея устройства */}
         <Col span={12}>
           <div className="text-center">
@@ -143,7 +157,7 @@ const QuickStats: React.FC<QuickStatsProps> = ({
           <div className="text-center">
             <HeartOutlined 
               style={{ 
-                color: dataQuality > 90 ? colors.status.success : colors.chart.warning, 
+                color: dataQuality > 90 ? colors.success : colors.warning, 
                 fontSize: typography.fontSize.sm,
                 marginBottom: '4px',
                 display: 'block'
@@ -152,11 +166,11 @@ const QuickStats: React.FC<QuickStatsProps> = ({
             <div style={{ 
               fontSize: typography.fontSize.base, 
               fontWeight: 'bold', 
-              color: dataQuality > 90 ? colors.status.success : colors.chart.warning
+              color: dataQuality > 90 ? colors.success : colors.warning
             }}>
               {dataQuality}%
             </div>
-            <div style={{ fontSize: '11px', color: '#666' }}>Качество данных</div>
+            <div style={{ fontSize: '11px', color: colors.text.secondary }}>Качество данных</div>
           </div>
         </Col>
 
@@ -166,12 +180,12 @@ const QuickStats: React.FC<QuickStatsProps> = ({
             title="Уведомлений"
             value={alertsToday}
             prefix={<ExclamationCircleOutlined style={{ 
-              color: alertsToday > 0 ? colors.chart.warning : colors.status.success, 
+              color: alertsToday > 0 ? colors.warning : colors.success, 
               fontSize: typography.fontSize.sm 
             }} />}
             valueStyle={{ 
               fontSize: typography.fontSize.base, 
-              color: alertsToday > 0 ? colors.chart.warning : colors.status.success, 
+              color: alertsToday > 0 ? colors.warning : colors.success, 
               fontWeight: typography.fontWeight.bold 
             }}
             className="text-center"
@@ -180,11 +194,16 @@ const QuickStats: React.FC<QuickStatsProps> = ({
       </Row>
 
       {/* Общий статус */}
-      <div className="mt-3 pt-2 border-t border-gray-200 text-center">
-        <div style={{ fontSize: '11px', color: '#666' }}>
+      <div style={{ 
+        marginTop: typography.spacing.md, 
+        paddingTop: typography.spacing.sm,
+        borderTop: `1px solid ${colors.border.default}`,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>
           Статус устройства: <span style={{ 
-            color: batteryLevel > 20 && signalQuality > 60 ? colors.status.success : colors.chart.warning,
-            fontWeight: 'bold'
+            color: batteryLevel > 20 && signalQuality > 60 ? colors.success : colors.warning,
+            fontWeight: typography.fontWeight.semibold,
           }}>
             {batteryLevel > 20 && signalQuality > 60 ? '✓ Активно' : '⚠ Требует внимания'}
           </span>

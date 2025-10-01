@@ -2,6 +2,7 @@
 import { Card, Typography, Row, Col, Button, Space, Alert, Tag, Modal, Avatar, Divider, Input, Progress, Descriptions, message, Badge, Spin } from 'antd';
 import dayjs from 'dayjs';
 import { PrinterOutlined, DownloadOutlined, UserOutlined, CheckCircleOutlined, RobotOutlined, EditOutlined, SaveOutlined, FileTextOutlined, ThunderboltOutlined, HeartOutlined, WarningOutlined, SafetyOutlined } from '@ant-design/icons';
+import { colors, typography } from '../theme';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -268,30 +269,30 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
 
   return (
     <div style={{ 
-      padding: '16px',
-      background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
+      padding: typography.spacing.md,
+      background: colors.background.secondary,
       minHeight: '100vh'
     }}>
       {/* Заголовок страницы */}
       <div style={{
-        marginBottom: '16px',
-        padding: '12px 16px',
-        background: 'linear-gradient(135deg, #fdf2f8 0%, #fef7ff 100%)',
+        marginBottom: typography.spacing.md,
+        padding: typography.spacing.md,
+        background: colors.primaryPale,
         borderRadius: '8px',
-        border: '1px solid #f3e8ff'
+        border: `1px solid ${colors.border.light}`
       }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar 
               size={32}
-              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
+              style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)` }}
               icon={<FileTextOutlined />}
             />
             <div>
-              <Title level={4} style={{ margin: 0, color: '#831843' }}>
+              <Title level={4} style={{ margin: 0, color: colors.text.primary }}>
                 Генерация медицинского отчёта
               </Title>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
+              <Text type="secondary" style={{ fontSize: typography.fontSize.sm }}>
                 Комплексный анализ КТГ с рекомендациями
               </Text>
             </div>
@@ -303,8 +304,8 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   icon={<PrinterOutlined />} 
                   onClick={() => message.info('Печать отчёта')}
                   style={{
-                    borderColor: '#ec4899',
-                    color: '#831843'
+                    borderColor: colors.primary,
+                    color: colors.text.primary
                   }}
                 >
                   Печать
@@ -314,7 +315,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   icon={<DownloadOutlined />}
                   onClick={() => message.info('Экспорт в PDF')}
                   style={{
-                    background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
                     border: 'none'
                   }}
                 >
@@ -334,19 +335,19 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             size="small"
             title={
               <div className="flex items-center gap-2">
-                <UserOutlined style={{ color: '#ec4899' }} />
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                <UserOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                   Информация о пациенте
                 </span>
               </div>
             }
-            style={{ marginBottom: '16px' }}
+            style={{ marginBottom: typography.spacing.md }}
             headStyle={{ 
-              padding: '8px 12px',
-              background: 'transparent',
-              borderBottom: '1px solid #f3e8ff'
+              padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+              background: colors.primaryPale,
+              borderBottom: `1px solid ${colors.border.light}`
             }}
-            bodyStyle={{ padding: '12px' }}
+            bodyStyle={{ padding: typography.spacing.md }}
           >
             <Descriptions column={1} size="small">
               <Descriptions.Item label="ФИО">
@@ -372,19 +373,19 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             size="small"
             title={
               <div className="flex items-center gap-2">
-                <SafetyOutlined style={{ color: '#be185d' }} />
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                <SafetyOutlined style={{ color: colors.primaryDark, fontSize: typography.fontSize.lg }} />
+                <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                   Ответственный врач
                 </span>
               </div>
             }
-            style={{ marginBottom: '16px' }}
+            style={{ marginBottom: typography.spacing.md }}
             headStyle={{ 
-              padding: '8px 12px',
-              background: 'transparent',
-              borderBottom: '1px solid #f3e8ff'
+              padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+              background: colors.primaryPale,
+              borderBottom: `1px solid ${colors.border.light}`
             }}
-            bodyStyle={{ padding: '12px' }}
+            bodyStyle={{ padding: typography.spacing.md }}
           >
             <Descriptions column={1} size="small">
               <Descriptions.Item label="ФИО">
@@ -406,52 +407,70 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
           <Card 
             size="small"
             title={
-              <div className="flex items-center gap-2">
-                <HeartOutlined style={{ color: '#ec4899' }} />
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                <HeartOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                   Данные КТГ сеансов
                 </span>
               </div>
             }
             headStyle={{ 
-              padding: '8px 12px',
-              background: 'transparent',
-              borderBottom: '1px solid #f3e8ff'
+              padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+              background: colors.primaryPale,
+              borderBottom: `1px solid ${colors.border.light}`
             }}
-            bodyStyle={{ padding: '12px' }}
+            bodyStyle={{ padding: typography.spacing.md }}
           >
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
-              <div className="flex items-center justify-between">
-                <Text>Всего сеансов:</Text>
-                <Tag color="blue">{ctgSessions.length}</Tag>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary }}>Всего сеансов:</Text>
+                <Tag style={{ 
+                  fontSize: typography.fontSize.xs,
+                  border: 'none',
+                  background: `${colors.info}10`,
+                  color: colors.info
+                }}>
+                  {ctgSessions.length}
+                </Tag>
               </div>
-              <div className="flex items-center justify-between">
-                <Text>Аномалий обнаружено:</Text>
-                <Tag color={ctgSessions.reduce((sum, s) => sum + s.anomalies.length, 0) > 0 ? 'warning' : 'success'}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary }}>Аномалий обнаружено:</Text>
+                <Tag style={{ 
+                  fontSize: typography.fontSize.xs,
+                  border: 'none',
+                  background: ctgSessions.reduce((sum, s) => sum + s.anomalies.length, 0) > 0 ? `${colors.warning}10` : `${colors.success}10`,
+                  color: ctgSessions.reduce((sum, s) => sum + s.anomalies.length, 0) > 0 ? colors.warning : colors.success
+                }}>
                   {ctgSessions.reduce((sum, s) => sum + s.anomalies.length, 0)}
                 </Tag>
               </div>
-              <Divider style={{ margin: '8px 0' }} />
+              <Divider style={{ margin: `${typography.spacing.sm} 0` }} />
               {ctgSessions.map((session, idx) => (
                 <div key={session.id} style={{
-                  padding: '8px',
-                  background: '#fef7ff',
-                  borderRadius: '4px',
-                  border: '1px solid #f3e8ff'
+                  padding: typography.spacing.sm,
+                  background: colors.primaryPale,
+                  borderRadius: '8px',
+                  border: `1px solid ${colors.border.light}`
                 }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <Text strong style={{ fontSize: '12px', color: '#831843' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: typography.spacing.xs }}>
+                    <Text strong style={{ fontSize: typography.fontSize.sm, color: colors.text.primary }}>
                       Сеанс #{idx + 1}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: '11px' }}>
+                    <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
                       {session.date.format('DD.MM.YYYY')}
                     </Text>
                   </div>
-                  <div style={{ fontSize: '11px', color: '#831843' }}>
+                  <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>
                     ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
                   </div>
                   {session.anomalies.length > 0 && (
-                    <Tag color="warning" style={{ fontSize: '10px', marginTop: '4px' }}>
+                    <Tag style={{ 
+                      fontSize: typography.fontSize.xs,
+                      marginTop: typography.spacing.xs,
+                      border: 'none',
+                      background: `${colors.warning}10`,
+                      color: colors.warning
+                    }}>
                       {session.anomalies[0].description}
                     </Tag>
                   )}
@@ -468,7 +487,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             <Card
               style={{ minHeight: '600px' }}
               bodyStyle={{ 
-                padding: '48px',
+                padding: typography.spacing['3xl'],
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -478,15 +497,21 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Avatar 
                 size={80}
                 style={{ 
-                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-                  marginBottom: '24px'
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
+                  marginBottom: typography.spacing['2xl']
                 }}
-                icon={<RobotOutlined style={{ fontSize: '40px' }} />}
+                icon={<RobotOutlined style={{ fontSize: typography.fontSize['3xl'] }} />}
               />
-              <Title level={3} style={{ color: '#831843', marginBottom: '12px' }}>
+              <Title level={3} style={{ color: colors.text.primary, marginBottom: typography.spacing.md }}>
                 Генерация отчёта с помощью ИИ
               </Title>
-              <Paragraph style={{ textAlign: 'center', maxWidth: '500px', marginBottom: '32px', color: '#64748b' }}>
+              <Paragraph style={{ 
+                textAlign: 'center', 
+                maxWidth: '500px', 
+                marginBottom: typography.spacing['3xl'], 
+                color: colors.text.secondary,
+                fontSize: typography.fontSize.base
+              }}>
                 Система проанализирует все данные КТГ сеансов и сгенерирует комплексный медицинский отчёт 
                 с заключением, оценкой рисков и персонализированными рекомендациями для врача и пациентки.
               </Paragraph>
@@ -497,13 +522,17 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                     percent={generationProgress} 
                     status="active"
                     strokeColor={{
-                      '0%': '#ec4899',
-                      '100%': '#be185d',
+                      '0%': colors.primary,
+                      '100%': colors.primaryDark,
                     }}
                   />
-                  <div style={{ textAlign: 'center', marginTop: '16px', color: '#831843' }}>
+                  <div style={{ 
+                    textAlign: 'center', 
+                    marginTop: typography.spacing.lg, 
+                    color: colors.text.primary 
+                  }}>
                     <Spin /> 
-                    <Text style={{ marginLeft: '8px' }}>
+                    <Text style={{ marginLeft: typography.spacing.sm, fontSize: typography.fontSize.sm }}>
                       {generationProgress < 30 ? 'Анализ данных КТГ...' :
                        generationProgress < 60 ? 'Оценка рисков...' :
                        generationProgress < 90 ? 'Формирование рекомендаций...' :
@@ -519,9 +548,9 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   onClick={generateAIReport}
                   style={{
                     height: '48px',
-                    fontSize: '16px',
-                    padding: '0 48px',
-                    background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                    fontSize: typography.fontSize.lg,
+                    padding: `0 ${typography.spacing['3xl']}`,
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
                     border: 'none'
                   }}
                 >
@@ -548,61 +577,69 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 <Card
                   size="small"
                   title={
-                    <div className="flex items-center gap-2">
-                      <WarningOutlined style={{ color: '#f59e0b' }} />
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                      <WarningOutlined style={{ color: colors.warning, fontSize: typography.fontSize.lg }} />
+                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                         Оценка рисков ИИ
                       </span>
                     </div>
                   }
                   headStyle={{ 
-                    padding: '8px 12px',
-                    background: 'transparent',
-                    borderBottom: '1px solid #f3e8ff'
+                    padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                    background: colors.primaryPale,
+                    borderBottom: `1px solid ${colors.border.light}`
                   }}
-                  bodyStyle={{ padding: '16px' }}
+                  bodyStyle={{ padding: typography.spacing.lg }}
                 >
                   <Row gutter={16} align="middle">
                     <Col span={12}>
                       <div style={{
-                        padding: '16px',
+                        padding: typography.spacing.lg,
                         borderRadius: '8px',
-                        background: riskAssessment.level === 'high' ? '#fef2f2' :
-                                   riskAssessment.level === 'medium' ? '#fefce8' : '#f0fdf4',
-                        border: `2px solid ${riskAssessment.level === 'high' ? '#fecaca' :
-                                            riskAssessment.level === 'medium' ? '#fef3c7' : '#bbf7d0'}`
+                        background: riskAssessment.level === 'high' ? `${colors.error}10` :
+                                   riskAssessment.level === 'medium' ? `${colors.warning}10` : `${colors.success}10`,
+                        border: `2px solid ${riskAssessment.level === 'high' ? colors.error :
+                                            riskAssessment.level === 'medium' ? colors.warning : colors.success}`
                       }}>
                         <div style={{ textAlign: 'center' }}>
-                          <Text style={{ fontSize: '12px', color: '#831843' }}>Уровень риска</Text>
+                          <Text style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary }}>Уровень риска</Text>
                           <div style={{
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            color: riskAssessment.level === 'high' ? '#dc2626' :
-                                   riskAssessment.level === 'medium' ? '#d97706' : '#16a34a',
-                            marginTop: '4px'
+                            fontSize: typography.fontSize['2xl'],
+                            fontWeight: typography.fontWeight.bold,
+                            color: riskAssessment.level === 'high' ? colors.error :
+                                   riskAssessment.level === 'medium' ? colors.warning : colors.success,
+                            marginTop: typography.spacing.xs
                           }}>
                             {riskAssessment.level === 'high' ? 'ВЫСОКИЙ' :
                              riskAssessment.level === 'medium' ? 'СРЕДНИЙ' : 'НИЗКИЙ'}
                           </div>
                           <Progress
                             percent={riskAssessment.score}
-                            strokeColor={riskAssessment.level === 'high' ? '#dc2626' :
-                                        riskAssessment.level === 'medium' ? '#d97706' : '#16a34a'}
+                            strokeColor={riskAssessment.level === 'high' ? colors.error :
+                                        riskAssessment.level === 'medium' ? colors.warning : colors.success}
                             showInfo={false}
-                            style={{ marginTop: '8px' }}
+                            style={{ marginTop: typography.spacing.sm }}
                           />
-                          <Text style={{ fontSize: '20px', fontWeight: 'bold', color: '#831843' }}>
+                          <Text style={{ 
+                            fontSize: typography.fontSize.xl, 
+                            fontWeight: typography.fontWeight.bold, 
+                            color: colors.text.primary 
+                          }}>
                             {riskAssessment.score}%
                           </Text>
                         </div>
                       </div>
                     </Col>
                     <Col span={12}>
-                      <div style={{ fontSize: '12px' }}>
-                        <Text strong style={{ color: '#831843' }}>Факторы оценки:</Text>
-                        <ul style={{ marginTop: '8px', paddingLeft: '16px', color: '#64748b' }}>
+                      <div style={{ fontSize: typography.fontSize.sm }}>
+                        <Text strong style={{ color: colors.text.primary }}>Факторы оценки:</Text>
+                        <ul style={{ 
+                          marginTop: typography.spacing.sm, 
+                          paddingLeft: typography.spacing.lg, 
+                          color: colors.text.secondary 
+                        }}>
                           {riskAssessment.factors.map((factor: string, idx: number) => (
-                            <li key={idx}>{factor}</li>
+                            <li key={idx} style={{ marginBottom: typography.spacing.xs }}>{factor}</li>
                           ))}
                         </ul>
                       </div>
@@ -615,10 +652,10 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileTextOutlined style={{ color: '#ec4899' }} />
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                      <FileTextOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                         Медицинское заключение
                       </span>
                     </div>
@@ -628,8 +665,8 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                         icon={<EditOutlined />}
                         onClick={() => setIsEditing(!isEditing)}
                         style={{
-                          borderColor: '#ec4899',
-                          color: '#be185d'
+                          borderColor: colors.primary,
+                          color: colors.primaryDark
                         }}
                       >
                         {isEditing ? 'Отменить' : 'Редактировать'}
@@ -638,25 +675,28 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   </div>
                 }
                 headStyle={{ 
-                  padding: '8px 12px',
-                  background: 'transparent',
-                  borderBottom: '1px solid #f3e8ff'
+                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  background: colors.primaryPale,
+                  borderBottom: `1px solid ${colors.border.light}`
                 }}
-                bodyStyle={{ padding: '16px' }}
+                bodyStyle={{ padding: typography.spacing.lg }}
               >
                 {isEditing ? (
                   <TextArea
                     value={aiConclusion}
                     onChange={(e) => setAiConclusion(e.target.value)}
                     rows={12}
-                    style={{ fontSize: '13px', lineHeight: '1.6' }}
+                    style={{ 
+                      fontSize: typography.fontSize.sm, 
+                      lineHeight: typography.lineHeight.relaxed 
+                    }}
                   />
                 ) : (
                   <div style={{ 
-                    fontSize: '13px', 
-                    lineHeight: '1.8', 
+                    fontSize: typography.fontSize.sm, 
+                    lineHeight: typography.lineHeight.relaxed, 
                     whiteSpace: 'pre-line',
-                    color: '#1e293b'
+                    color: colors.text.primary
                   }}>
                     {aiConclusion}
                   </div>
@@ -667,33 +707,36 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div className="flex items-center gap-2">
-                    <SafetyOutlined style={{ color: '#be185d' }} />
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                    <SafetyOutlined style={{ color: colors.primaryDark, fontSize: typography.fontSize.lg }} />
+                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                       Рекомендации для врача
                     </span>
                   </div>
                 }
                 headStyle={{ 
-                  padding: '8px 12px',
-                  background: 'transparent',
-                  borderBottom: '1px solid #f3e8ff'
+                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  background: colors.primaryPale,
+                  borderBottom: `1px solid ${colors.border.light}`
                 }}
-                bodyStyle={{ padding: '16px' }}
+                bodyStyle={{ padding: typography.spacing.lg }}
               >
                 {isEditing ? (
                   <TextArea
                     value={aiRecommendationsForDoctor}
                     onChange={(e) => setAiRecommendationsForDoctor(e.target.value)}
                     rows={10}
-                    style={{ fontSize: '13px', lineHeight: '1.6' }}
+                    style={{ 
+                      fontSize: typography.fontSize.sm, 
+                      lineHeight: typography.lineHeight.relaxed 
+                    }}
                   />
                 ) : (
                   <div style={{ 
-                    fontSize: '13px', 
-                    lineHeight: '1.8', 
+                    fontSize: typography.fontSize.sm, 
+                    lineHeight: typography.lineHeight.relaxed, 
                     whiteSpace: 'pre-line',
-                    color: '#1e293b'
+                    color: colors.text.primary
                   }}>
                     {aiRecommendationsForDoctor}
                   </div>
@@ -704,41 +747,44 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div className="flex items-center gap-2">
-                    <HeartOutlined style={{ color: '#ec4899' }} />
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                    <HeartOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
                       Рекомендации для пациентки
                     </span>
                     <Badge 
                       count="Для пациента"
                       style={{ 
-                        backgroundColor: '#fce7f3',
-                        color: '#be185d',
-                        fontSize: '10px'
+                        backgroundColor: colors.primaryLight,
+                        color: colors.primaryDark,
+                        fontSize: typography.fontSize.xs
                       }}
                     />
                   </div>
                 }
                 headStyle={{ 
-                  padding: '8px 12px',
-                  background: 'transparent',
-                  borderBottom: '1px solid #f3e8ff'
+                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  background: colors.primaryPale,
+                  borderBottom: `1px solid ${colors.border.light}`
                 }}
-                bodyStyle={{ padding: '16px' }}
+                bodyStyle={{ padding: typography.spacing.lg }}
               >
                 {isEditing ? (
                   <TextArea
                     value={aiRecommendationsForPatient}
                     onChange={(e) => setAiRecommendationsForPatient(e.target.value)}
                     rows={15}
-                    style={{ fontSize: '13px', lineHeight: '1.6' }}
+                    style={{ 
+                      fontSize: typography.fontSize.sm, 
+                      lineHeight: typography.lineHeight.relaxed 
+                    }}
                   />
                 ) : (
                   <div style={{ 
-                    fontSize: '13px', 
-                    lineHeight: '1.8', 
+                    fontSize: typography.fontSize.sm, 
+                    lineHeight: typography.lineHeight.relaxed, 
                     whiteSpace: 'pre-line',
-                    color: '#1e293b'
+                    color: colors.text.primary
                   }}>
                     {aiRecommendationsForPatient}
                   </div>
@@ -746,7 +792,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               </Card>
 
               {/* Кнопки действий */}
-              <Card bodyStyle={{ padding: '16px' }}>
+              <Card bodyStyle={{ padding: typography.spacing.lg }}>
                 <Row gutter={16}>
                   <Col span={24}>
                     <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
@@ -755,8 +801,8 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                           icon={<SaveOutlined />}
                           onClick={handleSaveReport}
                           style={{
-                            borderColor: '#ec4899',
-                            color: '#be185d'
+                            borderColor: colors.primary,
+                            color: colors.primaryDark
                           }}
                         >
                           Сохранить изменения
@@ -769,7 +815,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                           onClick={handleApproveReport}
                           disabled={isEditing}
                           style={{
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            background: `linear-gradient(135deg, ${colors.success} 0%, #059669 100%)`,
                             border: 'none'
                           }}
                         >

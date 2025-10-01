@@ -1,106 +1,144 @@
 import type { ThemeConfig } from 'antd';
 
-// Палитра цветов приложения (остается ваша)
+// ========================================
+// ЕДИНАЯ СИСТЕМА ДИЗАЙНА HERABEAT
+// Минималистичная, согласованная палитра
+// ========================================
+
 export const colors = {
-  // Основные цвета
-  primary: '#d46a92',
-  success: '#28A745',
-  warning: '#FFC107',
-  error: '#DC3545',
-  info: '#1890ff',
+  // Основной цвет - розовый (единая палитра)
+  primary: '#ec4899',          // Основной розовый (pink-500)
+  primaryDark: '#be185d',      // Темный розовый для акцентов (pink-700)
+  primaryLight: '#fbcfe8',     // Светлый розовый для фонов (pink-200)
+  primaryLighter: '#fce7f3',   // Очень светлый розовый (pink-100)
+  primaryPale: '#fdf2f8',      // Бледный розовый для больших площадей (pink-50)
   
-  // Цвета текста
+  // Семантические цвета (статус)
+  success: '#22c55e',          // Зеленый - успех, норма (green-500)
+  warning: '#f59e0b',          // Оранжевый - предупреждение (amber-500)
+  error: '#ef4444',            // Красный - ошибка, опасность (red-500)
+  info: '#06b6d4',             // Циан - информация (cyan-500)
+  
+  // Текст (градации серого)
   text: {
-    primary: '#1A1A1A',      // Основной текст
-    secondary: '#9ca3af',    // Вторичный текст (описания, подписи)
-    muted: '#6b7280',        // Приглушенный текст
-    disabled: '#d1d5db',     // Отключенный текст
-    accent: '#6a4162',       // Акцентный цвет для данных
+    primary: '#1f2937',        // Основной текст (gray-800)
+    secondary: '#6b7280',      // Вторичный текст (gray-500)
+    tertiary: '#9ca3af',       // Третичный текст (gray-400)
+    disabled: '#d1d5db',       // Отключенный (gray-300)
+    inverse: '#ffffff',        // Белый текст на темном фоне
   },
   
-  // Цвета фона
+  // Фоны
   background: {
-    primary: '#fefafa',      // Основной фон
-    secondary: '#f9fafb',    // Вторичный фон
-    card: '#ffffff',         // Фон карточек
-    gray: '#e5e7eb',         // Серый фон для элементов
+    primary: '#ffffff',        // Основной белый фон
+    secondary: '#f9fafb',      // Светло-серый фон (gray-50)
+    tertiary: '#f3f4f6',       // Третичный серый (gray-100)
+    accent: '#fdf2f8',         // Розовый фон для акцентов
   },
   
-  // Цвета для рисков
-  risk: {
-    low: '#10b981',          // 0-30% - Норма (зеленый)
-    medium: '#f59e0b',       // 30-60% - Подозрение (желтый)
-    high: '#e91e63',         // 60-100% - Критично (красный)
-  },
-  
-  // Цвета для статусов
-  status: {
-    success: '#52c41a',      // Успех, норма
-    warning: '#faad14',      // Предупреждение
-    danger: '#ff4d4f',       // Опасность
-    info: '#1890ff',         // Информация
-    processing: '#1890ff',   // Обработка
-    inactive: '#999999',     // Неактивно
-  },
-  
-  // Цвета для графиков и данных
-  chart: {
-    primary: '#d46a92',      // Основной цвет графика
-    secondary: '#1890ff',    // Вторичный цвет
-    success: '#52c41a',      // Положительные значения
-    warning: '#fa8c16',      // Предупреждающие значения
-    danger: '#ff4d4f',       // Критические значения
-    fhr: '#6a4162',          // Частота сердечных сокращений плода
-    uc: '#1890ff',           // Маточные сокращения
-    materialBlue: '#2196F3', // Material Design Blue
-    materialGreen: '#4CAF50', // Material Design Green
-    materialOrange: '#FF9800', // Material Design Orange
-    materialRed: '#F44336',  // Material Design Red
-  },
-  
-  // Цвета границ
+  // Границы
   border: {
-    primary: '#d9d9d9',      // Основные границы
-    secondary: '#f0f0f0',    // Вторичные границы
-    light: '#f0f0f0',        // Светлые границы
-    grid: '#eee',            // Границы сетки
-    divider: '#e8e8e8',      // Разделители
+    light: '#f3f4f6',          // Светлая граница (gray-100)
+    default: '#e5e7eb',        // Обычная граница (gray-200)
+    dark: '#d1d5db',           // Темная граница (gray-300)
   },
   
-  // Утилитарные цвета
-  utility: {
-    hover: '#fde7ef',        // Цвет при наведении
-    active: '#f8b5c9',       // Активное состояние
-    focus: '#e879a6',        // Фокус
-    inactive: '#f5f5f5',     // Неактивное состояние
-    positive: '#f6ffed',     // Положительный фон
-    negative: '#fff2f0',     // Отрицательный фон
-    warning: '#fffbe6',      // Предупреждающий фон
-  }
+  // Дополнительные цвета для графиков и статусов
+  chart: {
+    primary: '#ec4899',        // Розовый для основного графика
+    secondary: '#be185d',      // Темно-розовый для вторичного
+    tertiary: '#a21caf',       // Фиолетовый для третьего графика
+    fhr: '#ec4899',            // ЧСС плода - розовый
+    uc: '#be185d',             // Тонус матки - темно-розовый  
+    contractions: '#a21caf',   // Схватки - фиолетовый
+  },
+  
+  // Статусы (алиасы для удобства)
+  status: {
+    success: '#22c55e',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    info: '#06b6d4',
+  },
+  
+  // Уровни риска
+  risk: {
+    low: '#22c55e',            // Зеленый - низкий риск
+    medium: '#f59e0b',         // Оранжевый - средний риск
+    high: '#ef4444',           // Красный - высокий риск
+  },
 };
 
-// Конфигурация темы Ant Design
+// ========================================
+// ЕДИНАЯ ТИПОГРАФИЧЕСКАЯ СИСТЕМА
+// ========================================
+
+export const typography = {
+  // Размеры шрифтов - единая шкала
+  fontSize: {
+    xs: '11px',                // Очень мелкий
+    sm: '12px',                // Мелкий (основной для UI)
+    base: '14px',              // Базовый
+    lg: '16px',                // Крупный
+    xl: '18px',                // Очень крупный
+    '2xl': '24px',             // Заголовок
+    '3xl': '32px',             // Главный заголовок
+  },
+  
+  // Толщина шрифта
+  fontWeight: {
+    normal: 400,
+    medium: 500,
+    semibold: 600,
+    bold: 700,
+  },
+  
+  // Межстрочный интервал
+  lineHeight: {
+    tight: 1.25,
+    normal: 1.5,
+    relaxed: 1.75,
+  },
+  
+  // ЕДИНАЯ СИСТЕМА ОТСТУПОВ (кратно 4px)
+  spacing: {
+    xs: '4px',                 // 4px
+    sm: '8px',                 // 8px
+    md: '12px',                // 12px (основной)
+    lg: '16px',                // 16px
+    xl: '20px',                // 20px
+    '2xl': '24px',             // 24px
+    '3xl': '32px',             // 32px
+  },
+};
+
+// ========================================
+// КОНФИГУРАЦИЯ ТЕМЫ ANT DESIGN
+// ========================================
+
 export const theme: ThemeConfig = {
   token: {
-    // Основные цвета (ваша палитра)
+    // Основные цвета
     colorPrimary: colors.primary,
-    colorInfo: colors.primary,
+    colorInfo: colors.info,
     colorSuccess: colors.success,
     colorWarning: colors.warning,
     colorError: colors.error,
+    
+    // Текст
     colorText: colors.text.primary,
     colorTextSecondary: colors.text.secondary,
-    colorTextTertiary: colors.text.muted,
+    colorTextTertiary: colors.text.tertiary,
     colorTextDisabled: colors.text.disabled,
     
-    // Фоны (ваша палитра)
+    // Фоны
     colorBgBase: colors.background.primary,
-    colorBgContainer: colors.background.card,
-    colorBgElevated: colors.background.card,
+    colorBgContainer: colors.background.primary,
+    colorBgElevated: colors.background.primary,
     
-    // Границы (ваша палитра)
-    colorBorder: colors.border.primary,
-    colorBorderSecondary: colors.border.secondary,
+    // Границы
+    colorBorder: colors.border.default,
+    colorBorderSecondary: colors.border.light,
     
     // Типографика (более компактная система)
     fontSize: 12,                    // Базовый размер шрифта (уменьшен с 14 до 12)
@@ -144,72 +182,15 @@ export const theme: ThemeConfig = {
   },
 };
 
-// Дополнительные утилиты для работы с цветами
+// ========================================
+// УТИЛИТЫ ДЛЯ БЫСТРОГО ДОСТУПА
+// ========================================
+
 export const colorUtils = {
-  // Часто используемые цвета для быстрого доступа
   text: colors.text,
   chart: colors.chart,
   status: colors.status,
   risk: colors.risk,
   border: colors.border,
   background: colors.background,
-};
-
-// Временная совместимость со старой системой typography
-// TODO: Постепенно заменить на использование Ant Design компонентов
-export const typography = {
-  fontSize: {
-    xxs: '10px',
-    xs: '12px',
-    sm: '14px',
-    base: '16px',
-    lg: '18px',
-    xl: '20px',
-    '2xl': '24px',
-    '3xl': '30px',
-    '11px': '11px',
-  },
-  fontWeight: {
-    normal: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700,
-  },
-  spacing: {
-    xs: '4px',
-    sm: '8px',
-    md: '12px',
-    lg: '16px',
-    xl: '24px',
-  },
-  sizes: {
-    cardPadding: '16px',
-    cardHeight: {
-      header: '54px',
-    },
-    components: {
-      width100: '100%',
-    },
-  },
-  styles: {
-    h4: {
-      fontSize: '16px',
-      fontWeight: 600,
-      color: colors.text.primary,
-    },
-    body: {
-      fontSize: '14px',
-      fontWeight: 400,
-      color: colors.text.primary,
-    },
-    caption: {
-      fontSize: '12px',
-      fontWeight: 400,
-      color: colors.text.secondary,
-    },
-    button: {
-      fontSize: '14px',
-      fontWeight: 500,
-    },
-  }
 };

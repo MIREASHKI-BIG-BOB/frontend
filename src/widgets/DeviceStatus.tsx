@@ -116,31 +116,46 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
   return (
     <Card 
       title={
-        <div className="flex justify-between items-center">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
             <div 
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white"
-              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`
+              }}
             >
-              <SettingOutlined style={{ fontSize: '12px' }} />
+              <SettingOutlined style={{ fontSize: typography.fontSize.sm }} />
             </div>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>MoniPuck v2.1</span>
+            <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+              MoniPuck v2.1
+            </span>
           </Space>
-          <div className="flex items-center gap-2">
-            <div className={`w-1.5 h-1.5 rounded-full ${
-              isConnected ? 'bg-pink-500' : 'bg-red-500'
-            } ${isConnected ? 'animate-pulse' : ''}`}></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+            <div style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: isConnected ? colors.primary : colors.error,
+              animation: isConnected ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+            }}></div>
             <Tag 
-              color={overallStatus.color} 
               icon={overallStatus.icon}
-              className="text-xs font-medium border-0"
               style={{ 
-                fontSize: '9px',
-                padding: '1px 4px',
-                background: overallStatus.color === '#52c41a' ? '#fef7ff' : 
-                           overallStatus.color === '#faad14' ? '#fefce8' : '#fef2f2',
-                color: overallStatus.color === '#52c41a' ? '#a21caf' : 
-                       overallStatus.color === '#faad14' ? '#a16207' : '#dc2626'
+                fontSize: typography.fontSize.xs,
+                padding: '2px 8px',
+                margin: 0,
+                border: 'none',
+                background: overallStatus.color === colors.success ? `${colors.success}10` : 
+                           overallStatus.color === colors.warning ? `${colors.warning}10` : `${colors.error}10`,
+                color: overallStatus.color === colors.success ? colors.success : 
+                       overallStatus.color === colors.warning ? colors.warning : colors.error,
+                fontWeight: typography.fontWeight.semibold
               }}
             >
               {overallStatus.status}
@@ -148,140 +163,209 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
           </div>
         </div>
       }
-      className="h-full"
-      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
-      headStyle={{ 
-        padding: '6px 12px', 
-        minHeight: 'auto',
-        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-        borderBottom: '1px solid #f3e8ff'
-      }}
       style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      bodyStyle={{ padding: typography.spacing.md, height: '100%', display: 'flex', flexDirection: 'column' }}
+      headStyle={{ 
+        padding: `${typography.spacing.sm} ${typography.spacing.md}`, 
+        minHeight: '48px',
+        background: colors.primaryPale,
+        borderBottom: `1px solid ${colors.border.light}`
+      }}
     >
       <Space direction="vertical" size="small" className="w-full">
         {/* Компактные основные параметры в одну строку */}
-        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg" style={{ 
-          background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-          border: '1px solid #f3e8ff'
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: typography.spacing.sm,
+          padding: typography.spacing.md,
+          borderRadius: '8px',
+          background: colors.primaryPale,
+          border: `1px solid ${colors.border.light}`
         }}>
           {/* Батарея */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-2">
-              <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
-              <span style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Батарея</span>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: typography.spacing.xs, marginBottom: typography.spacing.sm }}>
+              <ThunderboltOutlined style={{ color: colors.primary, fontSize: typography.fontSize.sm }} />
+              <span style={{ fontSize: typography.fontSize.xs, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+                Батарея
+              </span>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: batteryStatus.color }}>
+            <div style={{ fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.bold, color: batteryStatus.color }}>
               {Math.round(battery)}%
             </div>
-            <div className="h-1.5 bg-pink-100 rounded-full mt-2 overflow-hidden">
+            <div style={{ height: '6px', background: colors.primaryLighter, borderRadius: '999px', marginTop: typography.spacing.sm, overflow: 'hidden' }}>
               <div 
-                className="h-full transition-all duration-500 rounded-full"
                 style={{ 
-                  width: `${battery}%`, 
-                  backgroundColor: battery > 50 ? '#ec4899' : battery > 20 ? '#f59e0b' : '#ef4444'
+                  height: '100%',
+                  width: `${battery}%`,
+                  transition: 'all 0.5s',
+                  borderRadius: '999px',
+                  backgroundColor: battery > 50 ? colors.primary : battery > 20 ? colors.warning : colors.error
                 }}
               />
             </div>
-            <div style={{ fontSize: '9px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: typography.spacing.xs }}>
               {batteryStatus.status}
             </div>
           </div>
 
           {/* Сигнал */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-2">
-              <WifiOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
-              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Bluetooth</span>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: typography.spacing.xs, marginBottom: typography.spacing.sm }}>
+              <WifiOutlined style={{ color: colors.primary, fontSize: typography.fontSize.sm }} />
+              <span style={{ fontSize: typography.fontSize.xs, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>Bluetooth</span>
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: signalStatus.color }}>
+            <div style={{ fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.bold, color: signalStatus.color }}>
               {Math.round(signalQuality)}%
             </div>
-            <div className="flex justify-center gap-1 mt-2">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginTop: typography.spacing.sm }}>
               {Array.from({ length: 4 }, (_, i) => (
                 <div
                   key={i}
-                  className="w-1.5 rounded-full transition-all duration-300"
                   style={{
+                    width: '6px',
                     height: `${(i + 1) * 3 + 4}px`,
-                    backgroundColor: i < signalStatus.bars ? '#ec4899' : '#f3e8ff'
+                    borderRadius: '999px',
+                    transition: 'all 0.3s',
+                    backgroundColor: i < signalStatus.bars ? colors.primary : colors.primaryLighter
                   }}
                 />
               ))}
             </div>
-            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: typography.spacing.xs }}>
               {signalStatus.status}
             </div>
           </div>
 
           {/* Температура */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-2">
-              <FireOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
-              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Температура</span>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: typography.spacing.xs, marginBottom: typography.spacing.sm }}>
+              <FireOutlined style={{ color: colors.primary, fontSize: typography.fontSize.sm }} />
+              <span style={{ fontSize: typography.fontSize.xs, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>Температура</span>
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: tempStatus.color }}>
+            <div style={{ fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.bold, color: tempStatus.color }}>
               {temperature.toFixed(1)}°C
             </div>
-            <div className="h-1.5 bg-pink-100 rounded-full mt-2 overflow-hidden">
+            <div style={{ height: '6px', background: colors.primaryLighter, borderRadius: '999px', marginTop: typography.spacing.sm, overflow: 'hidden' }}>
               <div 
-                className="h-full transition-all duration-500 rounded-full"
                 style={{ 
-                  width: `${Math.min(100, Math.max(0, ((temperature - 35) / 3) * 100))}%`, 
-                  backgroundColor: temperature >= 35.5 && temperature <= 37.5 ? '#ec4899' : '#f59e0b'
+                  height: '100%',
+                  width: `${Math.min(100, Math.max(0, ((temperature - 35) / 3) * 100))}%`,
+                  transition: 'all 0.5s',
+                  borderRadius: '999px',
+                  backgroundColor: temperature >= 35.5 && temperature <= 37.5 ? colors.primary : colors.warning
                 }}
               />
             </div>
-            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: typography.spacing.xs }}>
               {tempStatus.status}
             </div>
           </div>
         </div>
 
-        {/* Компактная статистика в 2 строки */}
-        <div className="grid grid-cols-4 gap-2">
-          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
+        {/* Компактная статистика */}
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: typography.spacing.sm
+        }}>
+          <div style={{ 
+            padding: typography.spacing.sm,
+            borderRadius: '8px',
+            textAlign: 'center',
+            backgroundColor: colors.primaryPale,
+            border: `1px solid ${colors.border.light}`
+          }}>
+            <div style={{ 
+              fontSize: typography.fontSize.lg, 
+              fontWeight: typography.fontWeight.bold, 
+              color: colors.primary 
+            }}>
               {sessionsToday}
             </div>
-            <div style={{ fontSize: '10px', color: '#831843' }}>сеансов</div>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>сеансов</div>
           </div>
 
-          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a21caf' }}>
+          <div style={{ 
+            padding: typography.spacing.sm,
+            borderRadius: '8px',
+            textAlign: 'center',
+            backgroundColor: colors.primaryPale,
+            border: `1px solid ${colors.border.light}`
+          }}>
+            <div style={{ 
+              fontSize: typography.fontSize.lg, 
+              fontWeight: typography.fontWeight.bold, 
+              color: colors.primary 
+            }}>
               {formatUptime(deviceUptime)}
             </div>
-            <div style={{ fontSize: '10px', color: '#831843' }}>работы</div>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>работы</div>
           </div>
 
-          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: dataQuality > 90 ? '#a21caf' : '#d97706' }}>
+          <div style={{ 
+            padding: typography.spacing.sm,
+            borderRadius: '8px',
+            textAlign: 'center',
+            backgroundColor: colors.primaryPale,
+            border: `1px solid ${colors.border.light}`
+          }}>
+            <div style={{ 
+              fontSize: typography.fontSize.lg, 
+              fontWeight: typography.fontWeight.bold, 
+              color: dataQuality > 90 ? colors.primary : colors.warning 
+            }}>
               {dataQuality}%
             </div>
-            <div style={{ fontSize: '10px', color: '#831843' }}>качество</div>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>качество</div>
           </div>
 
-          <div className="p-2 rounded text-center" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: alertsToday > 0 ? '#dc2626' : '#a21caf' }}>
+          <div style={{ 
+            padding: typography.spacing.sm,
+            borderRadius: '8px',
+            textAlign: 'center',
+            backgroundColor: colors.primaryPale,
+            border: `1px solid ${colors.border.light}`
+          }}>
+            <div style={{ 
+              fontSize: typography.fontSize.lg, 
+              fontWeight: typography.fontWeight.bold, 
+              color: alertsToday > 0 ? colors.error : colors.primary 
+            }}>
               {alertsToday}
             </div>
-            <div style={{ fontSize: '10px', color: '#831843' }}>уведомл.</div>
+            <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>уведомл.</div>
           </div>
         </div>
 
-        {/* Компактный статус подключения */}
-        <div className="flex items-center justify-between px-3 py-2 rounded" style={{ 
-          backgroundColor: isConnected ? '#fef7ff' : '#fef2f2',
-          border: `1px solid ${isConnected ? '#f3e8ff' : '#fecaca'}`
+        {/* Статус подключения */}
+        <div style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+          borderRadius: '8px',
+          backgroundColor: isConnected ? colors.primaryPale : `${colors.error}10`,
+          border: `1px solid ${isConnected ? colors.border.light : colors.error}`
         }}>
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-pink-500' : 'bg-red-500'
-            } ${isConnected ? 'animate-pulse' : ''}`}></div>
-            <span style={{ fontSize: '11px', color: isConnected ? '#831843' : '#991b1b', fontWeight: 'bold' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: isConnected ? colors.primary : colors.error,
+              animation: isConnected ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+            }}></div>
+            <span style={{ 
+              fontSize: typography.fontSize.xs, 
+              color: isConnected ? colors.text.primary : colors.error, 
+              fontWeight: typography.fontWeight.semibold 
+            }}>
               {deviceName} • {isConnected ? 'Подключено' : 'Отключено'}
             </span>
           </div>
-          <span style={{ fontSize: '10px', color: '#64748b' }}>
+          <span style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
             {new Date(lastUpdate).toLocaleTimeString('ru-RU', { 
               hour: '2-digit', 
               minute: '2-digit' 
@@ -289,15 +373,24 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
           </span>
         </div>
 
-        {/* Компактные предупреждения */}
+        {/* Предупреждения */}
         {(battery < 30 || signalQuality < 50) && isConnected && (
-          <div className="px-2 py-1 rounded-md" style={{ 
-            backgroundColor: '#fef2f2', 
-            border: '1px solid #fecaca' 
+          <div style={{ 
+            padding: typography.spacing.sm,
+            borderRadius: '8px',
+            backgroundColor: `${colors.error}10`, 
+            border: `1px solid ${colors.error}` 
           }}>
-            <div className="flex items-center gap-2">
-              <ExclamationCircleOutlined style={{ color: '#dc2626', fontSize: '10px' }} />
-              <div style={{ fontSize: '8px', color: '#991b1b', fontWeight: 'bold' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+              <ExclamationCircleOutlined style={{ 
+                color: colors.error, 
+                fontSize: typography.fontSize.xs 
+              }} />
+              <div style={{ 
+                fontSize: typography.fontSize.xs, 
+                color: colors.error, 
+                fontWeight: typography.fontWeight.semibold 
+              }}>
                 {battery < 30 ? 'Разряжается' : ''}
                 {battery < 30 && signalQuality < 50 ? ' • ' : ''}
                 {signalQuality < 50 ? 'Слабый сигнал' : ''}

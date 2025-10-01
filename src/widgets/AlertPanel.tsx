@@ -10,7 +10,7 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined
 } from '@ant-design/icons';
-import { colors } from '../theme';
+import { colors, typography } from '../theme';
 
 const { Text, Title } = Typography;
 
@@ -147,69 +147,84 @@ export default function AlertPanel({ className }: AlertPanelProps) {
   return (
     <Card 
       title={
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
             <div 
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white"
-              style={{ background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }}
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`
+              }}
             >
-              <BellOutlined style={{ fontSize: '12px' }} />
+              <BellOutlined style={{ fontSize: typography.fontSize.sm }} />
             </div>
-            <span style={{ fontSize: '15px', fontWeight: 600, color: '#831843' }}>Уведомления</span>
+            <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+              Уведомления
+            </span>
           </div>
           {activeAlerts.length > 0 && (
             <Badge 
               count={activeAlerts.length} 
-              style={{ backgroundColor: '#ec4899', color: 'white' }}
+              style={{ backgroundColor: colors.primary, color: '#ffffff' }}
             />
           )}
         </div>
       }
       className={className}
-      size="small"
-      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
-      headStyle={{ 
-        padding: '6px 12px', 
-        minHeight: 'auto',
-        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-        borderBottom: '1px solid #f3e8ff'
-      }}
       style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      bodyStyle={{ padding: typography.spacing.md, height: '100%', display: 'flex', flexDirection: 'column' }}
+      headStyle={{ 
+        padding: `${typography.spacing.sm} ${typography.spacing.md}`, 
+        minHeight: '48px',
+        background: colors.primaryPale,
+        borderBottom: `1px solid ${colors.border.light}`
+      }}
     >
-      {/* Краткая статистика в розовой палитре */}
-      <div className="grid grid-cols-3 gap-1 mb-2 p-1.5 rounded-lg" style={{ 
-        background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-        border: '1px solid #f3e8ff'
+      {/* Краткая статистика */}
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: typography.spacing.xs,
+        marginBottom: typography.spacing.sm,
+        padding: typography.spacing.sm,
+        borderRadius: '8px',
+        background: colors.primaryPale,
+        border: `1px solid ${colors.border.light}`
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ 
-            color: criticalCount > 0 ? '#dc2626' : '#a21caf',
-            fontSize: 20,
-            fontWeight: 'bold'
+            color: criticalCount > 0 ? colors.error : colors.text.secondary,
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.bold
           }}>
             {criticalCount}
           </div>
-          <div style={{ fontSize: 10, color: '#831843' }}>Критических</div>
+          <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>Критических</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ 
-            color: warningCount > 0 ? '#d97706' : '#a21caf',
-            fontSize: 20,
-            fontWeight: 'bold'
+            color: warningCount > 0 ? colors.warning : colors.text.secondary,
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.bold
           }}>
             {warningCount}
           </div>
-          <div style={{ fontSize: 10, color: '#831843' }}>Предупреждений</div>
+          <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>Предупреждений</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ 
-            color: activeAlerts.length > 0 ? '#ec4899' : '#a21caf',
-            fontSize: 20,
-            fontWeight: 'bold'
+            color: activeAlerts.length > 0 ? colors.primary : colors.text.secondary,
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.bold
           }}>
             {activeAlerts.length}
           </div>
-          <div style={{ fontSize: 10, color: '#831843' }}>Активных</div>
+          <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>Активных</div>
         </div>
       </div>
 
@@ -232,37 +247,46 @@ export default function AlertPanel({ className }: AlertPanelProps) {
               return (
                 <div 
                   key={alert.id}
-                  className="px-2.5 py-2 rounded-md cursor-pointer hover:opacity-80 transition-all"
                   style={{
-                    backgroundColor: alert.level === 'critical' ? '#fee2e2' : 
-                                   alert.level === 'warning' ? '#fef3c7' : '#fce7f3',
+                    padding: typography.spacing.sm,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backgroundColor: alert.level === 'critical' ? `${colors.error}10` : 
+                                   alert.level === 'warning' ? `${colors.warning}10` : `${colors.primary}10`,
                     borderLeft: `3px solid ${
-                      alert.level === 'critical' ? '#dc2626' : 
-                      alert.level === 'warning' ? '#f59e0b' : '#ec4899'
+                      alert.level === 'critical' ? colors.error : 
+                      alert.level === 'warning' ? colors.warning : colors.primary
                     }`
                   }}
                   onClick={() => handleResolveAlert(alert.id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: typography.spacing.sm }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       {/* Название */}
                       <Text strong style={{   
-                        fontSize: '11px', 
-                        color: alert.level === 'critical' ? '#991b1b' : 
-                               alert.level === 'warning' ? '#92400e' : '#831843',
-                        lineHeight: '1.3',
-                        fontWeight: '600',
+                        fontSize: typography.fontSize.xs, 
+                        color: alert.level === 'critical' ? colors.error : 
+                               alert.level === 'warning' ? colors.warning : colors.text.primary,
+                        lineHeight: typography.lineHeight.tight,
+                        fontWeight: typography.fontWeight.semibold,
                         display: 'block',
-                        marginBottom: '3px'
+                        marginBottom: '4px'
                       }}>
                         {alert.title}
                       </Text>
                       
-                      {/* Описание - серый текст */}
+                      {/* Описание */}
                       <Text style={{ 
-                        fontSize: '9px', 
-                        color: '#6b7280',
-                        lineHeight: '1.3',
+                        fontSize: typography.fontSize.xs, 
+                        color: colors.text.secondary,
+                        lineHeight: typography.lineHeight.tight,
                         display: 'block'
                       }}>
                         {alert.description}
@@ -271,12 +295,12 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                       {/* Значение, если есть */}
                       {alert.value && (
                         <Text style={{ 
-                          fontSize: '9px', 
-                          color: alert.level === 'critical' ? '#dc2626' : '#ec4899',
-                          lineHeight: '1.3',
+                          fontSize: typography.fontSize.xs, 
+                          color: alert.level === 'critical' ? colors.error : colors.primary,
+                          lineHeight: typography.lineHeight.tight,
                           display: 'block',
-                          marginTop: '2px',
-                          fontWeight: '600'
+                          marginTop: '4px',
+                          fontWeight: typography.fontWeight.semibold
                         }}>
                           Значение: {alert.value}
                           {alert.type === 'battery' || alert.type === 'signal' ? '%' : 
@@ -286,11 +310,11 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                       )}
                     </div>
                     
-                    {/* Время - справа у правой границы */}
+                    {/* Время */}
                     <Text style={{ 
-                      fontSize: '9px', 
-                      color: '#9ca3af',
-                      lineHeight: '1.3',
+                      fontSize: typography.fontSize.xs, 
+                      color: colors.text.tertiary,
+                      lineHeight: typography.lineHeight.tight,
                       whiteSpace: 'nowrap',
                       flexShrink: 0
                     }}>
@@ -302,24 +326,46 @@ export default function AlertPanel({ className }: AlertPanelProps) {
             })}
         </div>
       ) : (
-        <div className="p-3 rounded-lg text-center" style={{ 
-          backgroundColor: '#fef7ff',
-          border: '1px solid #f3e8ff'
+        <div style={{ 
+          padding: typography.spacing.md,
+          borderRadius: '8px',
+          textAlign: 'center',
+          backgroundColor: colors.primaryPale,
+          border: `1px solid ${colors.border.light}`
         }}>
-          <CheckCircleOutlined style={{ fontSize: '24px', color: '#22c55e', marginBottom: '8px' }} />
-          <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
+          <CheckCircleOutlined style={{ 
+            fontSize: typography.fontSize['2xl'], 
+            color: colors.success, 
+            marginBottom: typography.spacing.sm 
+          }} />
+          <div style={{ 
+            fontSize: typography.fontSize.base, 
+            fontWeight: typography.fontWeight.semibold, 
+            color: colors.text.primary, 
+            marginBottom: typography.spacing.xs 
+          }}>
             Уведомлений нет
           </div>
-          <div style={{ fontSize: '11px', color: '#831843', opacity: 0.7 }}>
+          <div style={{ 
+            fontSize: typography.fontSize.xs, 
+            color: colors.text.secondary
+          }}>
             Устройство работает нормально
           </div>
         </div>
       )}
 
-      {/* История (свернуто) в розовой палитре */}
+      {/* История */}
       {resolvedAlerts.length > 0 && (
-        <div className="mt-3 pt-2 border-t" style={{ borderColor: '#f3e8ff' }}>
-          <Text className="text-xs" style={{ color: '#831843', opacity: 0.7 }}>
+        <div style={{ 
+          marginTop: typography.spacing.md, 
+          paddingTop: typography.spacing.sm, 
+          borderTop: `1px solid ${colors.border.light}` 
+        }}>
+          <Text style={{ 
+            fontSize: typography.fontSize.xs, 
+            color: colors.text.secondary 
+          }}>
             Решено сегодня: {resolvedAlerts.length} уведомлений
           </Text>
         </div>

@@ -43,7 +43,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
   const menuItems = [
     {
       key: 'monitoring',
-      icon: <MonitorOutlined style={{ color: '#ec4899' }} />,
+      icon: <MonitorOutlined style={{ fontSize: '16px' }} />,
       label: 'Мониторинг устройства',
       type: 'submenu' as const,
       children: [
@@ -57,7 +57,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
     },
     {
       key: 'analytics',
-      icon: <FundOutlined style={{ color: '#8b5cf6' }} />,
+      icon: <FundOutlined style={{ fontSize: '16px' }} />,
       label: 'Анализ данных',
       type: 'submenu' as const,
       children: [
@@ -80,7 +80,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
     },
     {
       key: 'management',
-      icon: <TeamOutlined style={{ color: '#06b6d4' }} />,
+      icon: <TeamOutlined style={{ fontSize: '16px' }} />,
       label: 'Управление',
       type: 'submenu' as const,
       children: [
@@ -102,7 +102,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
     },
     {
       key: '#/settings',
-      icon: <SettingOutlined />,
+      icon: <SettingOutlined style={{ fontSize: '16px' }} />,
       label: 'Настройки',
     },
   ];
@@ -173,8 +173,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
         collapsible 
         collapsed={collapsed}
         width={240}
-        collapsedWidth={isMobile ? 0 : 80}
-        className="!bg-white shadow-lg"
+        collapsedWidth={isMobile ? 0 : 64}
         style={{
           position: 'fixed',
           height: '100vh',
@@ -182,36 +181,59 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           top: 0,
           bottom: 0,
           zIndex: 1000,
-          boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
-          transition: 'all 0.2s',
+          backgroundColor: '#ffffff',
+          boxShadow: '2px 0 12px rgba(0,0,0,0.08)',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRight: `1px solid ${colors.border.light}`,
         }}
       >
-        {/* Logo Area */}
+        {/* Logo Area - минималистичный */}
         <div 
-          className="h-16 flex items-center justify-center px-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+          style={{
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            padding: collapsed ? '0' : '0 16px',
+            borderBottom: `1px solid ${colors.border.light}`,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            background: colors.primaryPale,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = colors.primaryLighter;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = colors.primaryPale;
+          }}
           onClick={() => onNavigate('#/')}
         >
-          <Space size="small" align="center">
-            <HeartOutlined className="text-accent text-2xl" />
-            {!collapsed && (
-              <Text strong className="text-lg text-accent">
+          {collapsed ? (
+            <HeartOutlined style={{ fontSize: '24px', color: colors.primary }} />
+          ) : (
+            <Space size="small" align="center">
+              <HeartOutlined style={{ fontSize: '24px', color: colors.primary }} />
+              <Text strong style={{ fontSize: '18px', color: colors.primary, letterSpacing: '-0.5px' }}>
                 HeraBEAT
               </Text>
-            )}
-          </Space>
+            </Space>
+          )}
         </div>
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu - улучшенный стиль */}
         <Menu
           mode="inline"
           selectedKeys={[getActiveMenuKey()]}
           openKeys={openKeys}
           onOpenChange={setOpenKeys}
           onClick={handleMenuClick}
-          className="border-r-0 mt-4"
+          className="border-r-0"
           style={{
+            marginTop: '12px',
+            padding: '0 8px',
             fontSize: '14px',
             fontWeight: 500,
+            backgroundColor: 'transparent',
           }}
         >
           {menuItems.map((item) => {
@@ -277,34 +299,72 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
       </Sider>
 
       <Layout style={{ 
-        marginLeft: collapsed ? (isMobile ? 0 : 80) : 240, 
-        transition: 'margin-left 0.2s' 
+        marginLeft: collapsed ? (isMobile ? 0 : 64) : 240, 
+        transition: 'margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        backgroundColor: colors.background.secondary,
       }}>
-        {/* Top Header */}
-        <Header className="!bg-white !px-6 !h-16 flex items-center justify-between shadow-sm border-b border-gray-100 sticky top-0 z-50">
-          <Space size="large" align="center">
+        {/* Top Header - минималистичный */}
+        <Header 
+          style={{
+            background: '#ffffff',
+            padding: '0 24px',
+            height: '64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+            borderBottom: `1px solid ${colors.border.light}`,
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+          }}
+        >
+          <Space size="middle" align="center">
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
-              className="text-gray-600 hover:text-accent hover:bg-gray-50 !w-10 !h-10 flex items-center justify-center"
-              size="large"
+              style={{
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: colors.text.secondary,
+                borderRadius: '8px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = colors.primary;
+                e.currentTarget.style.backgroundColor = colors.primaryPale;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = colors.text.secondary;
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             />
-            <div className="h-6 w-px bg-gray-300" />
+            <div style={{ 
+              width: '1px', 
+              height: '24px', 
+              background: colors.border.default 
+            }} />
             <div>
-              <Text strong className="text-lg text-gray-800">
+              <Text strong style={{ 
+                fontSize: '18px', 
+                color: colors.text.primary,
+                fontWeight: 600,
+              }}>
                 {getActiveMenuLabel()}
               </Text>
             </div>
           </Space>
 
-          <Space size="large" align="center">
+          <Space size="middle" align="center">
             {/* Notifications */}
             <NotificationBell 
               onNavigateToNotifications={() => onNavigate('#/notifications')}
             />
 
-            {/* User Profile */}
+            {/* User Profile - минималистичный */}
             <Dropdown
               menu={{ items: userMenuItems }}
               placement="bottomRight"
@@ -312,21 +372,47 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
             >
               <Button 
                 type="text" 
-                className="hover:bg-gray-50 !h-auto !px-3 !py-2 flex items-center border border-transparent hover:border-gray-200 rounded-lg"
-                style={{ height: 'auto' }}
+                style={{
+                  height: 'auto',
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: `1px solid transparent`,
+                  borderRadius: '8px',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = colors.primaryPale;
+                  e.currentTarget.style.borderColor = colors.border.default;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = 'transparent';
+                }}
               >
                 <Space size="small" align="center">
                   <Avatar 
                     size={36}
-                    style={{ backgroundColor: colors.risk.high }}
+                    style={{ 
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
+                    }}
                     icon={<UserOutlined />}
                   />
                   {!isMobile && (
-                    <div className="text-left ml-2">
-                      <div className="text-sm font-semibold text-gray-800 leading-tight">
+                    <div style={{ textAlign: 'left', marginLeft: '8px' }}>
+                      <div style={{ 
+                        fontSize: '14px', 
+                        fontWeight: 600, 
+                        color: colors.text.primary,
+                        lineHeight: '18px',
+                      }}>
                         Др. Иванова А.С.
                       </div>
-                      <div className="text-xs text-gray-500 leading-tight">
+                      <div style={{ 
+                        fontSize: '12px', 
+                        color: colors.text.secondary,
+                        lineHeight: '16px',
+                      }}>
                         Акушер-гинеколог
                       </div>
                     </div>
@@ -337,8 +423,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           </Space>
         </Header>
 
-        {/* Main Content */}
-        <Content className="bg-gray-50 min-h-[calc(100vh-64px)]">
+        {/* Main Content - минималистичный */}
+        <Content style={{
+          background: colors.background.secondary,
+          minHeight: 'calc(100vh - 64px)',
+          padding: 0,
+        }}>
           {children}
         </Content>
       </Layout>

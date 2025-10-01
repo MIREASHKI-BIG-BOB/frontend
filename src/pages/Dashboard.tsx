@@ -24,11 +24,11 @@ interface DashboardLayout extends RGLLayout {
 
 const defaultLayouts = {
   lg: [
-    { i: 'patient', x: 0, y: 0, w: 3, h: 6.6, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'patient', x: 0, y: 0, w: 3, h: 6.8, minH: 6, component: 'PatientCard', title: 'Пациентка' },
     { i: 'homemonitor', x: 3, y: 0, w: 6, h: 6.6, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 9, y: 0, w: 3, h: 5, minH: 5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
-    { i: 'recent', x: 0, y: 8, w: 3, h: 5, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 8, w: 6, h:5, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'device', x: 9, y: 0, w: 3, h: 5.4, minH: 5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'recent', x: 0, y: 8, w: 3, h: 5.2, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
+    { i: 'trends', x: 3, y: 8, w: 6, h:5.4, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
     { i: 'alerts', x: 9, y: 8, w: 3, h: 6.6, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
@@ -153,7 +153,7 @@ export default function Dashboard() {
       case 'alerts':
         return <AlertPanel />;
       case 'trends':
-        return <TrendsChart height={120} />;
+        return <TrendsChart height={200} />;
       case 'recent':
         return <RecentPatients />;
       default:
@@ -180,35 +180,37 @@ export default function Dashboard() {
 
   const renderWidget = (layoutItem: RGLLayout) => {
     const commonStyle = {
-      background: 'white',
+      background: colors.background.primary,
       borderRadius: '8px',
       overflow: 'hidden' as const,
-      boxShadow: isEditMode ? '0 4px 12px rgba(233, 30, 99, 0.15)' : '0 2px 8px rgba(0,0,0,0.1)',
-      border: isEditMode ? `2px dashed ${colors.risk.high}` : `1px solid ${colors.border.light}`,
-      transition: 'all 0.2s ease',
+      boxShadow: isEditMode ? `0 4px 16px ${colors.primary}30` : '0 1px 4px rgba(0,0,0,0.08)',
+      border: isEditMode ? `2px dashed ${colors.primary}` : `1px solid ${colors.border.default}`,
+      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
       height: '100%',
       display: 'flex',
       flexDirection: 'column' as const,
     };
 
-    const labelColors: { [key: string]: string } = {
-      'patient': 'bg-blue-500',
-      'homemonitor': 'bg-green-500',
-      'device': 'bg-purple-500',
-      'alerts': 'bg-orange-500',
-      'quickstats': 'bg-cyan-500',
-      'trends': 'bg-indigo-500',
-      'recent': 'bg-pink-500',
-    };
-
     return (
       <div style={commonStyle} className={isEditMode ? 'cursor-move' : ''}>
         {isEditMode && (
-          <div className={`absolute top-2 left-2 z-50 ${labelColors[layoutItem.i] || 'bg-gray-500'} text-white text-xs px-2 py-1 rounded shadow-lg`}>
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            zIndex: 50,
+            background: colors.primary,
+            color: '#ffffff',
+            fontSize: typography.fontSize.xs,
+            padding: '4px 8px',
+            borderRadius: '4px',
+            boxShadow: `0 2px 8px ${colors.primary}40`,
+            fontWeight: typography.fontWeight.semibold,
+          }}>
             {getTitleById(layoutItem.i)}
           </div>
         )}
-        <div className="flex-1 w-full h-full">
+        <div style={{ flex: 1, width: '100%', height: '100%' }}>
           {getWidgetById(layoutItem.i)}
         </div>
       </div>
@@ -216,20 +218,37 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-3 max-w-[1600px] mx-auto relative">
-      {/* Floating Settings Button */}
-      <div className="fixed right-3 top-20 z-50 flex flex-col gap-2">
+    <div style={{ 
+      padding: typography.spacing.md, 
+      maxWidth: '1600px', 
+      margin: '0 auto',
+      position: 'relative',
+    }}>
+      {/* Floating Settings Button - минималистичный */}
+      <div style={{
+        position: 'fixed',
+        right: typography.spacing.md,
+        top: '88px',
+        zIndex: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: typography.spacing.sm,
+      }}>
         <Tooltip title={isEditMode ? 'Режим редактирования' : 'Настроить виджеты'} placement="left">
           <Button 
             type={isEditMode ? "primary" : "default"}
             icon={<SettingOutlined />}
             onClick={() => setIsEditMode(!isEditMode)}
-            size="middle"
             shape="circle"
-            style={isEditMode ? 
-              { backgroundColor: colors.risk.high, borderColor: colors.risk.high, width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)' } : 
-              { boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', width: '40px', height: '40px' }
-            }
+            style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: isEditMode ? colors.primary : colors.background.primary,
+              borderColor: isEditMode ? colors.primary : colors.border.default,
+              color: isEditMode ? '#ffffff' : colors.text.primary,
+              boxShadow: isEditMode ? `0 2px 12px ${colors.primary}40` : '0 2px 8px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.2s',
+            }}
           />
         </Tooltip>
         
@@ -240,9 +259,14 @@ export default function Dashboard() {
                 type="primary" 
                 icon={<SaveOutlined />} 
                 onClick={saveLayout}
-                size="middle"
                 shape="circle"
-                style={{ backgroundColor: colors.status.success, borderColor: colors.status.success, width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)' }}
+                style={{ 
+                  width: '40px', 
+                  height: '40px',
+                  backgroundColor: colors.success,
+                  borderColor: colors.success,
+                  boxShadow: `0 2px 12px ${colors.success}40`,
+                }}
               />
             </Tooltip>
             
@@ -250,10 +274,13 @@ export default function Dashboard() {
               <Button 
                 icon={<UndoOutlined />} 
                 onClick={resetLayout}
-                size="middle"
                 shape="circle"
                 danger
-                style={{ width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)' }}
+                style={{ 
+                  width: '40px', 
+                  height: '40px',
+                  boxShadow: `0 2px 12px ${colors.error}40`,
+                }}
               />
             </Tooltip>
           </>

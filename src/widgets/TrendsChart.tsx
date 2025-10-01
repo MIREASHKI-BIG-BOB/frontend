@@ -208,7 +208,7 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
       <div 
         className="rounded-lg border"
         style={{ 
-          height: '160px',
+          height: `${height}px`,
           background: 'linear-gradient(135deg, #fef7ff 0%, #ffffff 100%)',
           borderColor: '#f3e8ff',
           padding: '6px'
