@@ -76,10 +76,14 @@ export default function CTGChartSimple({
       try {
         setWsStatus('connecting');
         setWsError('');
-        ws = new WebSocket('ws://localhost:8081/ws');
+        // Используем относительный путь для работы как локально (через Vite proxy), так и в Docker
+        const wsUrl = window.location.protocol === 'https:' 
+          ? `wss://${window.location.host}/ws/` 
+          : `ws://${window.location.host}/ws/`;
+        ws = new WebSocket(wsUrl);
         
         ws.onopen = () => {
-          console.log('WebSocket connected to generator');
+          console.log('WebSocket connected to backend');
           setWsStatus('connected');
           setStartTime(Date.now()); // Сбрасываем время начала при подключении
           setData([]); // Очищаем данные при новом подключении
