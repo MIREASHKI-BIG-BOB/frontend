@@ -149,17 +149,18 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
         </div>
       }
       className="h-full"
-      bodyStyle={{ padding: '8px' }}
+      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         borderBottom: '1px solid #f3e8ff'
       }}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
     >
       <Space direction="vertical" size="small" className="w-full">
         {/* Компактные основные параметры в одну строку */}
-        <div className="grid grid-cols-3 gap-3 p-3 rounded-lg" style={{ 
+        <div className="grid grid-cols-3 gap-2 p-2 rounded-lg" style={{ 
           background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
           border: '1px solid #f3e8ff'
         }}>

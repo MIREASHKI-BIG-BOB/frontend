@@ -167,16 +167,17 @@ export default function AlertPanel({ className }: AlertPanelProps) {
       }
       className={className}
       size="small"
-      bodyStyle={{ padding: '10px' }}
+      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         borderBottom: '1px solid #f3e8ff'
       }}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
     >
       {/* Краткая статистика в розовой палитре */}
-      <div className="grid grid-cols-3 gap-2 mb-3 p-2 rounded-lg" style={{ 
+      <div className="grid grid-cols-3 gap-1 mb-2 p-1.5 rounded-lg" style={{ 
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         border: '1px solid #f3e8ff'
       }}>
@@ -214,7 +215,7 @@ export default function AlertPanel({ className }: AlertPanelProps) {
 
       {/* Активные уведомления в розовой палитре */}
       {activeAlerts.length > 0 ? (
-        <div className="space-y-1 max-h-72 overflow-y-auto">
+        <div className="space-y-0.5 max-h-72 overflow-y-auto">
           {activeAlerts
             .sort((a, b) => {
               // Сначала критичные, потом по времени
@@ -231,78 +232,70 @@ export default function AlertPanel({ className }: AlertPanelProps) {
               return (
                 <div 
                   key={alert.id}
-                  className="p-1.5 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition-all"
+                  className="px-2 py-1.5 rounded-md cursor-pointer hover:opacity-80 transition-all"
                   style={{
-                    backgroundColor: alert.level === 'critical' ? '#fef2f2' : 
-                                   alert.level === 'warning' ? '#fffbeb' : '#fef7ff',
-                    borderLeftColor: alert.level === 'critical' ? '#dc2626' : 
-                                   alert.level === 'warning' ? '#d97706' : '#ec4899',
-                    lineHeight: '1.2'
+                    backgroundColor: alert.level === 'critical' ? '#fee2e2' : 
+                                   alert.level === 'warning' ? '#fef3c7' : '#fce7f3',
+                    borderLeft: `3px solid ${
+                      alert.level === 'critical' ? '#dc2626' : 
+                      alert.level === 'warning' ? '#f59e0b' : '#ec4899'
+                    }`
                   }}
                   onClick={() => handleResolveAlert(alert.id)}
                 >
-                  <div className="flex items-start gap-1.5">
-                    {/* Иконка типа */}
-                    <div 
-                      className="w-4 h-4 rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: '#ec4899', fontSize: '10px' }}
-                    >
-                      {alertType.icon}
-                    </div>
-                    
-                    {/* Содержимое */}
+                  <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      {/* Заголовок */}
-                      <div className="flex items-center justify-between mb-0.5">
-                        <Tag 
-                          className="font-bold px-1.5 py-0.5"
-                          style={{
-                            fontSize: '8px',
-                            backgroundColor: alert.level === 'critical' ? '#fecaca' : 
-                                           alert.level === 'warning' ? '#fed7aa' : '#f3e8ff',
-                            color: alert.level === 'critical' ? '#991b1b' : 
-                                 alert.level === 'warning' ? '#92400e' : '#831843',
-                            border: `1px solid ${
-                              alert.level === 'critical' ? '#dc2626' : 
-                              alert.level === 'warning' ? '#d97706' : '#ec4899'
-                            }`,
-                            lineHeight: '1'
-                          }}
-                        >
-                          {alertLevel.text}
-                        </Tag>
-                        <Text style={{ fontSize: '8px', color: '#831843', opacity: 0.7, lineHeight: '1.1' }}>
-                          {formatTimeAgo(alert.timestamp)}
-                        </Text>
-                      </div>
-                      
                       {/* Название */}
-                      <Text strong className="block mb-0.5" style={{ fontSize: '9px', color: '#831843', lineHeight: '1.1' }}>
+                      <Text strong style={{   
+                        fontSize: '10px', 
+                        color: alert.level === 'critical' ? '#991b1b' : 
+                               alert.level === 'warning' ? '#92400e' : '#831843',
+                        lineHeight: '1.2',
+                        fontWeight: '600',
+                        display: 'block',
+                        marginBottom: '2px'
+                      }}>
                         {alert.title}
                       </Text>
                       
-                      {/* Описание */}
-                      <Text className="block mb-0.5" style={{ fontSize: '8px', color: '#831843', opacity: 0.8, lineHeight: '1.1' }}>
+                      {/* Описание - ультрамелкий шрифт */}
+                      <Text style={{ 
+                        fontSize: '70px', 
+                        color: '#374151',
+                        lineHeight: '1.1',
+                        display: 'block'
+                      }}>
                         {alert.description}
                       </Text>
                       
                       {/* Значение, если есть */}
                       {alert.value && (
-                        <div className="flex items-center justify-between mt-0.5">
-                          <Text style={{ fontSize: '8px', color: '#831843', opacity: 0.7, lineHeight: '1.1' }}>
-                            Значение: <span className="font-bold" style={{ color: '#ec4899' }}>
-                              {alert.value}
-                              {alert.type === 'battery' || alert.type === 'signal' ? '%' : 
-                               alert.type === 'fetal' ? ' bpm' : 
-                               alert.type === 'temperature' ? '°C' : ''}
-                            </span>
-                          </Text>
-                          <Button size="small" type="text" style={{ fontSize: '8px', color: '#ec4899', padding: '0 4px', lineHeight: '1.1' }}>
-                            Отметить ✓
-                          </Button>
-                        </div>
+                        <Text style={{ 
+                          fontSize: '7px', 
+                          color: alert.level === 'critical' ? '#dc2626' : '#ec4899',
+                          lineHeight: '1.1',
+                          display: 'block',
+                          marginTop: '1px',
+                          fontWeight: '600'
+                        }}>
+                          Значение: {alert.value}
+                          {alert.type === 'battery' || alert.type === 'signal' ? '%' : 
+                           alert.type === 'fetal' ? ' bpm' : 
+                           alert.type === 'temperature' ? '°C' : ''}
+                        </Text>
                       )}
                     </div>
+                    
+                    {/* Время - справа у правой границы */}
+                    <Text style={{ 
+                      fontSize: '7px', 
+                      color: '#9ca3af',
+                      lineHeight: '1',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
+                    }}>
+                      {formatTimeAgo(alert.timestamp)}
+                    </Text>
                   </div>
                 </div>
               );

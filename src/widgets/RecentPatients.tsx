@@ -179,13 +179,14 @@ const RecentSessions: React.FC<RecentSessionsProps> = ({ sessions }) => {
       }
       className="h-full"
       size="small"
-      bodyStyle={{ padding: '8px' }}
+      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         borderBottom: '1px solid #f3e8ff'
       }}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
     >
       <div className="space-y-1 max-h-80 overflow-y-auto">
         {sessionsList.map((session) => {

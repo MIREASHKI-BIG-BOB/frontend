@@ -21,7 +21,8 @@ import {
   ThunderboltOutlined,
   ApiOutlined,
   FundOutlined,
-  TeamOutlined
+  TeamOutlined,
+  MonitorOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -42,7 +43,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
   const menuItems = [
     {
       key: 'monitoring',
-      icon: <ApiOutlined style={{ color: '#ec4899' }} />,
+      icon: <MonitorOutlined style={{ color: '#ec4899' }} />,
       label: 'Мониторинг устройства',
       type: 'submenu' as const,
       children: [

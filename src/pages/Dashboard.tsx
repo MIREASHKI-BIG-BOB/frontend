@@ -28,7 +28,7 @@ const defaultLayouts = {
     { i: 'homemonitor', x: 3, y: 0, w: 6, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
     { i: 'device', x: 9, y: 0, w: 3, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
     { i: 'recent', x: 0, y: 8, w: 3, h: 5, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 8, w: 6, h: 5, minH: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'trends', x: 3, y: 8, w: 6, h: 4, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
     { i: 'alerts', x: 9, y: 8, w: 3, h: 5, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
@@ -210,58 +210,47 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
-      {/* Control Panel */}
-      <div className="mb-4 flex justify-between items-center">
-        <div className="flex gap-2">
+    <div className="p-3 max-w-[1600px] mx-auto relative">
+      {/* Floating Settings Button */}
+      <div className="fixed right-3 top-20 z-50 flex flex-col gap-2">
+        <Tooltip title={isEditMode ? 'Режим редактирования' : 'Настроить виджеты'} placement="left">
           <Button 
             type={isEditMode ? "primary" : "default"}
             icon={<SettingOutlined />}
             onClick={() => setIsEditMode(!isEditMode)}
             size="middle"
-            style={isEditMode ? { backgroundColor: colors.risk.high, borderColor: colors.risk.high, ...typography.styles.button } : typography.styles.button}
-          >
-            {isEditMode ? 'Режим редактирования' : 'Настроить виджеты'}
-          </Button>
-          
-          {isEditMode && (
-            <>
-              <Tooltip title="Сохранить текущую раскладку">
-                <Button 
-                  type="primary" 
-                  icon={<SaveOutlined />} 
-                  onClick={saveLayout}
-                  size="middle"
-                  style={{ backgroundColor: colors.status.success, borderColor: colors.status.success, ...typography.styles.button }}
-                >
-                  Сохранить
-                </Button>
-              </Tooltip>
-              
-              <Tooltip title="Сбросить к стандартной раскладке">
-                <Button 
-                  icon={<UndoOutlined />} 
-                  onClick={resetLayout}
-                  size="middle"
-                  style={typography.styles.button}
-                  danger
-                >
-                  Сбросить
-                </Button>
-              </Tooltip>
-            </>
-          )}
-        </div>
+            shape="circle"
+            style={isEditMode ? 
+              { backgroundColor: colors.risk.high, borderColor: colors.risk.high, width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)' } : 
+              { boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', width: '40px', height: '40px' }
+            }
+          />
+        </Tooltip>
         
         {isEditMode && (
-          <div className="text-sm text-gray-600 px-3 py-2 rounded-lg flex items-center gap-2" style={{
-            background: 'linear-gradient(135deg, #fef7ff 0%, #ffffff 100%)',
-            border: '1px solid #f3e8ff',
-            color: '#831843'
-          }}>
-            <SettingOutlined style={{ color: '#ec4899', fontSize: '16px' }} />
-            <span style={{ fontSize: '12px' }}>Перетащите виджеты или измените размер. Сохранение автоматическое.</span>
-          </div>
+          <>
+            <Tooltip title="Сохранить раскладку" placement="left">
+              <Button 
+                type="primary" 
+                icon={<SaveOutlined />} 
+                onClick={saveLayout}
+                size="middle"
+                shape="circle"
+                style={{ backgroundColor: colors.status.success, borderColor: colors.status.success, width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)' }}
+              />
+            </Tooltip>
+            
+            <Tooltip title="Сбросить раскладку" placement="left">
+              <Button 
+                icon={<UndoOutlined />} 
+                onClick={resetLayout}
+                size="middle"
+                shape="circle"
+                danger
+                style={{ width: '40px', height: '40px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)' }}
+              />
+            </Tooltip>
+          </>
         )}
       </div>
 
@@ -277,7 +266,7 @@ export default function Dashboard() {
         rowHeight={50}
         isDraggable={isEditMode}
         isResizable={isEditMode}
-        margin={[12, 12]}
+        margin={[8, 8]}
         containerPadding={[0, 0]}
         useCSSTransforms={true}
         compactType="vertical"

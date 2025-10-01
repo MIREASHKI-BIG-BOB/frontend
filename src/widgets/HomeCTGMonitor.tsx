@@ -5,7 +5,8 @@ import {
   ThunderboltOutlined,
   UserOutlined,
   ExclamationCircleOutlined,
-  MonitorOutlined
+  MonitorOutlined,
+  ApiOutlined
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 
@@ -219,16 +220,17 @@ const HomeCTGMonitor: React.FC<HomeCTGMonitorProps> = ({ onRiskChange }) => {
       }
       className="h-full"
       size="small"
-      bodyStyle={{ padding: '8px' }}
+      bodyStyle={{ padding: '8px', height: '100%', display: 'flex', flexDirection: 'column' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         borderBottom: '1px solid #f3e8ff'
       }}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
     >
       {/* Текущие показатели в розово-белом стиле */}
-      <div className="grid grid-cols-3 gap-2 mb-3 p-2 rounded-lg" style={{ 
+      <div className="grid grid-cols-3 gap-1.5 mb-2 p-1.5 rounded-lg" style={{ 
         background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
         border: '1px solid #f3e8ff'
       }}>
@@ -369,7 +371,8 @@ const HomeCTGMonitor: React.FC<HomeCTGMonitorProps> = ({ onRiskChange }) => {
       }}>
         <div className="flex justify-between items-center">
           <span style={{ opacity: 0.8 }}>
-            {isConnected ? '🔗 Bluetooth подключен' : '🔴 Устройство отключено'}
+            <ApiOutlined style={{ marginRight: '4px', color: isConnected ? '#10b981' : '#ef4444' }} />
+            {isConnected ? 'Bluetooth подключен' : 'Устройство отключено'}
           </span>
           <span style={{ opacity: 0.8 }}>
             Данных: <strong style={{ color: '#ec4899' }}>{data.length}</strong> точек
