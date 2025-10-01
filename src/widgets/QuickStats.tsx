@@ -19,7 +19,7 @@ interface QuickStatsProps {
 
 const QuickStats: React.FC<QuickStatsProps> = ({
   sessionsToday = 3,
-  deviceUptime = 847, // минуты
+  deviceUptime = 2400, // минуты
   dataQuality = 94,
   alertsToday = 2
 }) => {

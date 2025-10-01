@@ -24,7 +24,7 @@ interface DeviceStatusProps {
 const DeviceStatus: React.FC<DeviceStatusProps> = ({ 
   deviceName = "MoniPuck v2.1",
   sessionsToday = 3,
-  deviceUptime = 847,
+  deviceUptime = 240,
   dataQuality = 94,
   alertsToday = 2
 }) => {
@@ -33,7 +33,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     if (hours > 0) {
-      return `${hours}ч ${remainingMinutes}м`;
+      return `${hours}ч`;
     }
     return `${remainingMinutes}м`;
   };
