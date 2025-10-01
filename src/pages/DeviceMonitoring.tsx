@@ -143,7 +143,7 @@ export default function DeviceMonitoring() {
             title={
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <SettingOutlined style={{ color: '#06b6d4', fontSize: '18px' }} />
-                <span style={{ color: '#831843', fontWeight: 600, fontSize: '15px' }}>Настройка устройства "Шайба"</span>
+                <span style={{ color: '#831843', fontWeight: 600, fontSize: '15px' }}>Настройка устройства MoniPuck</span>
               </div>
             }
             bordered={false}

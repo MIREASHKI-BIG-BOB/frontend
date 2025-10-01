@@ -28,8 +28,8 @@ const defaultLayouts = {
     { i: 'homemonitor', x: 3, y: 0, w: 6, h: 6.6, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
     { i: 'device', x: 9, y: 0, w: 3, h: 5, minH: 5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
     { i: 'recent', x: 0, y: 8, w: 3, h: 5, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 8, w: 6, h: 7, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 9, y: 8, w: 3, h: 7, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 3, y: 8, w: 6, h:5, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 8, w: 3, h: 6.6, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
     { i: 'patient', x: 0, y: 0, w: 4, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
@@ -170,7 +170,7 @@ export default function Dashboard() {
     const titles: { [key: string]: string } = {
       'patient': 'Пациентка',
       'homemonitor': 'Домашний мониторинг',
-      'device': 'Устройство "Шайба"',
+      'device': 'MoniPuck v2.1',
       'alerts': 'Уведомления',
       'trends': 'Анализ мониторинга',
       'recent': 'История сеансов'

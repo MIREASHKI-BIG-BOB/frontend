@@ -160,17 +160,17 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
     >
       <Space direction="vertical" size="small" className="w-full">
         {/* Компактные основные параметры в одну строку */}
-        <div className="grid grid-cols-3 gap-2 p-2 rounded-lg" style={{ 
+        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg" style={{ 
           background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
           border: '1px solid #f3e8ff'
         }}>
           {/* Батарея */}
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-2">
-              <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '14px' }} />
-              <span style={{ fontSize: '11px', color: '#831843', fontWeight: 'bold' }}>Батарея</span>
+              <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '12px' }} />
+              <span style={{ fontSize: '10px', color: '#831843', fontWeight: 'bold' }}>Батарея</span>
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', color: batteryStatus.color }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: batteryStatus.color }}>
               {Math.round(battery)}%
             </div>
             <div className="h-1.5 bg-pink-100 rounded-full mt-2 overflow-hidden">
@@ -182,7 +182,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
                 }}
               />
             </div>
-            <div style={{ fontSize: '10px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
+            <div style={{ fontSize: '9px', color: '#831843', marginTop: '4px', opacity: 0.8 }}>
               {batteryStatus.status}
             </div>
           </div>

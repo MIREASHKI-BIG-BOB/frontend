@@ -232,7 +232,7 @@ export default function AlertPanel({ className }: AlertPanelProps) {
               return (
                 <div 
                   key={alert.id}
-                  className="px-2 py-1.5 rounded-md cursor-pointer hover:opacity-80 transition-all"
+                  className="px-2.5 py-2 rounded-md cursor-pointer hover:opacity-80 transition-all"
                   style={{
                     backgroundColor: alert.level === 'critical' ? '#fee2e2' : 
                                    alert.level === 'warning' ? '#fef3c7' : '#fce7f3',
@@ -247,22 +247,22 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                     <div className="flex-1 min-w-0">
                       {/* Название */}
                       <Text strong style={{   
-                        fontSize: '10px', 
+                        fontSize: '11px', 
                         color: alert.level === 'critical' ? '#991b1b' : 
                                alert.level === 'warning' ? '#92400e' : '#831843',
-                        lineHeight: '1.2',
+                        lineHeight: '1.3',
                         fontWeight: '600',
                         display: 'block',
-                        marginBottom: '2px'
+                        marginBottom: '3px'
                       }}>
                         {alert.title}
                       </Text>
                       
-                      {/* Описание - ультрамелкий шрифт */}
+                      {/* Описание - серый текст */}
                       <Text style={{ 
-                        fontSize: '70px', 
-                        color: '#374151',
-                        lineHeight: '1.1',
+                        fontSize: '9px', 
+                        color: '#6b7280',
+                        lineHeight: '1.3',
                         display: 'block'
                       }}>
                         {alert.description}
@@ -271,11 +271,11 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                       {/* Значение, если есть */}
                       {alert.value && (
                         <Text style={{ 
-                          fontSize: '7px', 
+                          fontSize: '9px', 
                           color: alert.level === 'critical' ? '#dc2626' : '#ec4899',
-                          lineHeight: '1.1',
+                          lineHeight: '1.3',
                           display: 'block',
-                          marginTop: '1px',
+                          marginTop: '2px',
                           fontWeight: '600'
                         }}>
                           Значение: {alert.value}
@@ -288,9 +288,9 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                     
                     {/* Время - справа у правой границы */}
                     <Text style={{ 
-                      fontSize: '7px', 
+                      fontSize: '9px', 
                       color: '#9ca3af',
-                      lineHeight: '1',
+                      lineHeight: '1.3',
                       whiteSpace: 'nowrap',
                       flexShrink: 0
                     }}>

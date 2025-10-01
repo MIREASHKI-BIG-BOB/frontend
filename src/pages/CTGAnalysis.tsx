@@ -3,8 +3,7 @@ import { Tabs, Card } from 'antd';
 import { 
   LineChartOutlined, 
   HistoryOutlined, 
-  SwapOutlined,
-  FundOutlined
+  SwapOutlined
 } from '@ant-design/icons';
 import CTGPage from './CTG';
 
@@ -66,15 +65,6 @@ export default function CTGAnalysis() {
             }
             key="compare"
           />
-          <TabPane
-            tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
-                <FundOutlined style={{ fontSize: '14px' }} />
-                <span>Тренды</span>
-              </span>
-            }
-            key="trends"
-          />
         </Tabs>
       </Card>
 
@@ -120,27 +110,6 @@ export default function CTGAnalysis() {
                 Сравнение показателей
               </p>
               <p>Выберите несколько сеансов для сравнения динамики показателей</p>
-            </div>
-          </Card>
-        )}
-
-        {activeTab === 'trends' && (
-          <Card
-            title={
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <FundOutlined style={{ color: '#ec4899', fontSize: '20px' }} />
-                <span style={{ color: '#831843', fontWeight: 600 }}>Анализ трендов</span>
-              </div>
-            }
-            bordered={false}
-            style={{ borderRadius: '12px' }}
-          >
-            <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-              <FundOutlined style={{ fontSize: '64px', color: '#ec4899', marginBottom: '16px' }} />
-              <p style={{ fontSize: '16px', fontWeight: 500, color: '#831843' }}>
-                Долгосрочные тренды
-              </p>
-              <p>Анализ изменений показателей за период наблюдения</p>
             </div>
           </Card>
         )}

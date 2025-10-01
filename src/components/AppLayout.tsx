@@ -50,7 +50,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
         {
           key: '#/dashboard',
           icon: <RadarChartOutlined />,
-          label: 'Шайба (Live)',
+          label: 'MoniPuck (Live)',
           badge: true,
         },
       ],
@@ -67,9 +67,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           label: 'КТГ Анализ',
         },
         {
-          key: '#/detailed-analysis',
+          key: '#/ai-analysis',
           icon: <ThunderboltOutlined />,
-          label: 'ИИ Анализ аномалий',
+          label: 'ИИ-Анализ сессий',
         },
         {
           key: '#/reports',
