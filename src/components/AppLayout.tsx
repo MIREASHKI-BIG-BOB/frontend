@@ -188,7 +188,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           borderRight: `1px solid ${colors.border.light}`,
         }}
       >
-        {/* Logo Area - минималистичный */}
+        {/* Logo Area - с настоящим лого */}
         <div 
           style={{
             height: '64px',
@@ -199,24 +199,48 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
             borderBottom: `1px solid ${colors.border.light}`,
             cursor: 'pointer',
             transition: 'all 0.2s',
-            background: colors.primaryPale,
+            background: 'linear-gradient(135deg, rgba(216, 98, 136, 0.05) 0%, rgba(216, 98, 136, 0.1) 100%)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = colors.primaryLighter;
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(216, 98, 136, 0.1) 0%, rgba(216, 98, 136, 0.15) 100%)';
+            e.currentTarget.style.transform = 'scale(1.02)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = colors.primaryPale;
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(216, 98, 136, 0.05) 0%, rgba(216, 98, 136, 0.1) 100%)';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
           onClick={() => onNavigate('#/')}
         >
           {collapsed ? (
-            <FimeaLogo size={24} />
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '8px',
+              padding: '6px',
+              boxShadow: '0 2px 8px rgba(216, 98, 136, 0.2)',
+            }}>
+              <FimeaLogo size={32} color="#D86288" />
+            </div>
           ) : (
-            <Space size="small" align="center">
-              <FimeaLogo size={24} />
-              <Text strong style={{ fontSize: '18px', color: colors.primary, letterSpacing: '-0.5px' }}>
+            <Space size="middle" align="center">
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '12px',
+                padding: '8px',
+                boxShadow: '0 4px 12px rgba(216, 98, 136, 0.2)',
+              }}>
+                <FimeaLogo size={32} color="#D86288" />
+              </div>
+              <div style={{ 
+                fontSize: '20px', 
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #D86288, #B83280)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                letterSpacing: '-0.5px'
+              }}>
                 FIMEA
-              </Text>
+              </div>
             </Space>
           )}
         </div>

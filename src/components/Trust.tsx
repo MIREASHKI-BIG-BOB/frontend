@@ -1,5 +1,6 @@
 import { Card, Typography, Row, Col, Avatar, Rate, Button } from 'antd';
 import { SafetyCertificateOutlined, TeamOutlined, HeartOutlined, StarFilled } from '@ant-design/icons';
+import FimeaLogo from './FimeaLogo';
 import { colors } from '../theme';
 
 const { Title, Paragraph } = Typography;
@@ -57,7 +58,28 @@ export default function Trust() {
     }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         {/* Заголовок */}
+        {/* Заголовок с лого */}
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            <FimeaLogo size={48} color="#D86288" />
+            <div style={{
+              fontSize: '28px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #D86288, #B83280)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.5px'
+            }}>
+              FIMEA
+            </div>
+          </div>
           <Title level={2} style={{ 
             fontSize: 'clamp(2rem, 3vw, 2.5rem)',
             marginBottom: '16px',
@@ -71,7 +93,7 @@ export default function Trust() {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            Тысячи семей и сотни врачей доверяют FIMEA заботу о самом важном
+            Тысячи семей и сотни врачей доверяют заботу о самом важном
           </Paragraph>
         </div>
 
@@ -242,7 +264,17 @@ export default function Trust() {
             maxWidth: '500px',
             margin: '0 auto 32px'
           }}>
-            Начните следить за здоровьем малыша уже сегодня с помощью FIMEA
+            Начните следить за здоровьем малыша уже сегодня с помощью{' '}
+            <span style={{
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontSize: '20px'
+            }}>
+              FIMEA
+            </span>
           </Paragraph>
           
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -267,7 +299,10 @@ export default function Trust() {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              Заказать FIMEA
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                <FimeaLogo size={20} color="#D86288" />
+                Заказать FIMEA
+              </span>
             </Button>
             
             <Button 

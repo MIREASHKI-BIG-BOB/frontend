@@ -17,6 +17,52 @@ export default function Hero() {
         <Row gutter={[48, 32]} align="middle">
           <Col xs={24} lg={12}>
             <div>
+              {/* Логотип и брендинг */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '24px',
+                marginBottom: '32px'
+              }}>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '20px',
+                  padding: '16px',
+                  boxShadow: '0 8px 32px rgba(216, 98, 136, 0.15)',
+                  transform: 'rotate(-3deg)',
+                  transition: 'transform 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(-3deg) scale(1)'}
+                >
+                  <FimeaLogo size={72} color="#D86288" />
+                </div>
+                <div>
+                  <div style={{
+                    fontSize: '3.5rem',
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #D86288, #B83280, #9F2B68)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                    textShadow: '0 4px 8px rgba(216, 98, 136, 0.3)'
+                  }}>
+                    FIMEA
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: colors.text.secondary,
+                    fontWeight: 600,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Медицинские технологии будущего
+                  </div>
+                </div>
+              </div>
+
               {/* Верхний бейдж */}
               <div style={{
                 display: 'inline-flex',
@@ -43,12 +89,12 @@ export default function Hero() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
               }}>
-                Медицинская технология{' '}
+                Революционная система{' '}
                 <span style={{ 
                   color: colors.primary,
                   WebkitTextFillColor: colors.primary 
                 }}>
-                  будущего
+                  мониторинга КТГ
                 </span>
               </Title>
 
@@ -59,9 +105,9 @@ export default function Hero() {
                 marginBottom: '32px',
                 lineHeight: 1.6
               }}>
-                FIMEA — революционный фетальный монитор, который позволяет 
-                отслеживать здоровье малыша в реальном времени. 
-                Точность больничного оборудования у вас дома.
+                Передовые алгоритмы искусственного интеллекта для анализа кардиотокографии 
+                в режиме реального времени. Обеспечиваем безопасность матери и ребенка 
+                на каждом этапе беременности.
               </Paragraph>
 
               {/* Ключевые преимущества */}
@@ -185,20 +231,34 @@ export default function Hero() {
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
-                  {/* Лого в центре */}
+                  {/* Ваше лого в центре */}
                   <div style={{
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    borderRadius: '20px',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    borderRadius: '24px',
                     padding: '24px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    marginBottom: '16px'
-                  }}>
-                    <FimeaLogo size={64} />
+                    boxShadow: '0 12px 48px rgba(216, 98, 136, 0.2)',
+                    marginBottom: '16px',
+                    transform: 'rotate(2deg)',
+                    transition: 'transform 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(2deg) scale(1)'}
+                  >
+                    <FimeaLogo size={80} color="#D86288" />
                   </div>
                   
-                  <Title level={4} style={{ color: colors.primary, margin: 0 }}>
+                  <div style={{
+                    fontSize: '24px',
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #D86288, #B83280)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    margin: 0,
+                    letterSpacing: '-0.01em'
+                  }}>
                     FIMEA Device
-                  </Title>
+                  </div>
                   <Paragraph style={{ color: colors.text.secondary, margin: '8px 0 0 0' }}>
                     Беспроводной монитор нового поколения
                   </Paragraph>
@@ -235,15 +295,18 @@ export default function Hero() {
                   textAlign: 'center'
                 }}>
                   {[
-                    { value: '99.9%', label: 'Точность' },
+                    { value: '99.7%', label: 'Точность ИИ' },
                     { value: '24/7', label: 'Мониторинг' },
-                    { value: '5000+', label: 'Семей' }
+                    { value: '250+', label: 'Клиник' }
                   ].map((stat, index) => (
                     <div key={index}>
                       <div style={{ 
                         fontSize: '20px', 
                         fontWeight: 700, 
-                        color: colors.primary,
+                        background: 'linear-gradient(135deg, #D86288, #B83280)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
                         marginBottom: '4px'
                       }}>
                         {stat.value}

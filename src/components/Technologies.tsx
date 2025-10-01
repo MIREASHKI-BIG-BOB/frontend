@@ -1,5 +1,6 @@
-import { Card, Typography, Row, Col, Progress } from 'antd';
+import { Card, Typography, Row, Col, Progress, Space } from 'antd';
 import { WifiOutlined, SafetyCertificateOutlined, CloudOutlined, MobileOutlined, HeartOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import FimeaLogo from './FimeaLogo';
 import { colors } from '../theme';
 
 const { Title, Paragraph } = Typography;
@@ -55,8 +56,28 @@ export default function Technologies() {
       background: colors.background.primary
     }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        {/* Заголовок */}
+        {/* Заголовок с лого */}
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            <FimeaLogo size={48} color="#D86288" />
+            <div style={{
+              fontSize: '28px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #D86288, #B83280)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.5px'
+            }}>
+              FIMEA
+            </div>
+          </div>
           <Title level={2} style={{ 
             fontSize: 'clamp(2rem, 3vw, 2.5rem)',
             marginBottom: '16px',
@@ -70,7 +91,7 @@ export default function Technologies() {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            FIMEA использует новейшие достижения медицинских технологий для обеспечения максимальной безопасности и точности
+            Революционная система мониторинга использует новейшие достижения медицинских технологий для обеспечения максимальной безопасности и точности
           </Paragraph>
         </div>
 
