@@ -1,4 +1,4 @@
-/**** Tailwind config for HeraBEAT ****/
+/**** Tailwind config for FIMEA ****/
 module.exports = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {

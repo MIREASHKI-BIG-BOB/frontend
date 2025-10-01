@@ -1,5 +1,6 @@
 import { Layout, Button, Typography, Space } from 'antd';
-import { HeartOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined } from '@ant-design/icons';
+import FimeaLogo from './components/FimeaLogo';
 import { colors } from './theme';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
@@ -67,8 +68,8 @@ export default function App() {
       <Header className="!bg-accent">
         <div className="mx-auto max-w-7xl flex items-center justify-between py-2">
           <Space size="large" align="center">
-            <HeartOutlined className="text-white text-2xl" aria-hidden />
-            <Typography.Title level={3} className="!text-white !mb-0">HeraBEAT</Typography.Title>
+            <FimeaLogo size={28} color="white" />
+            <Typography.Title level={3} className="!text-white !mb-0">FIMEA</Typography.Title>
           </Space>
           <Space>
             <Button type="primary" size="large" style={{backgroundColor: 'white', color: colors.primary}} onMouseOver={(e) => {e.currentTarget.style.backgroundColor = colors.primaryPale}} onMouseOut={(e) => {e.currentTarget.style.backgroundColor = 'white'}} aria-label="Открыть дешборд" onClick={() => (location.hash = '#/dashboard') }>
@@ -85,7 +86,7 @@ export default function App() {
       </Content>
       <Footer className="bg-white">
         <div className="mx-auto max-w-7xl text-secondary text-sm">
-          © {new Date().getFullYear()} HeraBEAT. Медицинская технология у вас на ладони.
+          © {new Date().getFullYear()} FIMEA. Медицинская технология у вас на ладони.
         </div>
       </Footer>
     </Layout>

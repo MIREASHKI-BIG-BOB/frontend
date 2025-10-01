@@ -18,6 +18,22 @@ npm run build
 npm run preview
 ```
 
+## Docker
+
+```powershell
+# Сборка production-образа
+docker build -t fimea-frontend .
+
+# Запуск контейнера на 8080 порту
+docker run --rm -p 8080:80 --name fimea-web fimea-frontend
+
+# Проверка состояния (опционально)
+curl http://localhost:8080/healthz
+```
+
+## Документация
+- [Архитектура фронтенда](docs/frontend-architecture.md)
+
 ## Палитра (токены)
 - Основная палитра: `#6a4162`, `#d46a92`, `#f39db6`, `#f6d2d6`, `#fefafa`
 - Фон `#fefafa`, Текст `#1A1A1A`, Акцент `#d46a92`

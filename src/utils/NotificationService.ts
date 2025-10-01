@@ -40,7 +40,7 @@ export class NotificationService {
     const notification = new Notification(title, {
       body: options.body,
       icon: options.icon || '/favicon.ico',
-      tag: options.tag || 'herabeat-alert',
+      tag: options.tag || 'fimea-alert',
       requireInteraction: options.requireInteraction || false,
       badge: '/favicon.ico',
       ...options

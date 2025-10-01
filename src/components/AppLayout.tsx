@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Button, Avatar, Badge, Dropdown, Space, Typography } from 'antd';
 import NotificationBell from './NotificationBell';
+import FimeaLogo from './FimeaLogo';
 import { colors, typography } from '../theme';
 import {
   HeartOutlined,
@@ -209,12 +210,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           onClick={() => onNavigate('#/')}
         >
           {collapsed ? (
-            <HeartOutlined style={{ fontSize: '24px', color: colors.primary }} />
+            <FimeaLogo size={24} />
           ) : (
             <Space size="small" align="center">
-              <HeartOutlined style={{ fontSize: '24px', color: colors.primary }} />
+              <FimeaLogo size={24} />
               <Text strong style={{ fontSize: '18px', color: colors.primary, letterSpacing: '-0.5px' }}>
-                HeraBEAT
+                FIMEA
               </Text>
             </Space>
           )}
