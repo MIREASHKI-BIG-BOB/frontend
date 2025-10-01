@@ -149,7 +149,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
         </div>
       }
       className="h-full"
-      bodyStyle={{ padding: '12px' }}
+      bodyStyle={{ padding: '8px' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',

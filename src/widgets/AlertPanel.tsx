@@ -155,7 +155,7 @@ export default function AlertPanel({ className }: AlertPanelProps) {
             >
               <BellOutlined style={{ fontSize: '12px' }} />
             </div>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>Уведомления устройства</span>
+            <span style={{ fontSize: '15px', fontWeight: 600, color: '#831843' }}>Уведомления</span>
           </div>
           {activeAlerts.length > 0 && (
             <Badge 
@@ -277,12 +277,12 @@ export default function AlertPanel({ className }: AlertPanelProps) {
                       </div>
                       
                       {/* Название */}
-                      <Text strong className="block mb-0.5" style={{ fontSize: '10px', color: '#831843', lineHeight: '1.2' }}>
+                      <Text strong className="block mb-0.5" style={{ fontSize: '9px', color: '#831843', lineHeight: '1.1' }}>
                         {alert.title}
                       </Text>
                       
                       {/* Описание */}
-                      <Text className="block mb-0.5" style={{ fontSize: '9px', color: '#831843', opacity: 0.8, lineHeight: '1.2' }}>
+                      <Text className="block mb-0.5" style={{ fontSize: '8px', color: '#831843', opacity: 0.8, lineHeight: '1.1' }}>
                         {alert.description}
                       </Text>
                       

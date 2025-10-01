@@ -197,10 +197,10 @@ const TrendsChart: React.FC<TrendsChartProps> = ({ height = 200 }) => {
           dropdownStyle={{ fontSize: '11px' }}
           maxTagCount="responsive"
         >
-          <Option value="battery">🔋 Батарея</Option>
-          <Option value="signalQuality">📶 Сигнал</Option>
-          <Option value="fetalActivity">💗 Активность плода</Option>
-          <Option value="deviceTemp">🌡️ Температура</Option>
+          <Option value="battery">Батарея</Option>
+          <Option value="signalQuality">Сигнал</Option>
+          <Option value="fetalActivity">Активность плода</Option>
+          <Option value="deviceTemp">Температура</Option>
         </Select>
       </div>
 

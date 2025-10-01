@@ -24,36 +24,36 @@ interface DashboardLayout extends RGLLayout {
 
 const defaultLayouts = {
   lg: [
-    { i: 'patient', x: 0, y: 0, w: 3, h: 6.5, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 6, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 9, y: 0, w: 3, h: 6.5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
-    { i: 'recent', x: 0, y: 7, w: 3, h: 3.5, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 7, w: 6, h: 3.5, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 9, y: 7, w: 3, h: 3.5, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'patient', x: 0, y: 0, w: 3, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 9, y: 0, w: 3, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'recent', x: 0, y: 8, w: 3, h: 5, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
+    { i: 'trends', x: 3, y: 8, w: 6, h: 5, minH: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 8, w: 3, h: 5, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
-    { i: 'patient', x: 0, y: 0, w: 4, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 4, y: 0, w: 5, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 9, y: 0, w: 3, h: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
-    { i: 'recent', x: 0, y: 7, w: 3, h: 3, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 7, w: 6, h: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 9, y: 7, w: 3, h: 3, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'patient', x: 0, y: 0, w: 4, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'homemonitor', x: 4, y: 0, w: 5, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 9, y: 0, w: 3, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'recent', x: 0, y: 8, w: 4, h: 4, minH: 3, component: 'RecentPatients', title: 'История сеансов' },
+    { i: 'trends', x: 4, y: 8, w: 5, h: 4, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 8, w: 3, h: 4, minH: 3, component: 'AlertPanel', title: 'Уведомления' },
   ],
   sm: [
-    { i: 'patient', x: 0, y: 0, w: 6, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 0, y: 6, w: 6, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 0, y: 13, w: 6, h: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
-    { i: 'recent', x: 0, y: 19, w: 6, h: 3, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 0, y: 22, w: 6, h: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 0, y: 26, w: 6, h: 4, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'patient', x: 0, y: 0, w: 6, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'homemonitor', x: 0, y: 7, w: 6, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 0, y: 15, w: 6, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'recent', x: 0, y: 22, w: 6, h: 4, minH: 3, component: 'RecentPatients', title: 'История сеансов' },
+    { i: 'trends', x: 0, y: 26, w: 6, h: 5, minH: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 0, y: 31, w: 6, h: 5, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   xs: [
-    { i: 'patient', x: 0, y: 0, w: 4, h: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 0, y: 6, w: 4, h: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 0, y: 13, w: 4, h: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
-    { i: 'recent', x: 0, y: 19, w: 4, h: 3, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 0, y: 22, w: 4, h: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 0, y: 26, w: 4, h: 4, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'patient', x: 0, y: 0, w: 4, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'homemonitor', x: 0, y: 7, w: 4, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 0, y: 15, w: 4, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'recent', x: 0, y: 22, w: 4, h: 4, minH: 3, component: 'RecentPatients', title: 'История сеансов' },
+    { i: 'trends', x: 0, y: 26, w: 4, h: 5, minH: 4, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 0, y: 31, w: 4, h: 5, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ]
 };
 
@@ -254,67 +254,18 @@ export default function Dashboard() {
         </div>
         
         {isEditMode && (
-          <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-            💡 Перетащите виджеты, измените размер или добавьте новые. Настройки сохраняются автоматически.
+          <div className="text-sm text-gray-600 px-3 py-2 rounded-lg flex items-center gap-2" style={{
+            background: 'linear-gradient(135deg, #fef7ff 0%, #ffffff 100%)',
+            border: '1px solid #f3e8ff',
+            color: '#831843'
+          }}>
+            <SettingOutlined style={{ color: '#ec4899', fontSize: '16px' }} />
+            <span style={{ fontSize: '12px' }}>Перетащите виджеты или измените размер. Сохранение автоматическое.</span>
           </div>
         )}
       </div>
 
-      {/* Простой выбор сеанса */}
-      <div style={{ 
-        background: 'white', 
-        padding: '16px', 
-        borderRadius: '8px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)', 
-        marginBottom: '16px',
-        border: `1px solid ${colors.border.light}`
-      }}>
-        <Space size="large" wrap>
-          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
-            <CalendarOutlined style={{ color: colors.status.info, fontSize: typography.fontSize.sm }} />
-            <Text type="secondary" style={typography.styles.body}>Дата:</Text>
-            <DatePicker 
-              value={selectedDate}
-              onChange={(date) => setSelectedDate(date || dayjs())}
-              format="DD.MM.YYYY"
-              size="middle"
-              style={{ fontSize: typography.fontSize.sm }}
-            />
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
-            <ClockCircleOutlined style={{ color: colors.status.success, fontSize: typography.fontSize.sm }} />
-            <Text type="secondary" style={typography.styles.body}>Время:</Text>
-            <TimePicker 
-              value={selectedTime}
-              onChange={(time) => setSelectedTime(time || dayjs())}
-              format="HH:mm"
-              size="middle"
-              style={{ fontSize: typography.fontSize.sm }}
-            />
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
-            <Text type="secondary" style={typography.styles.body}>Тип сеанса:</Text>
-            <Select
-              value={sessionType}
-              onChange={setSessionType}
-              size="middle"
-              style={{ width: 200, fontSize: typography.fontSize.sm }}
-              options={[
-                { value: 'home_monitoring', label: 'Домашний мониторинг' },
-                { value: 'movement_count', label: 'Подсчет движений' },
-                { value: 'rest_monitoring', label: 'Мониторинг покоя' },
-                { value: 'active_monitoring', label: 'Активный мониторинг' }
-              ]}
-            />
-          </div>
-          
-          <Text style={{ ...typography.styles.body, color: colors.text.muted }}>
-            Сеанс: {selectedDate.format('DD.MM.YYYY')} в {selectedTime.format('HH:mm')}
-          </Text>
-        </Space>
-      </div>
+
 
       {/* Responsive Grid Layout */}
       <ResponsiveGridLayout

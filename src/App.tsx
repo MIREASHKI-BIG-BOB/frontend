@@ -7,6 +7,8 @@ import Technologies from './components/Technologies';
 import Trust from './components/Trust';
 import AppLayout from './components/AppLayout';
 import Dashboard from './pages/Dashboard';
+import DeviceMonitoring from './pages/DeviceMonitoring';
+import CTGAnalysis from './pages/CTGAnalysis';
 import TestDashboard from './pages/TestDashboard';
 import Patients from './pages/Patients';
 import Settings from './pages/Settings';
@@ -44,9 +46,9 @@ export default function App() {
   // Render app layout for dashboard routes
   if (isAppRoute) {
     let content;
-    if (isDashboard) content = <Dashboard />;
+    if (isDashboard) content = <DeviceMonitoring />;
     else if (isPatients) content = <Patients />;
-    else if (isCTG) content = <CTGPage />;
+    else if (isCTG) content = <CTGAnalysis />;
     else if (isDetailedAnalysis) {
       // Заглушка для автономной страницы анализа аномалий
       const dummyData = {

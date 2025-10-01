@@ -179,7 +179,7 @@ const RecentSessions: React.FC<RecentSessionsProps> = ({ sessions }) => {
       }
       className="h-full"
       size="small"
-      bodyStyle={{ padding: '10px' }}
+      bodyStyle={{ padding: '8px' }}
       headStyle={{ 
         padding: '6px 12px', 
         minHeight: 'auto',

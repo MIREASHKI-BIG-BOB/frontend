@@ -15,7 +15,13 @@ import {
   ProfileOutlined,
   HomeOutlined,
   BarChartOutlined,
-  RobotOutlined
+  RobotOutlined,
+  RadarChartOutlined,
+  FileTextOutlined,
+  ThunderboltOutlined,
+  ApiOutlined,
+  FundOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -31,57 +37,74 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigate }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [dragOverItem, setDragOverItem] = useState<string | null>(null);
-  const [menuItems, setMenuItems] = useState([
+  const [openKeys, setOpenKeys] = useState<string[]>(['monitoring', 'analytics', 'management']);
+  
+  const menuItems = [
+    {
+      key: 'monitoring',
+      icon: <ApiOutlined style={{ color: '#ec4899' }} />,
+      label: 'Мониторинг устройства',
+      type: 'submenu' as const,
+      children: [
+        {
+          key: '#/dashboard',
+          icon: <RadarChartOutlined />,
+          label: 'Шайба (Live)',
+          badge: true,
+        },
+      ],
+    },
+    {
+      key: 'analytics',
+      icon: <FundOutlined style={{ color: '#8b5cf6' }} />,
+      label: 'Анализ данных',
+      type: 'submenu' as const,
+      children: [
+        {
+          key: '#/ctg',
+          icon: <LineChartOutlined />,
+          label: 'КТГ Анализ',
+        },
+        {
+          key: '#/detailed-analysis',
+          icon: <ThunderboltOutlined />,
+          label: 'ИИ Анализ аномалий',
+        },
+        {
+          key: '#/reports',
+          icon: <FileTextOutlined />,
+          label: 'Генерация отчётов',
+        },
+      ],
+    },
+    {
+      key: 'management',
+      icon: <TeamOutlined style={{ color: '#06b6d4' }} />,
+      label: 'Управление',
+      type: 'submenu' as const,
+      children: [
+        {
+          key: '#/patients',
+          icon: <UserOutlined />,
+          label: 'Пациенты',
+        },
+        {
+          key: '#/notifications',
+          icon: <BellOutlined />,
+          label: 'Уведомления',
+        },
+      ],
+    },
     {
       key: 'divider-1',
       type: 'divider' as const,
-    },
-    {
-      key: '#/dashboard',
-      icon: <DashboardOutlined />,
-      label: 'Мониторинг',
-    },
-    {
-      key: '#/patients',
-      icon: <UserOutlined />,
-      label: 'Пациенты',
-    },
-    {
-      key: '#/ctg',
-      icon: <LineChartOutlined />,
-      label: 'КТГ',
-    },
-    {
-      key: '#/detailed-analysis',
-      icon: <RobotOutlined />,
-      label: 'Анализ аномалий',
-    },
-    {
-      key: 'divider-2',
-      type: 'divider' as const,
-    },
-    {
-      key: '#/reports',
-      icon: <BarChartOutlined />,
-      label: 'Отчетность',
-    },
-    {
-      key: 'divider-3',
-      type: 'divider' as const,
-    },
-    {
-      key: '#/notifications',
-      icon: <BellOutlined />,
-      label: 'Уведомления',
     },
     {
       key: '#/settings',
       icon: <SettingOutlined />,
       label: 'Настройки',
     },
-  ]);
+  ];
 
   // Check for mobile screen size
   useEffect(() => {
@@ -106,64 +129,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
     }
   };
 
-  // Drag & Drop handlers
-  const handleDragStart = (e: React.DragEvent, key: string) => {
-    // Не даем перетаскивать разделители
-    if (key.includes('divider')) {
-      e.preventDefault();
-      return;
-    }
-    setDraggedItem(key);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', key);
-  };
-
-  const handleDragOver = (e: React.DragEvent, key: string) => {
-    e.preventDefault();
-    if (draggedItem && draggedItem !== key && !key.includes('divider')) {
-      setDragOverItem(key);
-      e.dataTransfer.dropEffect = 'move';
-    }
-  };
-
-  const handleDragLeave = () => {
-    setDragOverItem(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, dropKey: string) => {
-    e.preventDefault();
-    
-    if (!draggedItem || draggedItem === dropKey || dropKey.includes('divider')) {
-      return;
-    }
-
-    const newItems = [...menuItems];
-    const draggedIndex = newItems.findIndex(item => item.key === draggedItem);
-    const dropIndex = newItems.findIndex(item => item.key === dropKey);
-    
-    if (draggedIndex !== -1 && dropIndex !== -1) {
-      // Удаляем перетаскиваемый элемент
-      const [draggedMenuItem] = newItems.splice(draggedIndex, 1);
-      // Вставляем его в новую позицию
-      newItems.splice(dropIndex, 0, draggedMenuItem);
-      setMenuItems(newItems);
-    }
-
-    setDraggedItem(null);
-    setDragOverItem(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-    setDragOverItem(null);
-  };
-
   // Определяем активный ключ для меню
   const getActiveMenuKey = () => {
     if (currentRoute === '#/' || currentRoute === '#/dashboard') {
       return '#/dashboard';
     }
     return currentRoute;
+  };
+
+  // Находим название активного пункта меню
+  const getActiveMenuLabel = () => {
+    for (const item of menuItems) {
+      if (item.type === 'submenu' && item.children) {
+        const found = item.children.find((child: any) => child.key === getActiveMenuKey());
+        if (found) return found.label;
+      }
+      if (item.key === getActiveMenuKey()) {
+        return item.label;
+      }
+    }
+    return 'Медицинский мониторинг';
   };
 
   const userMenuItems: MenuProps['items'] = [
@@ -219,6 +204,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
         <Menu
           mode="inline"
           selectedKeys={[getActiveMenuKey()]}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
           onClick={handleMenuClick}
           className="border-r-0 mt-4"
           style={{
@@ -231,27 +218,42 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
               return <Menu.Divider key={item.key} />;
             }
             
-            const isDragging = draggedItem === item.key;
-            const isDragOver = dragOverItem === item.key;
+            if (item.type === 'submenu') {
+              return (
+                <Menu.SubMenu
+                  key={item.key}
+                  icon={item.icon}
+                  title={item.label}
+                  style={{
+                    fontWeight: 600,
+                  }}
+                >
+                  {item.children?.map((child: any) => {
+                    const isActive = getActiveMenuKey() === child.key;
+                    return (
+                      <Menu.Item
+                        key={child.key}
+                        icon={child.badge ? (
+                          <Badge dot status="success" offset={[-2, 2]}>
+                            {child.icon}
+                          </Badge>
+                        ) : child.icon}
+                        style={{
+                          fontWeight: child.badge && isActive ? 600 : undefined
+                        }}
+                      >
+                        {child.label}
+                      </Menu.Item>
+                    );
+                  })}
+                </Menu.SubMenu>
+              );
+            }
             
             return (
               <Menu.Item 
                 key={item.key} 
                 icon={item.icon}
-                draggable={true}
-                onDragStart={(e) => handleDragStart(e, item.key)}
-                onDragOver={(e) => handleDragOver(e, item.key)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, item.key)}
-                onDragEnd={handleDragEnd}
-                style={{
-                  opacity: isDragging ? 0.5 : 1,
-                  transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'all 0.2s ease',
-                  borderLeft: isDragOver ? `3px solid ${colors.status.info}` : 'none',
-                  backgroundColor: isDragOver ? `rgba(24, 144, 255, 0.1)` : undefined,
-                  cursor: isDragging ? 'move' : 'pointer'
-                }}
               >
                 {item.label}
               </Menu.Item>
@@ -290,7 +292,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
             <div className="h-6 w-px bg-gray-300" />
             <div>
               <Text strong className="text-lg text-gray-800">
-                {menuItems.find(item => item.key === getActiveMenuKey() && !item.key.includes('divider'))?.label || 'Медицинский мониторинг'}
+                {getActiveMenuLabel()}
               </Text>
             </div>
           </Space>
