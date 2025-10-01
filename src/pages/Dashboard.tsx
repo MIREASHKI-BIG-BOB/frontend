@@ -24,12 +24,12 @@ interface DashboardLayout extends RGLLayout {
 
 const defaultLayouts = {
   lg: [
-    { i: 'patient', x: 0, y: 0, w: 3, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
-    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 8, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
-    { i: 'device', x: 9, y: 0, w: 3, h: 7, minH: 6, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
+    { i: 'patient', x: 0, y: 0, w: 3, h: 6.6, minH: 6, component: 'PatientCard', title: 'Пациентка' },
+    { i: 'homemonitor', x: 3, y: 0, w: 6, h: 6.6, minH: 7, component: 'HomeCTGMonitor', title: 'Домашний мониторинг' },
+    { i: 'device', x: 9, y: 0, w: 3, h: 5, minH: 5, component: 'DeviceStatus', title: 'Устройство "Шайба"' },
     { i: 'recent', x: 0, y: 8, w: 3, h: 5, minH: 4, component: 'RecentPatients', title: 'История сеансов' },
-    { i: 'trends', x: 3, y: 8, w: 6, h: 4, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
-    { i: 'alerts', x: 9, y: 8, w: 3, h: 5, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
+    { i: 'trends', x: 3, y: 8, w: 6, h: 7, minH: 3, component: 'TrendsChart', title: 'Анализ мониторинга' },
+    { i: 'alerts', x: 9, y: 8, w: 3, h: 7, minH: 4, component: 'AlertPanel', title: 'Уведомления' },
   ],
   md: [
     { i: 'patient', x: 0, y: 0, w: 4, h: 7, minH: 6, component: 'PatientCard', title: 'Пациентка' },
@@ -87,6 +87,11 @@ export default function Dashboard() {
 
   // Load saved layouts from localStorage
   useEffect(() => {
+    // Временно принудительно сбрасываем раскладку для применения новых размеров
+    localStorage.removeItem('dashboard-layouts');
+    setLayouts(defaultLayouts);
+    
+    /* Раскомментируйте после применения изменений:
     const savedLayouts = localStorage.getItem('dashboard-layouts');
     if (savedLayouts) {
       try {
@@ -95,6 +100,7 @@ export default function Dashboard() {
         console.warn('Failed to parse saved layouts, using defaults');
       }
     }
+    */
   }, []);
 
   const handleLayoutChange = (layout: RGLLayout[], allLayouts: any) => {

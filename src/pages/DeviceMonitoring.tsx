@@ -33,16 +33,17 @@ export default function DeviceMonitoring() {
         <Tabs 
           activeKey={activeTab} 
           onChange={setActiveTab}
-          size="large"
+          size="small"
           tabBarStyle={{
             marginBottom: 0,
-            fontWeight: 600
+            fontWeight: 600,
+            minHeight: '32px'
           }}
         >
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <RadarChartOutlined style={{ fontSize: '16px', color: '#ec4899' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <RadarChartOutlined style={{ fontSize: '14px', color: '#ec4899' }} />
                 <span>Live Мониторинг</span>
               </span>
             }
@@ -50,8 +51,8 @@ export default function DeviceMonitoring() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <HistoryOutlined style={{ fontSize: '16px', color: '#8b5cf6' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <HistoryOutlined style={{ fontSize: '14px', color: '#8b5cf6' }} />
                 <span>История сеансов</span>
               </span>
             }
@@ -59,8 +60,8 @@ export default function DeviceMonitoring() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <SettingOutlined style={{ fontSize: '16px', color: '#06b6d4' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <SettingOutlined style={{ fontSize: '14px', color: '#06b6d4' }} />
                 <span>Настройка устройства</span>
               </span>
             }
@@ -68,8 +69,8 @@ export default function DeviceMonitoring() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ApiOutlined style={{ fontSize: '16px', color: '#10b981' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <ApiOutlined style={{ fontSize: '14px', color: '#10b981' }} />
                 <span>Статус подключения</span>
               </span>
             }

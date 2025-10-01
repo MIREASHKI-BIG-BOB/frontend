@@ -32,16 +32,17 @@ export default function CTGAnalysis() {
         <Tabs 
           activeKey={activeTab} 
           onChange={setActiveTab}
-          size="large"
+          size="small"
           tabBarStyle={{
             marginBottom: 0,
-            fontWeight: 600
+            fontWeight: 600,
+            minHeight: '32px'
           }}
         >
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <LineChartOutlined style={{ fontSize: '18px' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <LineChartOutlined style={{ fontSize: '14px' }} />
                 <span>Текущий анализ</span>
               </span>
             }
@@ -49,8 +50,8 @@ export default function CTGAnalysis() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <HistoryOutlined style={{ fontSize: '18px' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <HistoryOutlined style={{ fontSize: '14px' }} />
                 <span>Архив КТГ</span>
               </span>
             }
@@ -58,8 +59,8 @@ export default function CTGAnalysis() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SwapOutlined style={{ fontSize: '18px' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <SwapOutlined style={{ fontSize: '14px' }} />
                 <span>Сравнение сеансов</span>
               </span>
             }
@@ -67,8 +68,8 @@ export default function CTGAnalysis() {
           />
           <TabPane
             tab={
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FundOutlined style={{ fontSize: '18px' }} />
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <FundOutlined style={{ fontSize: '14px' }} />
                 <span>Тренды</span>
               </span>
             }
