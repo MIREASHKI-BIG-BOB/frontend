@@ -372,7 +372,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             size="small"
             title={
               <div className="flex items-center gap-2">
-                <SafetyOutlined style={{ color: '#8b5cf6' }} />
+                <SafetyOutlined style={{ color: '#be185d' }} />
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                   Ответственный врач
                 </span>
@@ -629,7 +629,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                         onClick={() => setIsEditing(!isEditing)}
                         style={{
                           borderColor: '#ec4899',
-                          color: '#831843'
+                          color: '#be185d'
                         }}
                       >
                         {isEditing ? 'Отменить' : 'Редактировать'}
@@ -668,7 +668,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 size="small"
                 title={
                   <div className="flex items-center gap-2">
-                    <SafetyOutlined style={{ color: '#8b5cf6' }} />
+                    <SafetyOutlined style={{ color: '#be185d' }} />
                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                       Рекомендации для врача
                     </span>
@@ -755,8 +755,8 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                           icon={<SaveOutlined />}
                           onClick={handleSaveReport}
                           style={{
-                            borderColor: '#8b5cf6',
-                            color: '#831843'
+                            borderColor: '#ec4899',
+                            color: '#be185d'
                           }}
                         >
                           Сохранить изменения

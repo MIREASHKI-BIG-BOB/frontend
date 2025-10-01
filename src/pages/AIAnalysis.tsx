@@ -9,6 +9,8 @@ import {
   LineChartOutlined,
   ClockCircleOutlined,
   UserOutlined,
+  UpOutlined,
+  DownOutlined,
   FileTextOutlined,
   RobotOutlined,
   PlayCircleOutlined,
@@ -384,18 +386,19 @@ export default function AIAnalysis() {
         style={{ 
           marginBottom: '16px',
           borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(6, 182, 212, 0.1)',
-          background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
+          boxShadow: '0 2px 8px rgba(236, 72, 153, 0.1)',
+          background: '#fdf2f8',
+          border: '1px solid #f3e8ff'
         }}
-        bodyStyle={{ padding: '20px 24px' }}
+        bodyStyle={{ padding: '16px 20px' }}
       >
         <Space align="center" size="large">
-          <UserOutlined style={{ fontSize: '32px', color: 'white' }} />
+          <UserOutlined style={{ fontSize: '28px', color: '#ec4899' }} />
           <div>
-            <Title level={3} style={{ margin: 0, color: 'white', fontSize: '20px' }}>
+            <Title level={3} style={{ margin: 0, color: '#831843', fontSize: '18px' }}>
               {patientInfo.name}
             </Title>
-            <Space size="large" style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px' }}>
+            <Space size="large" style={{ color: '#64748b', fontSize: '12px' }}>
               <span>Возраст: {patientInfo.age} лет</span>
               <span>ID: {patientInfo.id}</span>
               <span>Срок: {patientInfo.currentWeek} нед {patientInfo.currentDay} дн</span>
@@ -420,7 +423,7 @@ export default function AIAnalysis() {
               title={<span style={{ fontSize: '11px' }}>Всего КТГ</span>}
               value={sessions.length}
               prefix={<FileTextOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#06b6d4' }}
+              valueStyle={{ fontSize: '24px', color: '#ec4899' }}
             />
           </Col>
           <Col span={6}>
@@ -428,7 +431,7 @@ export default function AIAnalysis() {
               title={<span style={{ fontSize: '11px' }}>Проанализировано</span>}
               value={analyzedCount}
               prefix={<RobotOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#06b6d4' }}
+              valueStyle={{ fontSize: '24px', color: '#be185d' }}
             />
           </Col>
           <Col span={4}>
@@ -492,7 +495,7 @@ export default function AIAnalysis() {
             onClick={handleAnalyze}
             disabled={selectedIds.length === 0 || isAnalyzing}
             style={{
-              background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+              background: '#ec4899',
               border: 'none',
               borderRadius: '8px',
               fontWeight: 600,
@@ -509,8 +512,8 @@ export default function AIAnalysis() {
           <div style={{ marginTop: '16px' }}>
             <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Space>
-                <LoadingOutlined style={{ fontSize: '16px', color: '#06b6d4' }} />
-                <Text style={{ fontSize: '12px', color: '#0891b2', fontWeight: 600 }}>
+                <LoadingOutlined style={{ fontSize: '16px', color: '#ec4899' }} />
+                <Text style={{ fontSize: '12px', color: '#831843', fontWeight: 600 }}>
                   Искусственный интеллект анализирует КТГ-данные...
                 </Text>
               </Space>
@@ -520,10 +523,7 @@ export default function AIAnalysis() {
             </div>
             <Progress 
               percent={Math.round(progress)} 
-              strokeColor={{
-                '0%': '#06b6d4',
-                '100%': '#0891b2',
-              }}
+              strokeColor="#ec4899"
               size="small"
             />
             {currentAnalyzingId && (
@@ -545,7 +545,7 @@ export default function AIAnalysis() {
             style={{ 
               marginBottom: '12px',
               borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(6, 182, 212, 0.1)',
+              boxShadow: '0 2px 8px rgba(236, 72, 153, 0.1)',
               borderLeft: `4px solid ${getStatusColor(session.status)}`,
               opacity: isAnalyzing && !selectedIds.includes(session.id) ? 0.5 : 1
             }}
@@ -616,15 +616,16 @@ export default function AIAnalysis() {
               {/* Краткое резюме */}
               {session.aiAnalysis && (
                 <div style={{ 
-                  background: 'linear-gradient(135deg, #ecfeff 0%, #cffafe 100%)',
+                  background: '#fdf2f8',
                   padding: '12px',
                   borderRadius: '8px',
                   marginTop: '12px',
-                  marginLeft: '36px'
+                  marginLeft: '36px',
+                  border: '1px solid #fce7f3'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <ThunderboltOutlined style={{ color: '#06b6d4', fontSize: '14px', marginTop: '2px' }} />
-                    <Text style={{ fontSize: '12px', color: '#0891b2', lineHeight: '1.5' }}>
+                    <ThunderboltOutlined style={{ color: '#ec4899', fontSize: '14px', marginTop: '2px' }} />
+                    <Text style={{ fontSize: '12px', color: '#831843', lineHeight: '1.5' }}>
                       {session.aiAnalysis.summary}
                     </Text>
                   </div>
@@ -644,9 +645,10 @@ export default function AIAnalysis() {
                     header={
                       <Button 
                         type="link" 
-                        style={{ padding: 0, fontSize: '12px', fontWeight: 600, color: '#06b6d4' }}
+                        icon={expandedSession === session.id ? <UpOutlined /> : <DownOutlined />}
+                        style={{ padding: 0, fontSize: '12px', fontWeight: 600, color: '#ec4899' }}
                       >
-                        {expandedSession === session.id ? '▼ Скрыть детальный анализ' : '▶ Показать детальный анализ'}
+                        {expandedSession === session.id ? 'Скрыть детальный анализ' : 'Показать детальный анализ'}
                       </Button>
                     }
                     key="1"
@@ -657,13 +659,13 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#0891b2' }}>
-                            <HeartOutlined style={{ marginRight: '6px', color: '#06b6d4' }} />
+                          <span style={{ fontSize: '12px', color: '#831843' }}>
+                            <HeartOutlined style={{ marginRight: '6px', color: '#ec4899' }} />
                             Анализ частоты сердечных сокращений плода
                           </span>
                         }
                         bordered={false}
-                        style={{ marginBottom: '12px', background: '#ecfeff' }}
+                        style={{ marginBottom: '12px', background: '#fdf2f8' }}
                         bodyStyle={{ padding: '12px' }}
                       >
                         <Paragraph style={{ fontSize: '11px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
@@ -675,13 +677,13 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#0891b2' }}>
-                            <LineChartOutlined style={{ marginRight: '6px', color: '#06b6d4' }} />
+                          <span style={{ fontSize: '12px', color: '#831843' }}>
+                            <LineChartOutlined style={{ marginRight: '6px', color: '#be185d' }} />
                             Анализ сокращений матки
                           </span>
                         }
                         bordered={false}
-                        style={{ marginBottom: '12px', background: '#cffafe' }}
+                        style={{ marginBottom: '12px', background: '#fce7f3' }}
                         bodyStyle={{ padding: '12px' }}
                       >
                         <Paragraph style={{ fontSize: '11px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
@@ -693,7 +695,7 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#0891b2' }}>
+                          <span style={{ fontSize: '12px', color: '#831843' }}>
                             <CheckCircleOutlined style={{ marginRight: '6px', color: '#10b981' }} />
                             Рекомендации
                           </span>

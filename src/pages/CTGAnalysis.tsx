@@ -24,7 +24,7 @@ export default function CTGAnalysis() {
         style={{ 
           marginBottom: '16px',
           borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(139, 92, 246, 0.1)'
+          boxShadow: '0 2px 8px rgba(236, 72, 153, 0.1)'
         }}
         bodyStyle={{ padding: '12px 24px' }}
       >
@@ -76,7 +76,7 @@ export default function CTGAnalysis() {
           <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <HistoryOutlined style={{ color: '#8b5cf6', fontSize: '20px' }} />
+                <HistoryOutlined style={{ color: '#ec4899', fontSize: '20px' }} />
                 <span style={{ color: '#831843', fontWeight: 600 }}>Архив КТГ сеансов</span>
               </div>
             }
@@ -84,7 +84,7 @@ export default function CTGAnalysis() {
             style={{ borderRadius: '12px' }}
           >
             <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-              <HistoryOutlined style={{ fontSize: '64px', color: '#8b5cf6', marginBottom: '16px' }} />
+              <HistoryOutlined style={{ fontSize: '64px', color: '#ec4899', marginBottom: '16px' }} />
               <p style={{ fontSize: '16px', fontWeight: 500, color: '#831843' }}>
                 Архив КТГ записей
               </p>
@@ -97,7 +97,7 @@ export default function CTGAnalysis() {
           <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <SwapOutlined style={{ color: '#06b6d4', fontSize: '20px' }} />
+                <SwapOutlined style={{ color: '#be185d', fontSize: '20px' }} />
                 <span style={{ color: '#831843', fontWeight: 600 }}>Сравнение КТГ сеансов</span>
               </div>
             }
@@ -105,7 +105,7 @@ export default function CTGAnalysis() {
             style={{ borderRadius: '12px' }}
           >
             <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-              <SwapOutlined style={{ fontSize: '64px', color: '#06b6d4', marginBottom: '16px' }} />
+              <SwapOutlined style={{ fontSize: '64px', color: '#be185d', marginBottom: '16px' }} />
               <p style={{ fontSize: '16px', fontWeight: 500, color: '#831843' }}>
                 Сравнение показателей
               </p>
