@@ -18,6 +18,7 @@ import {
 } from 'antd';
 import { colors } from '../theme';
 import { useMLWebSocket } from '../hooks/useMLWebSocket';
+import MLPredictionPanel from '../components/MLPredictionPanel';
 import { 
   PlayCircleOutlined,
   PauseCircleOutlined,
@@ -33,7 +34,6 @@ import {
   LineChartOutlined,
   UpOutlined,
   DownOutlined,
-  ThunderboltOutlined,
   WifiOutlined,
   ExclamationCircleOutlined,
   WarningOutlined
@@ -374,6 +374,7 @@ export default function CTGPage() {
     confidence: 0,
     recommendations: ['Ожидание данных от ML модели...']
   });
+  const [mlPrediction, setMlPrediction] = useState<any>(null);
   const [anomalies, setAnomalies] = useState<Array<{
     time: number;
     type: 'fhr' | 'uc' | 'contractions';
@@ -619,12 +620,12 @@ export default function CTGPage() {
 
   // 🔄 Обновляем данные графиков и ML предсказания из WebSocket
   useEffect(() => {
-    if (!mlData || !isRecording) return;
+    if (!mlData || !mlData.data || !isRecording) return;
     
     // Обновляем графики с реальными данными
-    const newFHR = mlData.data.BPMChild;
-    const newUC = mlData.data.uterus;
-    const newSpasms = mlData.data.spasms;
+    const newFHR = mlData.data.BPMChild || mlData.data.bpmChild || 140;
+    const newUC = mlData.data.uterus || 20;
+    const newSpasms = mlData.data.spasms || 10;
     
     setFetalHeartRate(prev => [...prev.slice(-299), newFHR]);
     setUterineContractions(prev => [...prev.slice(-299), newUC]);
@@ -660,6 +661,9 @@ export default function CTGPage() {
           ? pred.recommendations 
           : ['Продолжить мониторинг']
       });
+      
+      // Сохраняем данные для MLPredictionPanel
+      setMlPrediction(pred);
       
       // Создаем аномалии из alerts
       if (pred.alerts && pred.alerts.length > 0) {
@@ -947,109 +951,11 @@ export default function CTGPage() {
 
         {/* Правая колонка - компактные виджеты в розовой палитре */}
         <Col span={6}>
-          {/* Предсказания ИИ */}
-          <Card 
-            size="small" 
-            style={{ marginBottom: '10px' }}
-            bodyStyle={{ padding: '8px' }}
-            headStyle={{ 
-              padding: '4px 8px', 
-              minHeight: 'auto',
-              background: 'linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)',
-              borderBottom: '1px solid #f3e8ff'
-            }}
-            title={
-              <div className="flex items-center gap-2">
-                <ThunderboltOutlined style={{ color: '#8b5cf6', fontSize: '14px' }} />
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
-                  Предсказания ИИ
-                </span>
-                <div className={`w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse`}></div>
-              </div>
-            }
-          >
-            <div className="space-y-2">
-              {/* Уровень риска */}
-              <div className="p-2 rounded" style={{ 
-                backgroundColor: aiPredictions.riskLevel === 'high' ? '#fef2f2' : 
-                                aiPredictions.riskLevel === 'medium' ? '#fefce8' : '#f0fdf4',
-                border: `1px solid ${aiPredictions.riskLevel === 'high' ? '#fecaca' : 
-                                     aiPredictions.riskLevel === 'medium' ? '#fef3c7' : '#bbf7d0'}`
-              }}>
-                <div className="flex items-center justify-between mb-1">
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
-                    Оценка риска
-                  </span>
-                  <span style={{ 
-                    fontSize: '12px', 
-                    fontWeight: 'bold',
-                    color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
-                           aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
-                  }}>
-                    {aiPredictions.riskLevel === 'high' ? 'ВЫСОКИЙ' : 
-                     aiPredictions.riskLevel === 'medium' ? 'СРЕДНИЙ' : 'НИЗКИЙ'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
-                    <div 
-                      className="h-full transition-all duration-500 rounded-full"
-                      style={{ 
-                        width: `${aiPredictions.riskScore}%`, 
-                        backgroundColor: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
-                                        aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
-                      }}
-                    />
-                  </div>
-                  <span style={{ 
-                    fontSize: '13px', 
-                    fontWeight: 'bold',
-                    color: aiPredictions.riskLevel === 'high' ? '#dc2626' : 
-                           aiPredictions.riskLevel === 'medium' ? '#d97706' : '#16a34a'
-                  }}>
-                    {aiPredictions.riskScore}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Прогноз и достоверность в одной строке */}
-              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
-                    Прогноз
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843' }}>
-                      Достоверность:
-                    </span>
-                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
-                      {aiPredictions.confidence}%
-                    </span>
-                  </div>
-                </div>
-                <div style={{ fontSize: '13px', color: '#a21caf', fontWeight: '500' }}>
-                  {aiPredictions.nextEvent}
-                </div>
-              </div>
-
-              {/* Рекомендации */}
-              <div className="p-2 rounded" style={{ backgroundColor: '#fef7ff', border: '1px solid #f3e8ff' }}>
-                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#831843', marginBottom: '4px' }}>
-                  Рекомендации ИИ
-                </div>
-                <div className="space-y-1">
-                  {aiPredictions.recommendations.map((rec, index) => (
-                    <div key={index} className="flex items-start gap-1">
-                      <span style={{ fontSize: '10px', color: '#ec4899' }}>•</span>
-                      <span style={{ fontSize: '11px', color: '#831843', lineHeight: '1.2' }}>
-                        {rec}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Card>
+          {/* ML Предсказания */}
+          <MLPredictionPanel 
+            prediction={mlPrediction} 
+            isAccumulating={!mlPrediction}
+          />
 
           {/* Управление */}
           <Card 
