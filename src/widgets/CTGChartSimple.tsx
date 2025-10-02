@@ -94,16 +94,31 @@ export default function CTGChartSimple({
           try {
             const message = JSON.parse(event.data);
             
-            // Ожидаем формат: { timestamp: number, data: { bpm: number, uterus: number } }
-            if (message.data && typeof message.data.bpm === 'number' && typeof message.data.uterus === 'number') {
-              const currentTime = Date.now();
-              const relativeTime = Math.round((currentTime - startTime) / 1000); // секунды с начала
+            // ⚠️ ВАЖНО: Backend использует BPMChild (с большой буквы), а не bpm!
+            // Ожидаем формат от ML: { data: { BPMChild: number, uterus: number }, prediction: {...} }
+            if (message.data && typeof message.data.BPMChild === 'number' && typeof message.data.uterus === 'number') {
+              // Используем secFromStart из сообщения, если есть, иначе вычисляем
+              const relativeTime = message.secFromStart 
+                ? Math.round(message.secFromStart) 
+                : Math.round((Date.now() - startTime) / 1000);
               
               const newPoint: Point = {
-                t: relativeTime, // используем относительное время в секундах
-                fhr: Math.max(90, Math.min(180, message.data.bpm)), // ограничиваем диапазон ЧСС
-                uc: Math.max(0, Math.min(100, message.data.uterus)) // ограничиваем диапазон UC
+                t: relativeTime,
+                fhr: Math.max(90, Math.min(180, message.data.BPMChild)), // ⚠️ Обратите внимание на регистр!
+                uc: Math.max(0, Math.min(100, message.data.uterus))
               };
+              
+              // Логируем ML предсказание если есть
+              if (message.prediction) {
+                console.log('ML Prediction:', {
+                  risk: message.prediction.hypoxia_risk,
+                  probability: message.prediction.hypoxia_probability,
+                  alerts: message.prediction.alerts,
+                  confidence: message.prediction.confidence
+                });
+              } else {
+                console.log('Accumulating data... (first 5 minutes)');
+              }
               
               setData(prev => {
                 const newData = [...prev, newPoint];

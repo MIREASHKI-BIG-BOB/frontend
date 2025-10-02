@@ -17,6 +17,7 @@ import {
   Avatar
 } from 'antd';
 import { colors } from '../theme';
+import { useMLWebSocket } from '../hooks/useMLWebSocket';
 import { 
   PlayCircleOutlined,
   PauseCircleOutlined,
@@ -362,13 +363,16 @@ export default function CTGPage() {
   const [uterineContractions, setUterineContractions] = useState<number[]>([]);
   const [contractions, setContractions] = useState<number[]>([]);
 
+  // 🔗 Подключаемся к ML WebSocket для получения реальных предсказаний
+  const { isConnected: mlConnected, latestData: mlData, error: mlError } = useMLWebSocket();
+
   // ИИ предсказания и аномалии
   const [aiPredictions, setAiPredictions] = useState({
     riskLevel: 'low' as 'low' | 'medium' | 'high',
     riskScore: 15,
-    nextEvent: 'Стабильное состояние',
-    confidence: 94,
-    recommendations: ['Продолжить мониторинг', 'Обратить внимание на вариабельность ЧСС']
+    nextEvent: 'Накопление данных...',
+    confidence: 0,
+    recommendations: ['Ожидание данных от ML модели...']
   });
   const [anomalies, setAnomalies] = useState<Array<{
     time: number;
@@ -560,14 +564,27 @@ export default function CTGPage() {
     setAnalysisData(null);
   };
 
-  // Управление записью
+  // Управление записью (данные уже поступают через ML WebSocket)
   const handleStartStop = () => {
     if (isRecording) {
+      // Остановка записи (но данные продолжают поступать)
+      console.log('⏹️ Recording stopped (data stream continues)');
       setIsRecording(false);
     } else {
-      setIsRecording(true);
-      setSessionStartTime(dayjs().format('DD.MM.YYYY HH:mm:ss'));
-      setRecordingTime(0);
+      // Начало записи (данные уже поступают через ML WebSocket)
+      if (mlConnected) {
+        console.log('▶️ Recording started (using ML data stream)');
+        setIsRecording(true);
+        setSessionStartTime(dayjs().format('DD.MM.YYYY HH:mm:ss'));
+        setRecordingTime(0);
+        // Очищаем старые данные
+        setFetalHeartRate([]);
+        setUterineContractions([]);
+        setContractions([]);
+      } else {
+        console.error('❌ ML WebSocket not connected');
+        alert('ML сервис не подключен. Подождите подключения или перезагрузите страницу.');
+      }
     }
   };
 
@@ -600,14 +617,72 @@ export default function CTGPage() {
     }
   };
 
-  // Таймер записи и генерация данных
+  // 🔄 Обновляем данные графиков и ML предсказания из WebSocket
+  useEffect(() => {
+    if (!mlData || !isRecording) return;
+    
+    // Обновляем графики с реальными данными
+    const newFHR = mlData.data.BPMChild;
+    const newUC = mlData.data.uterus;
+    const newSpasms = mlData.data.spasms;
+    
+    setFetalHeartRate(prev => [...prev.slice(-299), newFHR]);
+    setUterineContractions(prev => [...prev.slice(-299), newUC]);
+    setContractions(prev => [...prev.slice(-299), newSpasms]);
+    
+    // Обновляем ML предсказания если они есть
+    if (mlData.prediction) {
+      const pred = mlData.prediction;
+      
+      // Преобразуем hypoxia_risk в наш формат
+      let riskLevel: 'low' | 'medium' | 'high' = 'low';
+      if (pred.hypoxia_risk === 'critical' || pred.hypoxia_risk === 'high') {
+        riskLevel = 'high';
+      } else if (pred.hypoxia_risk === 'medium') {
+        riskLevel = 'medium';
+      }
+      
+      // Генерируем текст следующего события
+      const nextEventText = pred.hypoxia_risk === 'low' 
+        ? 'Стабильное состояние' 
+        : pred.hypoxia_risk === 'medium' 
+          ? 'Требуется наблюдение' 
+          : pred.hypoxia_risk === 'high'
+            ? 'ВНИМАНИЕ! Высокий риск'
+            : 'ТРЕВОГА! Критический риск';
+      
+      setAiPredictions({
+        riskLevel: riskLevel,
+        riskScore: Math.round(pred.hypoxia_probability * 100),
+        nextEvent: nextEventText,
+        confidence: Math.round(pred.confidence * 100),
+        recommendations: pred.recommendations.length > 0 
+          ? pred.recommendations 
+          : ['Продолжить мониторинг']
+      });
+      
+      // Создаем аномалии из alerts
+      if (pred.alerts && pred.alerts.length > 0) {
+        const newAnomalies = pred.alerts.map((alert, index) => ({
+          time: fetalHeartRate.length,
+          type: 'fhr' as const,
+          severity: pred.hypoxia_risk === 'critical' || pred.hypoxia_risk === 'high' 
+            ? 'critical' as const 
+            : 'warning' as const,
+          description: alert
+        }));
+        setAnomalies(prev => [...prev.slice(-10), ...newAnomalies]);
+      }
+    }
+  }, [mlData, isRecording]);
+
+  // Таймер записи (только для отображения времени)
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     
     if (isRecording) {
       interval = setInterval(() => {
         setRecordingTime(prev => prev + 1);
-        generateData();
       }, 1000);
     }
     
@@ -715,19 +790,34 @@ export default function CTGPage() {
               />
               <span style={{ fontSize: '16px', fontWeight: 600, color: '#831843' }}>КТГ Мониторинг</span>
             </div>
-            <Tag 
-              color={isRecording ? 'error' : 'default'}
-              className="text-sm"
-              style={{ 
-                fontSize: '12px',
-                padding: '4px 8px',
-                background: isRecording ? '#fef2f2' : '#f8fafc',
-                color: isRecording ? '#dc2626' : '#64748b',
-                border: `1px solid ${isRecording ? '#fecaca' : '#e2e8f0'}`
-              }}
-            >
-              {isRecording ? 'ЗАПИСЬ' : 'ОСТАНОВЛЕНО'}
-            </Tag>
+            <Space size="small">
+              <Tag 
+                color={isRecording ? 'error' : 'default'}
+                className="text-sm"
+                style={{ 
+                  fontSize: '12px',
+                  padding: '4px 8px',
+                  background: isRecording ? '#fef2f2' : '#f8fafc',
+                  color: isRecording ? '#dc2626' : '#64748b',
+                  border: `1px solid ${isRecording ? '#fecaca' : '#e2e8f0'}`
+                }}
+              >
+                {isRecording ? 'ЗАПИСЬ' : 'ОСТАНОВЛЕНО'}
+              </Tag>
+              {/* ML индикатор */}
+              <Tag 
+                color={mlConnected ? 'success' : 'default'}
+                style={{ 
+                  fontSize: '11px',
+                  padding: '2px 6px',
+                  background: mlConnected ? '#f0fdf4' : '#f8fafc',
+                  color: mlConnected ? '#16a34a' : '#64748b',
+                  border: `1px solid ${mlConnected ? '#bbf7d0' : '#e2e8f0'}`
+                }}
+              >
+                {mlConnected ? '🧠 ML' : '⚫ ML'}
+              </Tag>
+            </Space>
           </div>
         }
       >

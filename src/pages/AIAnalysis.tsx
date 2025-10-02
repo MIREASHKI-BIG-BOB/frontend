@@ -17,6 +17,7 @@ import {
   LoadingOutlined,
   SyncOutlined
 } from '@ant-design/icons';
+import { useMLDataContext } from '../contexts/MLDataContext';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -265,6 +266,16 @@ const mockAIResults: Record<string, Omit<CTGSession, 'id' | 'date' | 'duration' 
 };
 
 export default function AIAnalysis() {
+  // Используем ML данные из контекста
+  const { 
+    latestData, 
+    isConnected, 
+    predictionHistory, 
+    detectedAnomalies, 
+    currentSession,
+    sessionHistory 
+  } = useMLDataContext();
+  
   const [sessions, setSessions] = useState<CTGSession[]>(initialSessions);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
@@ -369,11 +380,6 @@ export default function AIAnalysis() {
     return '#ef4444';
   };
 
-  const analyzedCount = sessions.filter(s => s.status !== 'pending').length;
-  const normalCount = sessions.filter(s => s.status === 'normal').length;
-  const warningCount = sessions.filter(s => s.status === 'warning').length;
-  const criticalCount = sessions.filter(s => s.status === 'critical').length;
-
   return (
     <div style={{ 
       padding: '16px',
@@ -407,57 +413,116 @@ export default function AIAnalysis() {
         </Space>
       </Card>
 
-      {/* Статистика */}
+      {/* Текущие ML данные */}
       <Card
         bordered={false}
         style={{ 
           marginBottom: '16px',
           borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(139, 92, 246, 0.1)'
+          boxShadow: '0 2px 8px rgba(236, 72, 153, 0.1)',
+          background: isConnected ? '#f0fdf4' : '#fef2f2',
+          border: `1px solid ${isConnected ? '#bbf7d0' : '#fecaca'}`
         }}
-        bodyStyle={{ padding: '16px' }}
+        bodyStyle={{ padding: '16px 20px' }}
       >
-        <Row gutter={16}>
-          <Col span={6}>
-            <Statistic
-              title={<span style={{ fontSize: '11px' }}>Всего КТГ</span>}
-              value={sessions.length}
-              prefix={<FileTextOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#ec4899' }}
-            />
-          </Col>
-          <Col span={6}>
-            <Statistic
-              title={<span style={{ fontSize: '11px' }}>Проанализировано</span>}
-              value={analyzedCount}
-              prefix={<RobotOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#be185d' }}
-            />
-          </Col>
+        <Row gutter={16} align="middle">
           <Col span={4}>
-            <Statistic
-              title={<span style={{ fontSize: '11px' }}>Норма</span>}
-              value={normalCount}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#10b981' }}
-            />
+            <Space align="center">
+              <RobotOutlined style={{ 
+                fontSize: '24px', 
+                color: isConnected ? '#059669' : '#dc2626' 
+              }} />
+              <div>
+                <Text style={{ 
+                  fontSize: '14px', 
+                  fontWeight: 600, 
+                  color: isConnected ? '#065f46' : '#991b1b' 
+                }}>
+                  ML Анализ
+                </Text>
+                <div style={{ 
+                  fontSize: '11px', 
+                  color: isConnected ? '#047857' : '#b91c1c' 
+                }}>
+                  {isConnected ? 'Активен' : 'Отключен'}
+                </div>
+              </div>
+            </Space>
           </Col>
-          <Col span={4}>
-            <Statistic
-              title={<span style={{ fontSize: '11px' }}>Внимание</span>}
-              value={warningCount}
-              prefix={<WarningOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#f59e0b' }}
-            />
-          </Col>
-          <Col span={4}>
-            <Statistic
-              title={<span style={{ fontSize: '11px' }}>Критично</span>}
-              value={criticalCount}
-              prefix={<CloseCircleOutlined />}
-              valueStyle={{ fontSize: '24px', color: '#ef4444' }}
-            />
-          </Col>
+          
+          {latestData && latestData.prediction && (
+            <>
+              <Col span={4}>
+                <Statistic
+                  title="Риск гипоксии"
+                  value={`${(latestData.prediction.hypoxia_probability * 100).toFixed(1)}%`}
+                  valueStyle={{ 
+                    color: latestData.prediction.hypoxia_risk === 'critical' ? '#dc2626' :
+                           latestData.prediction.hypoxia_risk === 'high' ? '#ea580c' :
+                           latestData.prediction.hypoxia_risk === 'medium' ? '#d97706' : '#059669',
+                    fontSize: '16px'
+                  }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Уверенность"
+                  value={`${(latestData.prediction.confidence * 100).toFixed(1)}%`}
+                  valueStyle={{ fontSize: '16px', color: '#4338ca' }}
+                />
+              </Col>
+              <Col span={4}>
+                <div>
+                  <Text style={{ fontSize: '11px', color: '#64748b' }}>Статус</Text>
+                  <div>
+                    <Tag color={
+                      latestData.prediction.hypoxia_risk === 'critical' ? 'red' :
+                      latestData.prediction.hypoxia_risk === 'high' ? 'orange' :
+                      latestData.prediction.hypoxia_risk === 'medium' ? 'yellow' : 'green'
+                    }>
+                      {latestData.prediction.hypoxia_risk.toUpperCase()}
+                    </Tag>
+                  </div>
+                </div>
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Алертов"
+                  value={latestData.prediction.alerts.length}
+                  valueStyle={{ fontSize: '16px', color: '#dc2626' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Аномалий"
+                  value={detectedAnomalies.length}
+                  valueStyle={{ fontSize: '16px', color: '#ea580c' }}
+                />
+              </Col>
+            </>
+          )}
+          
+          {(!latestData || !latestData.prediction) && isConnected && (
+            <Col span={20}>
+              <Alert
+                message="Ожидание данных ML"
+                description="ML сервис подключен, но пока не получил достаточно данных для анализа"
+                type="info"
+                showIcon
+              />
+            </Col>
+          )}
+          
+          {!isConnected && (
+            <Col span={20}>
+              <Alert
+                message="ML сервис недоступен"
+                description="Проверьте подключение к ML сервису для получения реальных предикшенов"
+                type="error"
+                showIcon
+              />
+            </Col>
+          )}
         </Row>
       </Card>
 

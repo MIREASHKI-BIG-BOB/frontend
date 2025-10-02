@@ -3,11 +3,22 @@ import { Card, Typography, Row, Col, Button, Space, Alert, Tag, Modal, Avatar, D
 import dayjs from 'dayjs';
 import { PrinterOutlined, DownloadOutlined, UserOutlined, CheckCircleOutlined, RobotOutlined, EditOutlined, SaveOutlined, FileTextOutlined, ThunderboltOutlined, HeartOutlined, WarningOutlined, SafetyOutlined } from '@ant-design/icons';
 import { colors, typography } from '../theme';
+import { useMLDataContext } from '../contexts/MLDataContext';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 export default function ReportsPage() {
+  // ML данные из контекста
+  const { 
+    latestData, 
+    isConnected, 
+    predictionHistory, 
+    detectedAnomalies,
+    currentSession,
+    sessionHistory 
+  } = useMLDataContext();
+  
   // Данные пациента
   const [patientData] = useState({
     name: 'Иванова Мария Петровна',
@@ -93,6 +104,42 @@ export default function ReportsPage() {
   const [riskAssessment, setRiskAssessment] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [approvedByDoctor, setApprovedByDoctor] = useState(false);
+
+  // Автоматическое обновление рекомендаций из ML данных
+  React.useEffect(() => {
+    if (latestData && latestData.prediction && latestData.prediction.recommendations) {
+      const recommendations = latestData.prediction.recommendations;
+      
+      // Рекомендации для врача (медицинские действия)
+      const doctorRecs = recommendations
+        .filter(rec => rec.includes('СРОЧНО') || rec.includes('консультация') || rec.includes('Рассмотреть'))
+        .join('\n• ');
+      
+      // Рекомендации для пациента (общие указания)
+      const patientRecs = recommendations
+        .filter(rec => rec.includes('положения') || rec.includes('покой') || rec.includes('наблюдение'))
+        .join('\n• ');
+      
+      if (doctorRecs) setAiRecommendationsForDoctor('• ' + doctorRecs);
+      if (patientRecs) setAiRecommendationsForPatient('• ' + patientRecs);
+      
+      // Обновляем оценку риска
+      setRiskAssessment({
+        level: latestData.prediction.hypoxia_risk,
+        probability: Math.round(latestData.prediction.hypoxia_probability * 100),
+        confidence: Math.round(latestData.prediction.confidence * 100),
+        alerts: latestData.prediction.alerts
+      });
+      
+      // Обновляем заключение
+      const conclusion = `Проведен анализ CTG с использованием ML алгоритмов. 
+Выявлен ${latestData.prediction.hypoxia_risk} уровень риска гипоксии плода (вероятность ${Math.round(latestData.prediction.hypoxia_probability * 100)}%).
+Уверенность модели: ${Math.round(latestData.prediction.confidence * 100)}%.
+Обнаружено ${latestData.prediction.alerts.length} критических показателей.`;
+      
+      setAiConclusion(conclusion);
+    }
+  }, [latestData]);
 
   // Генерация отчёта с помощью ИИ
   const generateAIReport = () => {

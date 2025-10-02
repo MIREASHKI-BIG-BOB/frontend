@@ -17,6 +17,7 @@ import CTGPage from './pages/CTG';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
 import AIAnalysis from './pages/AIAnalysis';
+import { MLDataProvider } from './contexts/MLDataContext';
 import { useEffect, useState } from 'react';
 
 const { Header, Content, Footer } = Layout;
@@ -49,16 +50,18 @@ export default function App() {
     let content;
     if (isDashboard) content = <DeviceMonitoring />;
     else if (isPatients) content = <Patients />;
-    else if (isCTG) content = <CTGAnalysis />;
+    else if (isCTG) content = <CTGPage />;
     else if (isAIAnalysis) content = <AIAnalysis />;
     else if (isSettings) content = <Settings />;
     else if (isNotifications) content = <Notifications />;
     else if (isReports) content = <Reports />;
 
     return (
-      <AppLayout currentRoute={route} onNavigate={handleNavigate}>
-        {content}
-      </AppLayout>
+      <MLDataProvider>
+        <AppLayout currentRoute={route} onNavigate={handleNavigate}>
+          {content}
+        </AppLayout>
+      </MLDataProvider>
     );
   }
 
