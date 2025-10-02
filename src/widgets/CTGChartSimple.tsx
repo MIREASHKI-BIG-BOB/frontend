@@ -94,9 +94,11 @@ export default function CTGChartSimple({
           try {
             const message = JSON.parse(event.data);
             
-            // ⚠️ ВАЖНО: Backend использует BPMChild (с большой буквы), а не bpm!
-            // Ожидаем формат от ML: { data: { BPMChild: number, uterus: number }, prediction: {...} }
-            if (message.data && typeof message.data.BPMChild === 'number' && typeof message.data.uterus === 'number') {
+            // Поддерживаем оба формата: BPMChild (от ML) и bpmChild (от генератора)
+            const bpmValue = message.data && (message.data.BPMChild || message.data.bpmChild);
+            const uterusValue = message.data && message.data.uterus;
+            
+            if (message.data && typeof bpmValue === 'number' && typeof uterusValue === 'number') {
               // Используем secFromStart из сообщения, если есть, иначе вычисляем
               const relativeTime = message.secFromStart 
                 ? Math.round(message.secFromStart) 
@@ -104,8 +106,8 @@ export default function CTGChartSimple({
               
               const newPoint: Point = {
                 t: relativeTime,
-                fhr: Math.max(90, Math.min(180, message.data.BPMChild)), // ⚠️ Обратите внимание на регистр!
-                uc: Math.max(0, Math.min(100, message.data.uterus))
+                fhr: Math.max(90, Math.min(180, bpmValue)), // Поддерживаем оба формата
+                uc: Math.max(0, Math.min(100, uterusValue))
               };
               
               // Логируем ML предсказание если есть

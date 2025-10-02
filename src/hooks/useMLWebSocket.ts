@@ -12,7 +12,8 @@ export interface CTGDataPoint {
   sensorID: string;
   secFromStart: number;
   data: {
-    BPMChild: number;  // ⚠️ Обратите внимание на регистр!
+    BPMChild?: number;  // Формат от ML сервиса
+    bpmChild?: number;  // Формат от генератора
     uterus: number;
     spasms: number;
   };
@@ -57,13 +58,15 @@ export function useMLWebSocket(): UseMLWebSocketReturn {
           try {
             const data: CTGDataPoint = JSON.parse(event.data);
             
-            // Проверяем что это данные от ML (есть поле data.BPMChild)
-            if (data.data && typeof data.data.BPMChild === 'number') {
+            // Поддерживаем оба формата: BPMChild (от ML) и bpmChild (от генератора)
+            const bpmValue = data.data && (data.data.BPMChild || data.data.bpmChild);
+            
+            if (data.data && typeof bpmValue === 'number') {
               setLatestData(data);
               
               // Логируем CTG данные
               console.log('📊 CTG Data:', {
-                BPMChild: data.data.BPMChild?.toFixed(1),
+                BPM: bpmValue?.toFixed(1),
                 uterus: data.data.uterus?.toFixed(1),
                 spasms: data.data.spasms?.toFixed(1)
               });

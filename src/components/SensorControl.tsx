@@ -18,16 +18,16 @@ export default function SensorControl({ onStatusChange }: SensorControlProps) {
     setLoading(true);
     try {
       const response = await startSensors(sensorCount);
-      if (response.success) {
-        message.success(`Запущено сенсоров: ${sensorCount}`);
+      if (response.message) {
+        message.success(`Сенсор запущен: ${response.sensor?.uuid || 'unknown'}`);
         setIsRunning(true);
         onStatusChange?.(true);
       } else {
-        message.error(response.message || 'Ошибка при запуске сенсоров');
+        message.error('Неожиданный ответ от сервера');
       }
     } catch (error) {
-      message.error('Не удалось запустить сенсоры');
-      console.error(error);
+      message.error('Не удалось запустить сенсоры. Проверьте подключение к бэкенду.');
+      console.error('❌ Failed to start sensors', error);
     } finally {
       setLoading(false);
     }
@@ -37,12 +37,12 @@ export default function SensorControl({ onStatusChange }: SensorControlProps) {
     setLoading(true);
     try {
       const response = await stopSensors();
-      if (response.success) {
+      if (response.message) {
         message.info('Все сенсоры остановлены');
         setIsRunning(false);
         onStatusChange?.(false);
       } else {
-        message.error(response.message || 'Ошибка при остановке сенсоров');
+        message.error('Неожиданный ответ от сервера');
       }
     } catch (error) {
       message.error('Не удалось остановить сенсоры');

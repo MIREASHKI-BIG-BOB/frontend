@@ -10,13 +10,15 @@ export interface SensorStartParams {
 }
 
 export interface SensorStartResponse {
-  success: boolean;
   message: string;
-  sensors?: string[];
+  sensor?: {
+    uuid: string;
+    ip: string;
+    connected: boolean;
+  };
 }
 
 export interface SensorStopResponse {
-  success: boolean;
   message: string;
 }
 
