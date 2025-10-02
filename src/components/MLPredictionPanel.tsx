@@ -41,13 +41,23 @@ export default function MLPredictionPanel({ prediction, isAccumulating = false }
           borderRadius: '8px'
         }}
       >
-        <Alert
-          message="Анализирую данные..."
-          description="Накопление данных для точного прогноза"
-          type="info"
-          showIcon
-          style={{ border: 'none', background: 'transparent' }}
-        />
+        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ 
+            fontSize: '16px', 
+            fontWeight: 'bold', 
+            color: '#ec4899',
+            marginBottom: '8px'
+          }}>
+            Накопление данных
+          </div>
+          <div style={{ 
+            fontSize: '14px', 
+            color: '#831843',
+            opacity: 0.7
+          }}>
+            Анализирую поступающие данные...
+          </div>
+        </div>
       </Card>
     );
   }
@@ -99,103 +109,114 @@ export default function MLPredictionPanel({ prediction, isAccumulating = false }
         borderRadius: '8px'
       }}
     >
-      <Space direction="vertical" style={{ width: '100%' }} size="small">
-        {/* Статус с иконкой */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            marginBottom: 8
-          }}>
-            {risk.icon}
-            <span style={{
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: risk.color
-            }}>
-              {risk.text}
-            </span>
-          </div>
-          
-          <div style={{ 
-            fontSize: '14px', 
-            color: '#831843',
-            marginBottom: 8
-          }}>
-            Риск гипоксии: <strong>{probability}%</strong>
-          </div>
-
-          <Progress 
-            percent={probability} 
-            strokeColor={{
-              '0%': '#ec4899',
-              '100%': risk.color,
-            }}
-            trailColor="rgba(255,255,255,0.5)"
-            size="small"
-            showInfo={false}
-            strokeWidth={6}
-            style={{ marginBottom: 12 }}
-          />
+      <div style={{ textAlign: 'center' }}>
+        {/* Большой процент риска */}
+        <div style={{
+          fontSize: '48px',
+          fontWeight: 'bold',
+          color: risk.color,
+          lineHeight: '1',
+          marginBottom: '4px'
+        }}>
+          {probability}%
+        </div>
+        
+        {/* Статус */}
+        <div style={{
+          fontSize: '18px',
+          fontWeight: 'bold',
+          color: risk.color,
+          marginBottom: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          {risk.icon}
+          {risk.text}
+        </div>
+        
+        {/* Описание */}
+        <div style={{
+          fontSize: '14px',
+          color: '#831843',
+          marginBottom: '16px',
+          opacity: 0.8
+        }}>
+          Риск гипоксии
         </div>
 
-        {/* Алерты */}
-        {prediction.alerts && prediction.alerts.length > 0 && (
-          <div style={{ 
-            background: 'rgba(255,255,255,0.7)', 
-            padding: '8px 12px', 
-            borderRadius: '6px',
-            fontSize: '13px',
-            color: '#831843',
-            border: '1px solid rgba(236, 72, 153, 0.2)'
-          }}>
-            <div style={{ 
-              fontWeight: 'bold', 
-              marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <WarningOutlined style={{ color: '#f59e0b' }} />
-              Обнаружено:
-            </div>
-            {prediction.alerts.slice(0, 2).map((alert, index) => (
-              <div key={index} style={{ marginBottom: 2, paddingLeft: '4px' }}>
-                • {alert}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Прогресс бар */}
+        <Progress 
+          percent={probability} 
+          strokeColor={{
+            '0%': '#10b981',
+            '50%': '#f59e0b', 
+            '80%': '#f97316',
+            '100%': '#ef4444',
+          }}
+          trailColor="rgba(255,255,255,0.5)"
+          size="small"
+          showInfo={false}
+          strokeWidth={8}
+          style={{ marginBottom: 16 }}
+        />
+      </div>
 
-        {/* Рекомендации */}
-        {prediction.recommendations && prediction.recommendations.length > 0 && prediction.hypoxia_risk !== 'low' && (
+      {/* Алерты */}
+      {prediction.alerts && prediction.alerts.length > 0 && (
+        <div style={{ 
+          background: 'rgba(255,255,255,0.7)', 
+          padding: '8px 12px', 
+          borderRadius: '6px',
+          fontSize: '13px',
+          color: '#831843',
+          border: '1px solid rgba(236, 72, 153, 0.2)'
+        }}>
           <div style={{ 
-            background: 'rgba(255,255,255,0.8)', 
-            padding: '8px 12px', 
-            borderRadius: '6px',
-            fontSize: '13px',
-            color: '#831843',
-            marginTop: 8,
-            border: '1px solid rgba(236, 72, 153, 0.2)'
+            fontWeight: 'bold', 
+            marginBottom: 6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
           }}>
-            <div style={{ 
-              fontWeight: 'bold', 
-              marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <BulbOutlined style={{ color: '#ec4899' }} />
-              Действия:
-            </div>
-            <div style={{ paddingLeft: '4px' }}>
-              {prediction.recommendations[0]}
-            </div>
+            <WarningOutlined style={{ color: '#f59e0b' }} />
+            Обнаружено:
           </div>
-        )}
-      </Space>
+          {prediction.alerts.slice(0, 2).map((alert, index) => (
+            <div key={index} style={{ marginBottom: 2, paddingLeft: '4px' }}>
+              • {alert}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Рекомендации */}
+      {prediction.recommendations && prediction.recommendations.length > 0 && prediction.hypoxia_risk !== 'low' && (
+        <div style={{ 
+          background: 'rgba(255,255,255,0.8)', 
+          padding: '8px 12px', 
+          borderRadius: '6px',
+          fontSize: '13px',
+          color: '#831843',
+          marginTop: 8,
+          border: '1px solid rgba(236, 72, 153, 0.2)'
+        }}>
+          <div style={{ 
+            fontWeight: 'bold', 
+            marginBottom: 6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <BulbOutlined style={{ color: '#ec4899' }} />
+            Действия:
+          </div>
+          <div style={{ paddingLeft: '4px' }}>
+            {prediction.recommendations[0]}
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

@@ -8,7 +8,7 @@ import {
   Card, 
   Row, 
   Col, 
-  Statistic, 
+  Statistic,
   Form, 
   Select, 
   DatePicker, 
@@ -43,6 +43,35 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import AnomalyAnalysisPage from './AnomalyAnalysis';
 import DetailedAnomalyAnalysis from './DetailedAnomalyAnalysis';
+
+// CSS стили для анимаций
+const styles = `
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .anomaly-indicator {
+    animation: blink 1s infinite;
+  }
+  
+  .anomaly-pulse {
+    animation: pulse 2s infinite;
+  }
+`;
+
+// Добавляем стили в документ
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+}
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -154,12 +183,14 @@ const CTGChart: React.FC<CTGChartProps> = ({
         </Text>
         {/* Индикатор аномалий в заголовке */}
         {anomalies && anomalies.filter(a => a.type === chartType).length > 0 && (
-          <WarningOutlined style={{ 
-            marginLeft: '6px', 
-            fontSize: '14px',
-            color: '#dc2626',
-            animation: 'blink 1s infinite'
-          }} />
+          <WarningOutlined 
+            className="anomaly-indicator"
+            style={{ 
+              marginLeft: '6px', 
+              fontSize: '14px',
+              color: '#dc2626'
+            }} 
+          />
         )}
       </div>
       
@@ -200,25 +231,39 @@ const CTGChart: React.FC<CTGChartProps> = ({
             </React.Fragment>
           ))}
           
-          {/* Отображение реальных аномалий - точечное выделение */}
+          {/* Отображение реальных аномалий - улучшенное выделение */}
           {anomalies && anomalies
             .filter(anomaly => anomaly.type === chartType && anomaly.time < data.length) // Только валидные аномалии
             .slice(-5) // Показываем только последние 5 аномалий для каждого типа
             .map((anomaly, index) => (
               <React.Fragment key={`anomaly-${index}`}>
-                {/* Точечная подсветка критической области */}
+                {/* Широкая подсветка аномальной области с градиентом */}
+                <ReferenceArea
+                  x1={Math.max(0, anomaly.time - 8)}
+                  x2={Math.min(data.length - 1, anomaly.time + 8)}
+                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                  fillOpacity={0.15}
+                />
+                {/* Средняя подсветка */}
+                <ReferenceArea
+                  x1={Math.max(0, anomaly.time - 5)}
+                  x2={Math.min(data.length - 1, anomaly.time + 5)}
+                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                  fillOpacity={0.25}
+                />
+                {/* Интенсивная подсветка критической области */}
                 <ReferenceArea
                   x1={Math.max(0, anomaly.time - 3)}
                   x2={Math.min(data.length - 1, anomaly.time + 3)}
                   fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                  fillOpacity={0.3}
+                  fillOpacity={0.4}
                 />
                 {/* Центральная точка аномалии */}
                 <ReferenceArea
                   x1={anomaly.time}
                   x2={anomaly.time}
                   fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                  fillOpacity={0.6}
+                  fillOpacity={0.7}
                 />
               </React.Fragment>
             ))}
@@ -248,26 +293,39 @@ const CTGChart: React.FC<CTGChartProps> = ({
                 
                 return (
                   <g style={{ cursor: 'pointer' }} onClick={handleAnomalyDotClick}>
-                    {/* Пульсирующий круг для аномалии */}
+                    {/* Внешнее кольцо с пульсацией */}
+                    <circle 
+                      cx={props.cx} 
+                      cy={props.cy} 
+                      r={12}
+                      fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                      opacity={0.2}
+                    >
+                      <animate attributeName="r" values="8;15;8" dur="1.5s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.1;0.4;0.1" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    {/* Среднее кольцо */}
                     <circle 
                       cx={props.cx} 
                       cy={props.cy} 
                       r={8}
                       fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                      opacity={0.3}
+                      opacity={0.4}
                     >
                       <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/>
-                      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
                     </circle>
-                    {/* Основная точка */}
+                    {/* Основная точка с большим размером */}
                     <circle 
                       cx={props.cx} 
                       cy={props.cy} 
-                      r={5}
+                      r={6}
                       fill={anomaly?.severity === 'critical' ? '#dc2626' : '#f59e0b'}
                       stroke="#fff"
-                      strokeWidth={2}
-                    />
+                      strokeWidth={3}
+                    >
+                      <animate attributeName="r" values="5;7;5" dur="1s" repeatCount="indefinite"/>
+                    </circle>
                     {/* Восклицательный знак как SVG */}
                     <foreignObject 
                       x={props.cx - 8} 
