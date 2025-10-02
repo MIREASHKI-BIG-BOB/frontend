@@ -200,24 +200,25 @@ const CTGChart: React.FC<CTGChartProps> = ({
             </React.Fragment>
           ))}
           
-          {/* Отображение аномалий - улучшенная визуализация */}
+          {/* Отображение реальных аномалий - точечное выделение */}
           {anomalies && anomalies
-            .filter(anomaly => anomaly.type === chartType)
+            .filter(anomaly => anomaly.type === chartType && anomaly.time < data.length) // Только валидные аномалии
+            .slice(-5) // Показываем только последние 5 аномалий для каждого типа
             .map((anomaly, index) => (
               <React.Fragment key={`anomaly-${index}`}>
-                {/* Подсветка области аномалии */}
-                <ReferenceArea
-                  x1={Math.max(0, anomaly.time - 8)}
-                  x2={Math.min(data.length - 1, anomaly.time + 8)}
-                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                  fillOpacity={0.25}
-                />
-                {/* Более яркая центральная область */}
+                {/* Точечная подсветка критической области */}
                 <ReferenceArea
                   x1={Math.max(0, anomaly.time - 3)}
                   x2={Math.min(data.length - 1, anomaly.time + 3)}
                   fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
-                  fillOpacity={0.4}
+                  fillOpacity={0.3}
+                />
+                {/* Центральная точка аномалии */}
+                <ReferenceArea
+                  x1={anomaly.time}
+                  x2={anomaly.time}
+                  fill={anomaly.severity === 'critical' ? '#dc2626' : '#f59e0b'}
+                  fillOpacity={0.6}
                 />
               </React.Fragment>
             ))}
@@ -366,6 +367,9 @@ export default function CTGPage() {
   // 🔗 Подключаемся к ML WebSocket для получения реальных предсказаний
   const { isConnected: mlConnected, latestData: mlData, error: mlError } = useMLWebSocket();
 
+  // Отслеживаем время начала записи для корректного позиционирования аномалий
+  const [startTime, setStartTime] = useState<number | null>(null);
+
   // ИИ предсказания и аномалии
   const [aiPredictions, setAiPredictions] = useState({
     riskLevel: 'low' as 'low' | 'medium' | 'high',
@@ -450,6 +454,8 @@ export default function CTGPage() {
         setFetalHeartRate([]);
         setUterineContractions([]);
         setContractions([]);
+        setAnomalies([]);
+        setStartTime(null); // Сбрасываем время начала
       } else {
         console.error('❌ ML WebSocket not connected');
         alert('ML сервис не подключен. Подождите подключения или перезагрузите страницу.');
@@ -470,6 +476,8 @@ export default function CTGPage() {
       setFetalHeartRate([]);
       setUterineContractions([]);
       setContractions([]);
+      setAnomalies([]);
+      setStartTime(null);
       setSessionStartTime('');
     }
   };
@@ -482,6 +490,8 @@ export default function CTGPage() {
       setFetalHeartRate([]);
       setUterineContractions([]);
       setContractions([]);
+      setAnomalies([]);
+      setStartTime(null);
       setSessionStartTime('');
     }
   };
@@ -489,6 +499,12 @@ export default function CTGPage() {
   // 🔄 Обновляем данные графиков и ML предсказания из WebSocket
   useEffect(() => {
     if (!mlData || !mlData.data || !isRecording) return;
+    
+    // Инициализируем время начала записи при первых данных ТОЛЬКО если оно ещё не установлено
+    if (startTime === null && mlData.secFromStart) {
+      console.log(`⏰ Setting start time: ${mlData.secFromStart}`);
+      setStartTime(mlData.secFromStart);
+    }
     
     // Обновляем графики с реальными данными
     const newFHR = mlData.data.BPMChild || mlData.data.bpmChild || 140;
@@ -533,20 +549,71 @@ export default function CTGPage() {
       // Сохраняем данные для MLPredictionPanel
       setMlPrediction(pred);
       
-      // Создаем аномалии из alerts
+      // Создаем аномалии из реальных данных ML, а не из алертов
       if (pred.alerts && pred.alerts.length > 0) {
-        const newAnomalies = pred.alerts.map((alert, index) => ({
-          time: fetalHeartRate.length,
-          type: 'fhr' as const,
-          severity: pred.hypoxia_risk === 'critical' || pred.hypoxia_risk === 'high' 
-            ? 'critical' as const 
-            : 'warning' as const,
-          description: alert
-        }));
-        setAnomalies(prev => [...prev.slice(-10), ...newAnomalies]);
+        const currentDataLength = fetalHeartRate.length;
+        const currentFHR = newFHR;
+        const currentUC = newUC;
+        
+        // Анализируем реальные критические значения из данных
+        const isCriticalFHR = currentFHR < 90 || currentFHR > 180; // Реальная брадикардия/тахикардия  
+        const isCriticalUC = currentUC > 65; // Реальный гипертонус
+        const isCriticalSpasms = newSpasms > 70; // Сильные схватки
+        
+        const newAnomalies: any[] = [];
+        
+        // Создаем аномалию только если есть реальная проблема в данных
+        if (isCriticalFHR) {
+          newAnomalies.push({
+            time: Math.max(0, currentDataLength - 5), // Чуть раньше текущего момента
+            type: 'fhr' as const,
+            severity: currentFHR < 80 || currentFHR > 200 ? 'critical' as const : 'warning' as const,
+            description: currentFHR < 90 ? `Брадикардия: ${currentFHR.toFixed(0)} уд/мин` : `Тахикардия: ${currentFHR.toFixed(0)} уд/мин`
+          });
+        }
+        
+        if (isCriticalUC) {
+          newAnomalies.push({
+            time: Math.max(0, currentDataLength - 5),
+            type: 'uc' as const,
+            severity: 'critical' as const,
+            description: `Гипертонус матки: ${currentUC.toFixed(0)} mmHg`
+          });
+        }
+        
+        if (isCriticalSpasms) {
+          newAnomalies.push({
+            time: Math.max(0, currentDataLength - 5),
+            type: 'contractions' as const,
+            severity: 'warning' as const,
+            description: `Интенсивные схватки: ${newSpasms.toFixed(0)} mmHg`
+          });
+        }
+        
+        console.log(`🎯 Real anomalies detected: FHR=${currentFHR.toFixed(0)} UC=${currentUC.toFixed(0)} Spasms=${newSpasms.toFixed(0)}`);
+        
+        // Добавляем аномалии только если они реально есть
+        if (newAnomalies.length > 0) {
+          setAnomalies(prev => {
+            // Проверяем, есть ли уже похожие аномалии в последних записях
+            const recentAnomalies = prev.slice(-5);
+            const hasRecentSimilar = recentAnomalies.some(existing => 
+              Math.abs(existing.time - (currentDataLength - 5)) < 15 && // В пределах 15 точек
+              existing.type === newAnomalies[0]?.type
+            );
+            
+            if (!hasRecentSimilar) {
+              console.log(`➕ Adding ${newAnomalies.length} real anomalies at position ${currentDataLength - 5}`);
+              return [...prev.slice(-20), ...newAnomalies]; // Храним последние 20 аномалий
+            } else {
+              console.log(`⏭️ Skipping duplicate anomaly (similar exists)`);
+              return prev;
+            }
+          });
+        }
       }
     }
-  }, [mlData, isRecording]);
+  }, [mlData, isRecording, startTime]);
 
   // Таймер записи (только для отображения времени)
   useEffect(() => {
