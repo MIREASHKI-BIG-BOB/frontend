@@ -18,7 +18,8 @@ import {
   CheckCircleOutlined,
   FilterOutlined
 } from '@ant-design/icons';
-import { useState, useMemo } from 'react';
+import { useMLWebSocket } from '../hooks/useMLWebSocket';
+import React, { useState, useMemo, useEffect } from 'react';
 import { colors, typography } from '../theme';
 
 const { Title, Text } = Typography;
@@ -231,12 +232,50 @@ const formatTime = (timestamp: Date) => {
 };
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { latestData: mlData } = useMLWebSocket();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [sourceFilter, setSourceFilter] = useState<NotificationSource | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<NotificationStatus | 'all'>('all');
   const [searchText, setSearchText] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Создаем уведомления из реальных ML данных
+  useEffect(() => {
+    if (!mlData || !mlData.prediction) return;
+
+    const pred = mlData.prediction;
+    
+    // Создаем уведомление только для критических состояний
+    if (pred.hypoxia_risk === 'critical' || pred.hypoxia_risk === 'high') {
+      const newNotification: Notification = {
+        id: `ml-${Date.now()}`,
+        title: `ИИ-анализ: ${pred.hypoxia_risk === 'critical' ? 'КРИТИЧЕСКОЕ' : 'ВЫСОКИЙ РИСК'} состояние`,
+        message: `Риск гипоксии: ${Math.round(pred.hypoxia_probability * 100)}%. ${pred.alerts.join(', ')}`,
+        level: pred.hypoxia_risk === 'critical' ? 'critical' : 'warning',
+        status: 'unread',
+        timestamp: new Date(),
+        patient: 'Пациент КТГ',
+        source: 'ai_analysis',
+        data: {
+          score: Math.round(pred.hypoxia_probability * 100),
+          risks: pred.alerts,
+          session: `ctg-${mlData.sensorID?.slice(0, 8)}`
+        }
+      };
+
+      setNotifications(prev => {
+        // Избегаем дублирования - проверяем что последнее уведомление не такое же
+        const lastNotification = prev[0];
+        if (lastNotification && 
+            lastNotification.level === newNotification.level &&
+            Date.now() - lastNotification.timestamp.getTime() < 10000) { // Менее 10 секунд
+          return prev;
+        }
+        return [newNotification, ...prev.slice(0, 19)]; // Храним последние 20 уведомлений
+      });
+    }
+  }, [mlData]);
 
   const filteredNotifications = useMemo(() => {
     return notifications.filter(notification => {
