@@ -1,9 +1,0 @@
-node_modules
-build
-dist
-.vite
-.vscode
-.git
-.gitignore
-.DS_Store
-*.log
