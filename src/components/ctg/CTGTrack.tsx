@@ -164,6 +164,7 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
           maxValue={maxValue}
           events={events}
           onSelectEvent={onSelectEvent}
+          secondsPerPixel={secondsPerPixel}
         />
 
         {overlayPaths.map(({ path, config }, idx) =>
@@ -184,20 +185,22 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
 
         {pathD && (
           <>
+            {/* Белая обводка для контраста */}
             <path
               d={pathD}
               fill="none"
               stroke="#fff"
-              strokeWidth={1.6}
+              strokeWidth={channel === "tone" ? 0.8 : 1.6}
               strokeLinecap="butt"
               strokeLinejoin="miter"
               opacity={0.9}
             />
+            {/* Основная линия */}
             <path
               d={pathD}
               fill="none"
               stroke={color}
-              strokeWidth={3.4}
+              strokeWidth={channel === "tone" ? 1.5 : 3.4}
               strokeLinejoin="miter"
               strokeLinecap="butt"
             />

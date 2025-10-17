@@ -17,6 +17,7 @@ interface CTGStripProps {
   onPan: (deltaSeconds: number) => void;
   onToggleLive: (isLive: boolean) => void;
   trackHeight?: number;
+  isLive?: boolean;
 }
 
 const FHR_RANGE = { min: 50, max: 210 };
@@ -36,6 +37,7 @@ const CTGStrip: React.FC<CTGStripProps> = ({
   onPan,
   onToggleLive,
   trackHeight,
+  isLive,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverState, setHoverState] = useState<{
@@ -102,6 +104,14 @@ const CTGStrip: React.FC<CTGStripProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<{ startX: number; startVisibleStart: number; startVisibleEnd: number } | null>(null);
 
+  // Автоприлипание к правому краю при live
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    if (isLive) {
+      containerRef.current.scrollLeft = containerRef.current.scrollWidth;
+    }
+  }, [width, isLive]);
+
   return (
     <div
       ref={containerRef}
@@ -139,7 +149,7 @@ const CTGStrip: React.FC<CTGStripProps> = ({
       }}
       onDoubleClick={() => onToggleLive(true)}
     >
-  <div style={{ position: "relative", width: `${width}px`, height: totalHeight, backgroundColor: "#fffaf7", border: "1px solid #d4d4d8", boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)" }}>
+  <div ref={containerRef} style={{ position: "relative", minWidth: "100%", width: `${width}px`, height: totalHeight, backgroundColor: "#fffaf7", border: "1px solid #d4d4d8", boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)" }}>
         <CTGGrid
           width={width}
           height={totalHeight}
@@ -172,6 +182,7 @@ const CTGStrip: React.FC<CTGStripProps> = ({
           onSelectEvent={onSelectEvent}
           hoverTime={hoverState.time}
           onHover={(payload) => setHoverState(payload)}
+
           overlays={
             showFhrMA
               ? [
@@ -199,18 +210,19 @@ const CTGStrip: React.FC<CTGStripProps> = ({
           color="#7c3aed"
           label="UC/TOCO"
           unit="mmHg"
-          baseline={0}
+          baseline={null}
           normZone={null}
           events={events}
           qualitySegments={trackQuality}
           onSelectEvent={onSelectEvent}
           hoverTime={hoverState.time}
           onHover={(payload) => setHoverState(payload)}
+
           overlays={[
             {
               values: ucValues,
               color: "#be123c",
-              strokeWidth: 2.2,
+              strokeWidth: 1.6,
               opacity: 0.9,
               dasharray: "6 4",
             },

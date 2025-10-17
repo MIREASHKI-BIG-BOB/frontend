@@ -329,15 +329,26 @@ export function buildSample(
   time: number,
   fhr: number | null,
   toco: number | null,
-  uc: number | null
+  uc: number | null,
+  tone: number | null = null
 ): CTGSample {
   return {
     time,
     fhr,
     toco,
     uc,
+    tone: tone ?? generateToneValue(), // генерируем значение tone если не передано
     quality: classifyQuality(fhr),
   };
+}
+
+// Генерация реалистичных значений tone (тонус матки)
+// Диапазон 0-40 mmHg, небольшая амплитуда колебаний
+function generateToneValue(): number {
+  const baseline = 10 + Math.random() * 5; // базовый уровень 10-15 mmHg
+  const oscillation = Math.sin(Date.now() / 1000) * 3; // медленные колебания ±3
+  const noise = (Math.random() - 0.5) * 2; // небольшой шум ±1
+  return Math.max(0, Math.min(40, baseline + oscillation + noise));
 }
 
 function classifyQuality(fhr: number | null): "good" | "poor" | "lost" {

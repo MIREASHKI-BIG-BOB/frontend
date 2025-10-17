@@ -9,7 +9,7 @@ import {
   WifiOutlined,
 } from "@ant-design/icons";
 
-import CTGStrip from "../components/ctg/CTGStrip";
+import CTGCombinedStrip from "../components/ctg/CTGCombinedStrip";
 import CTGStatsBar from "../components/ctg/CTGStatsBar";
 import CTGStaticWindow from "../components/ctg/CTGStaticWindow";
 import { CTGEvent, CTGSample, StaticWindowState } from "../components/ctg/types";
@@ -182,8 +182,7 @@ const CTGPage: React.FC = () => {
     setLastTimestamp(0);
     lastTimestampRef.current = 0;
     sessionOffsetRef.current = null;
-    // В самом начале показываем только доступную часть, без пустой простыни
-    setVisibleRange({ start: 0, end: 0 });
+    setVisibleRange({ start: 0, end: visibleWindowSec });
     setIsLive(true);
   }, [visibleWindowSec]);
 
@@ -265,7 +264,7 @@ const CTGPage: React.FC = () => {
     setStaticWindow(null);
     setIsLive(true);
     const end = lastTimestampRef.current;
-    const start = end < visibleWindowSec ? 0 : end - visibleWindowSec;
+    const start = Math.max(0, end - visibleWindowSec);
     setVisibleRange({ start, end });
   }, [visibleWindowSec]);
 
@@ -274,7 +273,7 @@ const CTGPage: React.FC = () => {
       setIsLive(nextLive);
       if (nextLive) {
         const end = lastTimestampRef.current;
-        const start = end < visibleWindowSec ? 0 : end - visibleWindowSec;
+        const start = Math.max(0, end - visibleWindowSec);
         setVisibleRange({ start, end });
         setStaticWindow(null);
       }
@@ -309,10 +308,6 @@ const CTGPage: React.FC = () => {
       setVisibleWindowSec(seconds);
       setVisibleRange((range) => {
         const end = isLive ? lastTimestampRef.current : range.end;
-        if (isLive) {
-          const start = end < seconds ? 0 : end - seconds;
-          return { start, end };
-        }
         const start = Math.max(earliestAvailable, end - seconds);
         return { start, end };
       });
@@ -395,7 +390,7 @@ const CTGPage: React.FC = () => {
                 onPaperSpeedChange={handlePaperSpeed}
                 onMarkFetalMovement={handleMarkFetalMovement}
               />
-              <CTGStrip
+              <CTGCombinedStrip
                 samples={samples}
                 visibleStart={visibleRange.start}
                 visibleEnd={visibleRange.end}
@@ -404,6 +399,8 @@ const CTGPage: React.FC = () => {
                 baseline={metrics.baseline}
                 normZone={FHR_NORM}
                 paperSpeed={paperSpeed}
+                combinedHeight={380}
+                toneHeight={160}
                 onSelectEvent={handleSelectEvent}
                 onPan={handlePan}
                 onToggleLive={handleToggleLive}

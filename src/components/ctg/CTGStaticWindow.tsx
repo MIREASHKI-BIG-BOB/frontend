@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import CTGStrip from "./CTGStrip";
+import CTGCombinedStrip from "./CTGCombinedStrip";
 import { CTGEvent, CTGQualitySegment, CTGSample } from "./types";
 
 interface CTGStaticWindowProps {
@@ -36,11 +36,11 @@ const CTGStaticWindow: React.FC<CTGStaticWindowProps> = ({
     <Modal
       open={open}
       onCancel={onClose}
-      width={1200}
+      width={1400}
       footer={null}
       title={
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>Статический участок КТГ</span>
+          <span>Статический участок КТГ (3 графика: FHR + UC + Tone)</span>
           <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={() => onNavigate("prev")}
@@ -65,7 +65,7 @@ const CTGStaticWindow: React.FC<CTGStaticWindowProps> = ({
       }
       styles={{ body: { padding: 16 } }}
     >
-      <CTGStrip
+      <CTGCombinedStrip
         samples={visibleSamples}
         visibleStart={start}
         visibleEnd={end}
@@ -74,7 +74,8 @@ const CTGStaticWindow: React.FC<CTGStaticWindowProps> = ({
         baseline={baseline}
         normZone={normZone}
         paperSpeed={paperSpeed}
-        trackHeight={280}
+        combinedHeight={380}
+        toneHeight={160}
         onSelectEvent={() => undefined}
         onPan={() => undefined}
         onToggleLive={() => undefined}

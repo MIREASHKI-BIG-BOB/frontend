@@ -110,7 +110,7 @@ const CTGGrid: React.FC<CTGGridProps> = ({
             <text
               x={line.x + 3}
               y={height - 6}
-              fontSize={11}
+              fontSize={12}
               fill="#475569"
               opacity={0.9}
             >
@@ -136,7 +136,7 @@ const CTGGrid: React.FC<CTGGridProps> = ({
             <text
               x={8}
               y={line.y - 4}
-              fontSize={9}
+              fontSize={11}
               fill="#475569"
               opacity={0.85}
             >

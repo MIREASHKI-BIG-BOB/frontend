@@ -1,10 +1,11 @@
-export type CTGChannel = "fhr" | "toco" | "uc";
+export type CTGChannel = "fhr" | "toco" | "uc" | "tone";
 
 export interface CTGSample {
   time: number; // seconds from the beginning of the session
   fhr: number | null;
   toco: number | null;
   uc: number | null;
+  tone: number | null; // маточный тонус (0-40 mmHg)
   quality: "good" | "poor" | "lost";
 }
 

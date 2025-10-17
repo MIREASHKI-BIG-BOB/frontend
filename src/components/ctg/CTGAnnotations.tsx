@@ -13,6 +13,8 @@ interface CTGAnnotationsProps {
   maxValue: number;
   events: CTGEvent[];
   onSelectEvent?: (event: CTGEvent) => void;
+  offsetX?: number;
+  secondsPerPixel: number;
 }
 
 const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
@@ -27,9 +29,9 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
   maxValue,
   events,
   onSelectEvent,
+  offsetX = 0,
+  secondsPerPixel,
 }) => {
-  const duration = Math.max(1, visibleEnd - visibleStart);
-  const secondsPerPixel = duration / width;
   const valueToY = (value: number) =>
     height - ((value - minValue) / (maxValue - minValue)) * height;
 
@@ -41,7 +43,7 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
           y={valueToY(normZone.to)}
           width={width}
           height={valueToY(normZone.from) - valueToY(normZone.to)}
-          fill="rgba(134, 239, 172, 0.28)"
+          fill="rgba(86, 186, 86, 0.15)"
         />
       )}
 
@@ -51,18 +53,18 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
           y1={valueToY(baseline)}
           x2={width}
           y2={valueToY(baseline)}
-          stroke="#2563eb"
-          strokeWidth={1.2}
-          strokeDasharray="8 4"
+          stroke="#475569"
+          strokeWidth={1}
+          strokeDasharray="6 4"
         />
       )}
 
       {events
         .filter((event) => event.channel === channel)
         .map((event) => {
-          const x1 = (event.start - visibleStart) / secondsPerPixel;
-          const x2 = (event.end - visibleStart) / secondsPerPixel;
-          const xPeak = (event.peak - visibleStart) / secondsPerPixel;
+          const x1 = offsetX + (event.start - visibleStart) / secondsPerPixel;
+          const x2 = offsetX + (event.end - visibleStart) / secondsPerPixel;
+          const xPeak = offsetX + (event.peak - visibleStart) / secondsPerPixel;
           if (x2 < -10 || x1 > width + 10) {
             return null;
           }
@@ -77,7 +79,7 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
                 width={Math.min(width, x2) - Math.max(0, x1)}
                 height={height}
                 fill={color}
-                opacity={0.08}
+                opacity={0.1}
               />
               <line
                 x1={xPeak}
@@ -85,16 +87,16 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
                 x2={xPeak}
                 y2={height}
                 stroke={color}
-                strokeWidth={1.4}
-                strokeDasharray="6 4"
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
               />
               <circle
                 cx={xPeak}
                 cy={height / 2}
-                r={8}
+                r={6}
                 fill={color}
                 stroke="#fff"
-                strokeWidth={2.2}
+                strokeWidth={2}
                 onClick={() => onSelectEvent && onSelectEvent(event)}
                 style={{ cursor: "pointer" }}
               />
