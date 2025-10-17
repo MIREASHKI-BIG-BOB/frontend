@@ -14,6 +14,8 @@ export interface CTGDataPoint {
   data: {
     BPMChild?: number;  // Формат от ML сервиса
     bpmChild?: number;  // Формат от генератора
+    bpm?: number;       // BPM значение
+    sec_from_start?: number; // Время в секундах
     uterus: number;
     spasms: number;
     tone?: number;      // Тонус матки

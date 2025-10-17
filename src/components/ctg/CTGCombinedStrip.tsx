@@ -56,10 +56,12 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     time: number | null;
     value: number | null;
     channel: CTGChannel | null;
+    clientX?: number;
+    clientY?: number;
   }>({ time: null, value: null, channel: null });
 
   // Разделение объединённого блока: верхняя половина FHR, временная полоса, нижняя UC
-  const timeStripHeight = 24; // высота временной полосы между графиками
+  const timeStripHeight = 16; // высота временной полосы между графиками
   const graphsHeight = combinedHeight - timeStripHeight;
   const fhrHeight = Math.floor(graphsHeight * 0.5);
   const ucHeight = graphsHeight - fhrHeight;
@@ -113,7 +115,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     },
     {
       channel: "uc",
-      top: fhrHeight + timeStripHeight, // смещаем вниз на высоту временной полосы
+      top: fhrHeight,
       height: ucHeight,
       minValue: UC_TONE_RANGE.min,
       maxValue: UC_TONE_RANGE.max,
@@ -193,28 +195,37 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
             height: fhrHeight,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "12px 8px",
+            position: "relative",
+            paddingTop: 8,
+            paddingBottom: 8,
             borderBottom: "1px solid rgba(220, 165, 140, 0.3)",
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 8, paddingLeft: 4 }}>
             FHR
           </div>
-          {[210, 180, 150, 120, 90, 60, 30].map((val) => (
-            <div
-              key={val}
-              style={{
-                fontSize: 10,
-                color: "#64748b",
-                textAlign: "right",
-                fontFamily: "monospace",
-              }}
-            >
-              {val}
-            </div>
-          ))}
-          <div style={{ fontSize: 9, color: "#94a3b8" }}>bpm</div>
+          <div style={{ flex: 1, position: "relative" }}>
+            {[210, 180, 150, 120, 90, 60, 30].map((val, idx) => {
+              const yPos = (idx / 6) * 100;
+              return (
+                <div
+                  key={val}
+                  style={{
+                    position: "absolute",
+                    top: `${yPos}%`,
+                    right: 8,
+                    fontSize: 10,
+                    color: "#64748b",
+                    textAlign: "right",
+                    fontFamily: "monospace",
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  {val}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Временная полоса */}
@@ -237,27 +248,36 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
             height: ucHeight,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "12px 8px",
+            position: "relative",
+            paddingTop: 8,
+            paddingBottom: 8,
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#2563eb", marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#2563eb", marginBottom: 8, paddingLeft: 4 }}>
             UC
           </div>
-          {[30, 25, 20, 15, 10, 5, 0].map((val) => (
-            <div
-              key={val}
-              style={{
-                fontSize: 10,
-                color: "#64748b",
-                textAlign: "right",
-                fontFamily: "monospace",
-              }}
-            >
-              {val}
-            </div>
-          ))}
-          <div style={{ fontSize: 9, color: "#94a3b8" }}>mmHg</div>
+          <div style={{ flex: 1, position: "relative" }}>
+            {[30, 25, 20, 15, 10, 5, 0].map((val, idx) => {
+              const yPos = (idx / 6) * 100;
+              return (
+                <div
+                  key={val}
+                  style={{
+                    position: "absolute",
+                    top: `${yPos}%`,
+                    right: 8,
+                    fontSize: 10,
+                    color: "#64748b",
+                    textAlign: "right",
+                    fontFamily: "monospace",
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  {val}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -334,55 +354,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
             onHover={(payload) => setHoverState(payload)}
           />
 
-          {/* Временная полоса между графиками */}
-          <div
-            style={{
-              width: `${width}px`,
-              height: timeStripHeight,
-              position: "relative",
-              background: "#fef9f5",
-              borderTop: "1px solid rgba(220, 165, 140, 0.3)",
-              borderBottom: "1px solid rgba(220, 165, 140, 0.3)",
-            }}
-          >
-            <svg width={width} height={timeStripHeight} style={{ position: "absolute", inset: 0 }}>
-              {/* Временные метки */}
-              {Array.from({ length: Math.ceil(duration) + 1 }, (_, i) => {
-                const t = Math.floor(visibleStart) + i;
-                const x = (t - visibleStart) / secondsPerPixel;
-                if (x < 0 || x > width) return null;
-                
-                const minutes = Math.floor(t / 60);
-                const seconds = t % 60;
-                const label = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                return (
-                  <g key={i}>
-                    {/* Вертикальная метка */}
-                    <line
-                      x1={x}
-                      x2={x}
-                      y1={0}
-                      y2={timeStripHeight}
-                      stroke="rgba(220, 165, 140, 0.4)"
-                      strokeWidth={0.5}
-                    />
-                    {/* Текст времени */}
-                    <text
-                      x={x + 2}
-                      y={timeStripHeight / 2 + 4}
-                      fontSize={10}
-                      fill="#64748b"
-                      fontFamily="monospace"
-                    >
-                      {label}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
           {/* График UC (нижняя половина) */}
           <CTGTrack
             width={width}
@@ -449,35 +420,37 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
           </svg>
         )}
       </div>
-
-        {/* Информация при наведении */}
-        {hoverState.time !== null && hoverState.value !== null && (
-          <div
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              background: "rgba(255, 255, 255, 0.95)",
-              border: "1px solid #cbd5f5",
-              borderRadius: 6,
-              padding: "8px 12px",
-              fontSize: 13,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <span style={{ fontWeight: 600 }}>
-              {formatTime(hoverState.time)} · {hoverState.value.toFixed(1)}{" "}
-              {hoverState.channel === "fhr" ? "bpm" : "mmHg"}
-            </span>
-            <span style={{ opacity: 0.7, fontSize: 11, textTransform: "uppercase" }}>
-              {hoverState.channel}
-            </span>
-          </div>
-        )}
       </div>
+
+      {/* Информация при наведении - зафиксирована */}
+      {hoverState.time !== null && hoverState.value !== null && (
+        <div
+          style={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            background: "rgba(255, 255, 255, 0.95)",
+            border: "1px solid #cbd5f5",
+            borderRadius: 6,
+            padding: "8px 12px",
+            fontSize: 13,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            zIndex: 20,
+            pointerEvents: "none",
+          }}
+        >
+          <span style={{ fontWeight: 600 }}>
+            {formatTime(hoverState.time)} · {hoverState.value.toFixed(1)}{" "}
+            {hoverState.channel === "fhr" ? "bpm" : "mmHg"}
+          </span>
+          <span style={{ opacity: 0.7, fontSize: 11, textTransform: "uppercase" }}>
+            {hoverState.channel}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

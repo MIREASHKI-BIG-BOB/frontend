@@ -254,42 +254,6 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
         )}
       </svg>
 
-      <div
-        style={{
-          position: "absolute",
-          top: 8,
-          left: 8,
-          fontSize: 12,
-          fontWeight: 600,
-          color: "#1f2937",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <span>{label}</span>
-        <span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7 }}>{unit}</span>
-      </div>
-
-      {/* Большие цифры текущего значения справа сверху */}
-      {lastValidValue !== null && (
-        <div
-          style={{
-            position: "absolute",
-            top: 12,
-            right: 16,
-            fontSize: channel === "fhr" ? 56 : 42,
-            fontWeight: 700,
-            color: color,
-            textShadow: "0 2px 4px rgba(0,0,0,0.1), 0 0 2px rgba(255,255,255,0.8)",
-            fontFamily: "'Roboto Mono', monospace",
-            letterSpacing: "-1px",
-            lineHeight: 1,
-          }}
-        >
-          {Math.round(lastValidValue)}
-        </div>
-      )}
     </div>
   );
 };

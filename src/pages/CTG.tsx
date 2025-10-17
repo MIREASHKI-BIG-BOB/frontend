@@ -515,76 +515,58 @@ const CTGPage: React.FC = () => {
 
         <Col span={6}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            {/* Текущие значения */}
-            <Card title="Текущие значения" bodyStyle={{ padding: 16 }}>
-              <Space direction="horizontal" size={12} style={{ width: "100%", justifyContent: "space-between" }}>
-                {/* FHR */}
-                {latestData?.data?.bpmChild != null && (
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(220, 38, 38, 0.08)",
-                      border: "2px solid #dc2626",
-                      borderRadius: 8,
-                      padding: "12px 8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 10, color: "#991b1b", fontWeight: 600, marginBottom: 4 }}>
-                      FHR
+            {/* Текущие значения - 4 блока без заголовка */}
+            {(() => {
+              const lastSample = samples.length > 0 ? samples[samples.length - 1] : null;
+              return (
+                <div style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "repeat(3, 1fr)", 
+                  gap: "1px",
+                  padding: "12px",
+                  background: "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb"
+                }}>
+                  
+                  {/* BPM (FHR) */}
+                  {lastSample?.fhr != null && (
+                    <div style={{ textAlign: "center", padding: "8px" }}>
+                      <div style={{ fontSize: 10, color: "#991b1b", fontWeight: 600, marginBottom: 4 }}>
+                        BPM
+                      </div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#dc2626", fontFamily: "monospace", lineHeight: 1 }}>
+                        {Math.round(lastSample.fhr)}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: "#dc2626", fontFamily: "monospace", lineHeight: 1 }}>
-                      {Math.round(latestData.data.bpmChild)}
+                  )}
+                  
+                  {/* UTERUS (TOCO) */}
+                  {lastSample?.toco != null && (
+                    <div style={{ textAlign: "center", padding: "8px" }}>
+                      <div style={{ fontSize: 10, color: "#c2410c", fontWeight: 600, marginBottom: 4 }}>
+                        UTERUS
+                      </div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#f97316", fontFamily: "monospace", lineHeight: 1 }}>
+                        {Math.round(lastSample.toco)}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 9, color: "#991b1b", marginTop: 4 }}>bpm</div>
-                  </div>
-                )}
-                
-                {/* TOCO */}
-                {latestData?.data?.uterus != null && (
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(249, 115, 22, 0.08)",
-                      border: "2px solid #f97316",
-                      borderRadius: 8,
-                      padding: "12px 8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 10, color: "#c2410c", fontWeight: 600, marginBottom: 4 }}>
-                      TOCO
-                    </div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: "#f97316", fontFamily: "monospace", lineHeight: 1 }}>
-                      {Math.round(latestData.data.uterus)}
-                    </div>
-                    <div style={{ fontSize: 9, color: "#c2410c", marginTop: 4 }}>mmHg</div>
-                  </div>
-                )}
+                  )}
 
-                {/* UC */}
-                {latestData?.data?.spasms != null && (
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "rgba(37, 99, 235, 0.08)",
-                      border: "2px solid #2563eb",
-                      borderRadius: 8,
-                      padding: "12px 8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontSize: 10, color: "#1e40af", fontWeight: 600, marginBottom: 4 }}>
-                      UC
+                  {/* SPASMS (UC) */}
+                  {lastSample?.uc != null && (
+                    <div style={{ textAlign: "center", padding: "8px" }}>
+                      <div style={{ fontSize: 10, color: "#1e40af", fontWeight: 600, marginBottom: 4 }}>
+                        SPASMS
+                      </div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#2563eb", fontFamily: "monospace", lineHeight: 1 }}>
+                        {Math.round(lastSample.uc)}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: "#2563eb", fontFamily: "monospace", lineHeight: 1 }}>
-                      {Math.round(latestData.data.spasms)}
-                    </div>
-                    <div style={{ fontSize: 9, color: "#1e40af", marginTop: 4 }}>mmHg</div>
-                  </div>
-                )}
-              </Space>
-            </Card>
+                  )}
+                </div>
+              );
+            })()}
 
             <MLPredictionPanel
               prediction={latestData?.prediction ?? null}
