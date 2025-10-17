@@ -1,1546 +1,480 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button, Card, Col, Row, Space, Tag, Typography, message } from "antd";
 import {
-  Button,
-  Typography,
-  Input,
-  Space,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Form,
-  Select,
-  DatePicker,
-  TimePicker,
-  Collapse,
-  Avatar,
-} from "antd";
-import { colors } from "../theme";
-import { useMLWebSocket } from "../hooks/useMLWebSocket";
-import MLPredictionPanel from "../components/MLPredictionPanel";
-import { startGenerator, stopGenerator } from "../services/sensorApi";
-import {
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-  SaveOutlined,
-  DeleteOutlined,
-  PlusOutlined,
   ClockCircleOutlined,
-  UserOutlined,
-  HeartOutlined,
-  AlertOutlined,
-  SettingOutlined,
-  CalendarOutlined,
-  LineChartOutlined,
-  UpOutlined,
-  DownOutlined,
+  FlagOutlined,
+  PauseCircleOutlined,
+  PlayCircleOutlined,
+  SyncOutlined,
   WifiOutlined,
-  ExclamationCircleOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceArea,
-} from "recharts";
-import dayjs from "dayjs";
-import type { Dayjs } from "dayjs";
-import AnomalyAnalysisPage from "./AnomalyAnalysis";
-import DetailedAnomalyAnalysis from "./DetailedAnomalyAnalysis";
 
-// CSS стили для анимаций
-const styles = `
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0.3; }
-  }
-  
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-  
-  .anomaly-indicator {
-    animation: blink 1s infinite;
-  }
-  
-  .anomaly-pulse {
-    animation: pulse 2s infinite;
-  }
-`;
-
-// Добавляем стили в документ
-if (typeof document !== "undefined") {
-  const styleSheet = document.createElement("style");
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
-}
+import { CTGStatsBar, CTGStrip } from "../components/ctg";
+import CTGStaticWindow from "../components/ctg/CTGStaticWindow";
+import { CTGEvent, CTGSample, StaticWindowState } from "../components/ctg/types";
+import MLPredictionPanel from "../components/MLPredictionPanel";
+import { useMLWebSocket } from "../hooks/useMLWebSocket";
+import { startGenerator, stopGenerator } from "../services/sensorApi";
+import { buildSample, computeCTGMetrics } from "../utils/ctgMetrics";
 
 const { Text, Title } = Typography;
-const { Option } = Select;
-const { Panel } = Collapse;
 
-// Компонент для интерактивного графика КТГ в розовой палитре
-interface CTGChartProps {
-  title: string;
-  unit: string;
-  color: string;
-  minValue: number;
-  maxValue: number;
-  height: string;
-  data: number[];
-  dangerRanges?: { min: number; max: number }[];
-  chartType?: "fhr" | "uc" | "contractions";
-  anomalies?: Array<{
-    time: number;
-    type: "fhr" | "uc" | "contractions";
-    severity: "warning" | "critical";
-    description: string;
-  }>;
-  onAnomalyClick?: (anomaly: any) => void;
+const MAX_HISTORY_SEC = 40 * 60;
+const STATIC_WINDOW_HALF = 90;
+const FHR_NORM = { from: 110, to: 160 };
+
+interface Range {
+  start: number;
+  end: number;
 }
 
-const CTGChart: React.FC<CTGChartProps> = ({
-  title,
-  unit,
-  color,
-  minValue,
-  maxValue,
-  height,
-  data,
-  dangerRanges = [],
-  chartType = "fhr",
-  anomalies = [],
-  onAnomalyClick,
-}) => {
-  // Преобразуем данные для Recharts
-  const chartData = data.map((value, index) => ({
-    time: index,
-    value: value,
-    timestamp: `${Math.floor(index / 60)}:${(index % 60)
-      .toString()
-      .padStart(2, "0")}`,
-  }));
+const emptyMetrics = () => ({
+  baseline: null,
+  shortTermVariability: null,
+  variabilityAmplitude: null,
+  accelerations: { count: 0, totalDuration: 0 },
+  decelerations: { count: 0, totalDuration: 0 },
+  contractionFrequency: null,
+  category: "Normal" as const,
+  reasons: ["Нет данных"],
+  hasUnstableBaseline: false,
+});
 
-  // Функция для определения опасности значения
-  const isDangerValue = (value: number) => {
-    return dangerRanges.some((range) => value < range.min || value > range.max);
-  };
-
-  // Кастомный Tooltip в розовой палитре
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      const isDanger = isDangerValue(data.value);
-      return (
-        <div
-          style={{
-            background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-            border: `1px solid ${isDanger ? "#f43f5e" : "#ec4899"}`,
-            borderRadius: "6px",
-            padding: "8px 12px",
-            boxShadow: "0 4px 12px rgba(236, 72, 153, 0.15)",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontWeight: 600,
-              color: "#831843",
-              fontSize: "11px",
-            }}
-          >
-            {title}
-          </p>
-          <p
-            style={{
-              margin: "4px 0 0 0",
-              fontSize: "14px",
-              fontWeight: "bold",
-              color: isDanger ? "#f43f5e" : "#a21caf",
-            }}
-          >
-            {Math.round(data.value)} {unit}
-          </p>
-          <p
-            style={{
-              margin: "2px 0 0 0",
-              fontSize: "10px",
-              color: "#831843",
-              opacity: 0.8,
-            }}
-          >
-            {data.payload.timestamp}
-          </p>
-          {isDanger && (
-            <p
-              style={{
-                margin: "4px 0 0 0",
-                fontSize: "10px",
-                color: "#f43f5e",
-                fontWeight: "bold",
-              }}
-            >
-              ⚠️ ВНИМАНИЕ!
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <div
-      style={{
-        height,
-        position: "relative",
-        background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-        border: "1px solid #f3e8ff",
-        borderRadius: "6px",
-        padding: "8px",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: "8px",
-          left: "10px",
-          background: "rgba(255,255,255,0.95)",
-          padding: "3px 6px",
-          borderRadius: "4px",
-          zIndex: 10,
-          boxShadow: "0 1px 3px rgba(236, 72, 153, 0.1)",
-          border: "1px solid #f3e8ff",
-        }}
-      >
-        <Text strong style={{ color: "#831843", fontSize: "12px" }}>
-          {title}
-        </Text>
-        <Text
-          style={{
-            marginLeft: "4px",
-            fontSize: "11px",
-            color: "#831843",
-            opacity: 0.7,
-          }}
-        >
-          ({unit})
-        </Text>
-        {/* Индикатор аномалий в заголовке */}
-        {anomalies &&
-          anomalies.filter((a) => a.type === chartType).length > 0 && (
-            <WarningOutlined
-              className="anomaly-indicator"
-              style={{
-                marginLeft: "6px",
-                fontSize: "14px",
-                color: "#dc2626",
-              }}
-            />
-          )}
-      </div>
-
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={chartData}
-          margin={{ top: 32, right: 20, left: 20, bottom: 8 }}
-        >
-          <CartesianGrid strokeDasharray="2 2" stroke="#f3e8ff" />
-          <XAxis
-            dataKey="time"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: "#831843" }}
-            tickFormatter={(value) =>
-              `${Math.floor(value / 60)}:${(value % 60)
-                .toString()
-                .padStart(2, "0")}`
-            }
-          />
-          <YAxis
-            domain={[minValue, maxValue]}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 11, fill: "#831843" }}
-            width={35}
-          />
-          <Tooltip content={<CustomTooltip />} />
-
-          {/* Опасные зоны как фоновая заливка в розовых тонах */}
-          {dangerRanges.map((range, index) => (
-            <React.Fragment key={index}>
-              <ReferenceArea
-                y1={minValue}
-                y2={range.min}
-                fill="#f43f5e"
-                fillOpacity={0.08}
-              />
-              <ReferenceArea
-                y1={range.max}
-                y2={maxValue}
-                fill="#f43f5e"
-                fillOpacity={0.08}
-              />
-            </React.Fragment>
-          ))}
-
-          {/* Отображение реальных аномалий - улучшенное выделение */}
-          {anomalies &&
-            anomalies
-              .filter(
-                (anomaly) =>
-                  anomaly.type === chartType && anomaly.time < data.length
-              ) // Только валидные аномалии
-              .slice(-5) // Показываем только последние 5 аномалий для каждого типа
-              .map((anomaly, index) => (
-                <React.Fragment key={`anomaly-${index}`}>
-                  {/* Широкая подсветка аномальной области с градиентом */}
-                  <ReferenceArea
-                    x1={Math.max(0, anomaly.time - 8)}
-                    x2={Math.min(data.length - 1, anomaly.time + 8)}
-                    fill={
-                      anomaly.severity === "critical" ? "#dc2626" : "#f59e0b"
-                    }
-                    fillOpacity={0.15}
-                  />
-                  {/* Средняя подсветка */}
-                  <ReferenceArea
-                    x1={Math.max(0, anomaly.time - 5)}
-                    x2={Math.min(data.length - 1, anomaly.time + 5)}
-                    fill={
-                      anomaly.severity === "critical" ? "#dc2626" : "#f59e0b"
-                    }
-                    fillOpacity={0.25}
-                  />
-                  {/* Интенсивная подсветка критической области */}
-                  <ReferenceArea
-                    x1={Math.max(0, anomaly.time - 3)}
-                    x2={Math.min(data.length - 1, anomaly.time + 3)}
-                    fill={
-                      anomaly.severity === "critical" ? "#dc2626" : "#f59e0b"
-                    }
-                    fillOpacity={0.4}
-                  />
-                  {/* Центральная точка аномалии */}
-                  <ReferenceArea
-                    x1={anomaly.time}
-                    x2={anomaly.time}
-                    fill={
-                      anomaly.severity === "critical" ? "#dc2626" : "#f59e0b"
-                    }
-                    fillOpacity={0.7}
-                  />
-                </React.Fragment>
-              ))}
-
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={(props: any) => {
-              const isDanger = isDangerValue(props.payload.value);
-              const hasAnomaly =
-                anomalies &&
-                anomalies.some(
-                  (anomaly) =>
-                    anomaly.type === chartType &&
-                    Math.abs(anomaly.time - props.payload.time) <= 3
-                );
-
-              if (hasAnomaly) {
-                const anomaly = anomalies.find(
-                  (anomaly) =>
-                    anomaly.type === chartType &&
-                    Math.abs(anomaly.time - props.payload.time) <= 3
-                );
-
-                const handleAnomalyDotClick = (e: any) => {
-                  e.stopPropagation();
-                  if (onAnomalyClick && anomaly) {
-                    onAnomalyClick(anomaly);
-                  }
-                };
-
-                return (
-                  <g
-                    style={{ cursor: "pointer" }}
-                    onClick={handleAnomalyDotClick}
-                  >
-                    {/* Внешнее кольцо с пульсацией */}
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={12}
-                      fill={
-                        anomaly?.severity === "critical" ? "#dc2626" : "#f59e0b"
-                      }
-                      opacity={0.2}
-                    >
-                      <animate
-                        attributeName="r"
-                        values="8;15;8"
-                        dur="1.5s"
-                        repeatCount="indefinite"
-                      />
-                      <animate
-                        attributeName="opacity"
-                        values="0.1;0.4;0.1"
-                        dur="1.5s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                    {/* Среднее кольцо */}
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={8}
-                      fill={
-                        anomaly?.severity === "critical" ? "#dc2626" : "#f59e0b"
-                      }
-                      opacity={0.4}
-                    >
-                      <animate
-                        attributeName="r"
-                        values="6;10;6"
-                        dur="2s"
-                        repeatCount="indefinite"
-                      />
-                      <animate
-                        attributeName="opacity"
-                        values="0.3;0.6;0.3"
-                        dur="2s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                    {/* Основная точка с большим размером */}
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={6}
-                      fill={
-                        anomaly?.severity === "critical" ? "#dc2626" : "#f59e0b"
-                      }
-                      stroke="#fff"
-                      strokeWidth={3}
-                    >
-                      <animate
-                        attributeName="r"
-                        values="5;7;5"
-                        dur="1s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                    {/* Восклицательный знак как SVG */}
-                    <foreignObject
-                      x={props.cx - 8}
-                      y={props.cy - 25}
-                      width={16}
-                      height={16}
-                      style={{ pointerEvents: "none" }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          width: "16px",
-                          height: "16px",
-                          color:
-                            anomaly?.severity === "critical"
-                              ? "#dc2626"
-                              : "#f59e0b",
-                          fontSize: "12px",
-                        }}
-                      >
-                        <WarningOutlined />
-                      </div>
-                    </foreignObject>
-                    {/* Невидимая увеличенная область для клика */}
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={15}
-                      fill="transparent"
-                      stroke="transparent"
-                    />
-                  </g>
-                );
-              }
-
-              return (
-                <circle
-                  cx={props.cx}
-                  cy={props.cy}
-                  r={isDanger ? 3 : 1.5}
-                  fill={isDanger ? "#f43f5e" : color}
-                  stroke={isDanger ? "#fff" : "none"}
-                  strokeWidth={isDanger ? 1 : 0}
-                />
-              );
-            }}
-            activeDot={{
-              r: 4,
-              fill: color,
-              stroke: "#fff",
-              strokeWidth: 1,
-            }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-
-      {/* Текущее значение в розовой палитре */}
-      {data.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: "8px",
-            right: "10px",
-            background: isDangerValue(data[data.length - 1])
-              ? "#fef2f2"
-              : "#fef7ff",
-            border: `1px solid ${
-              isDangerValue(data[data.length - 1]) ? "#fecaca" : "#f3e8ff"
-            }`,
-            borderRadius: "4px",
-            padding: "4px 8px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            color: isDangerValue(data[data.length - 1]) ? "#dc2626" : "#a21caf",
-          }}
-        >
-          {Math.round(data[data.length - 1])}
-          {isDangerValue(data[data.length - 1]) && (
-            <WarningOutlined
-              style={{
-                marginLeft: "3px",
-                color: "#dc2626",
-                animation: "blink 1s infinite",
-              }}
-            />
-          )}
-        </div>
-      )}
-    </div>
-  );
+const severityColor: Record<CTGEvent["severity"], string> = {
+  info: "blue",
+  warning: "orange",
+  critical: "red",
 };
 
-export default function CTGPage() {
-  // Состояние пациентки
-  const [patientName, setPatientName] = useState<string>(
-    "Иванова Мария Петровна"
+function formatClock(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainder = Math.floor(seconds % 60);
+  return `${minutes}:${remainder.toString().padStart(2, "0")}`;
+}
+
+function clamp(value: number, min: number, max: number) {
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
+const CTGPage: React.FC = () => {
+  const { isConnected, latestData, error: wsError } = useMLWebSocket();
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [visibleWindowSec, setVisibleWindowSec] = useState(600);
+  const [paperSpeed, setPaperSpeed] = useState<1 | 3>(3);
+  const [visibleRange, setVisibleRange] = useState<Range>({ start: 0, end: 600 });
+  const [samples, setSamples] = useState<CTGSample[]>([]);
+  const [manualEvents, setManualEvents] = useState<CTGEvent[]>([]);
+  const [staticWindow, setStaticWindow] = useState<StaticWindowState | null>(null);
+  const [isLive, setIsLive] = useState(true);
+  const [lastTimestamp, setLastTimestamp] = useState(0);
+  const [actionPending, setActionPending] = useState(false);
+
+  const lastTimestampRef = useRef(0);
+  const sessionOffsetRef = useRef<number | null>(null);
+
+  const hasSamples = samples.length > 0;
+  const earliestAvailable = samples.length ? samples[0].time : 0;
+
+  const detection = useMemo(() => {
+    if (!samples.length) {
+      return {
+        events: [],
+        qualitySegments: [],
+        metrics: emptyMetrics(),
+      };
+    }
+    const reference = lastTimestamp || samples[samples.length - 1].time;
+    return computeCTGMetrics(samples, reference, {
+      windowSec: visibleWindowSec,
+      contractionWindowSec: 600,
+    });
+  }, [samples, lastTimestamp, visibleWindowSec]);
+
+  const metrics = samples.length ? detection.metrics : emptyMetrics();
+  const qualitySegments = samples.length ? detection.qualitySegments : [];
+  const combinedEvents = useMemo(() => {
+    const base = samples.length ? detection.events : [];
+    return [...base, ...manualEvents].sort((a, b) => a.start - b.start);
+  }, [samples.length, detection.events, manualEvents]);
+
+  const navigableEvents = useMemo(
+    () => combinedEvents.filter((event) => event.kind !== "loss"),
+    [combinedEvents]
   );
-  const [pregnancyWeek, setPregnancyWeek] = useState<number>(35);
-  const [gestationDay, setGestationDay] = useState<number>(4);
-  const [sessionDate, setSessionDate] = useState<Dayjs>(dayjs());
-  const [sessionTime, setSessionTime] = useState<Dayjs>(dayjs());
-  const [sessionType, setSessionType] = useState<string>("routine");
 
-  // Состояние записи
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [recordingTime, setRecordingTime] = useState<number>(0);
-  const [sessionStartTime, setSessionStartTime] = useState<string>("");
+  const eventsSidebar = useMemo(
+    () =>
+      combinedEvents
+        .filter((event) => event.kind !== "mark")
+        .slice(-8)
+        .reverse(),
+    [combinedEvents]
+  );
 
-  // Данные для графиков
-  const [fetalHeartRate, setFetalHeartRate] = useState<number[]>([]);
-  const [uterineContractions, setUterineContractions] = useState<number[]>([]);
-  const [contractions, setContractions] = useState<number[]>([]);
+  useEffect(() => {
+    if (!isRecording || !latestData) {
+      return;
+    }
 
-  // 🔗 Подключаемся к ML WebSocket для получения реальных предсказаний
-  const {
-    isConnected: mlConnected,
-    latestData: mlData,
-    error: mlError,
-  } = useMLWebSocket();
+    const bpm = latestData.data?.BPMChild ?? latestData.data?.bpmChild ?? null;
+    const toco = latestData.data?.uterus ?? null;
+    const uc = latestData.data?.spasms ?? null;
 
-  // Отслеживаем время начала записи для корректного позиционирования аномалий
-  const [startTime, setStartTime] = useState<number | null>(null);
+    if (bpm === null && toco === null && uc === null) {
+      return;
+    }
 
-  // ИИ предсказания и аномалии
-  const [aiPredictions, setAiPredictions] = useState({
-    riskLevel: "low" as "low" | "medium" | "high",
-    riskScore: 15,
-    nextEvent: "Накопление данных...",
-    confidence: 0,
-    recommendations: ["Ожидание данных от ML модели..."],
-  });
-  const [mlPrediction, setMlPrediction] = useState<any>(null);
-  const [anomalies, setAnomalies] = useState<
-    Array<{
-      time: number;
-      type: "fhr" | "uc" | "contractions";
-      severity: "warning" | "critical";
-      description: string;
-    }>
-  >([]);
-  const [selectedAnomaly, setSelectedAnomaly] = useState<any>(null);
+    const rawTime = typeof latestData.secFromStart === "number" ? latestData.secFromStart : null;
+    if (rawTime !== null) {
+      if (sessionOffsetRef.current === null || rawTime < (sessionOffsetRef.current ?? 0)) {
+        sessionOffsetRef.current = rawTime;
+      }
+    }
 
-  // Состояние для управления видимостью страниц
-  const [showAnalysisPage, setShowAnalysisPage] = useState(false);
-  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
-  const [detailedAnalysisData, setDetailedAnalysisData] = useState<any>(null);
-  const [analysisData, setAnalysisData] = useState<any>(null);
+    const time =
+      rawTime !== null && sessionOffsetRef.current !== null
+        ? Math.max(0, rawTime - sessionOffsetRef.current)
+        : lastTimestampRef.current + 1;
 
-  // Типы сеансов КТГ
-  const sessionTypes = [
-    { value: "routine", label: "Плановое КТГ", color: "blue" },
-    { value: "emergency", label: "Экстренное КТГ", color: "red" },
-    { value: "prenatal", label: "Антенатальное КТГ", color: "green" },
-    { value: "intrapartum", label: "Интранатальное КТГ", color: "orange" },
-  ];
+    const sample = buildSample(
+      time,
+      typeof bpm === "number" ? bpm : null,
+      typeof toco === "number" ? toco : null,
+      typeof uc === "number" ? uc : null
+    );
 
-  // Обработчик клика по аномалии - переход к детальному анализу
-  const handleAnomalyClick = (anomaly: any) => {
-    setSelectedAnomaly(anomaly);
-    // Создаем объект с данными для детального анализа
-    const detailedDataObj = {
-      anomaly,
-      timestamp: new Date().toISOString(),
-      patientInfo: {
-        name: patientName,
-        week: pregnancyWeek,
-        day: gestationDay,
-      },
-      chartData: {
-        fhr: fetalHeartRate.slice(
-          Math.max(0, anomaly.time - 30),
-          anomaly.time + 30
-        ),
-        uc: uterineContractions.slice(
-          Math.max(0, anomaly.time - 30),
-          anomaly.time + 30
-        ),
-        contractions: contractions.slice(
-          Math.max(0, anomaly.time - 30),
-          anomaly.time + 30
-        ),
-      },
-    };
+    lastTimestampRef.current = time;
+    setLastTimestamp(time);
+    setRecordingSeconds((prev) => Math.max(prev, Math.floor(time)));
 
-    // Переходим к странице детального анализа
-    setDetailedAnalysisData(detailedDataObj);
-    setShowDetailedAnalysis(true);
-  };
+    setSamples((prev) => {
+      const cutoff = time - MAX_HISTORY_SEC;
+      const trimmed = prev.filter((item) => item.time >= cutoff);
+      return [...trimmed, sample];
+    });
 
-  // Обработчик возврата с детального анализа
-  const handleBackFromDetailedAnalysis = () => {
-    setShowDetailedAnalysis(false);
-    setDetailedAnalysisData(null);
-  };
+    setManualEvents((prev) => prev.filter((event) => event.end >= time - MAX_HISTORY_SEC));
 
-  // Обработчик возврата со страницы анализа
-  const handleBackFromAnalysis = () => {
-    setShowAnalysisPage(false);
-    setAnalysisData(null);
-  };
+    if (isLive) {
+      const end = time;
+      const start = Math.max(0, end - visibleWindowSec);
+      setVisibleRange({ start, end });
+    }
+  }, [latestData, isRecording, isLive, visibleWindowSec]);
 
-  // Управление записью (данные уже поступают через ML WebSocket)
-  const handleStartStop = async () => {
-    if (isRecording) {
-      // Остановка записи и генератора
-      console.log("⏹️ Stopping recording and generator...");
-      try {
+  const resetSession = useCallback(() => {
+    setSamples([]);
+    setManualEvents([]);
+    setStaticWindow(null);
+    setRecordingSeconds(0);
+    setLastTimestamp(0);
+    lastTimestampRef.current = 0;
+    sessionOffsetRef.current = null;
+    setVisibleRange({ start: 0, end: visibleWindowSec });
+    setIsLive(true);
+  }, [visibleWindowSec]);
+
+  const handleStartStop = useCallback(async () => {
+    if (actionPending) {
+      return;
+    }
+    try {
+      setActionPending(true);
+      if (isRecording) {
         await stopGenerator();
         setIsRecording(false);
-        console.log("✅ Generator stopped successfully");
-      } catch (error) {
-        console.error("❌ Failed to stop generator:", error);
-        // Все равно останавливаем запись локально
-        setIsRecording(false);
-      }
-    } else {
-      // Начало записи и запуск генератора
-      if (mlConnected) {
-        console.log("▶️ Starting recording and generator...");
-        try {
-          await startGenerator();
-          setIsRecording(true);
-          setSessionStartTime(dayjs().format("DD.MM.YYYY HH:mm:ss"));
-          setRecordingTime(0);
-          // Очищаем старые данные
-          setFetalHeartRate([]);
-          setUterineContractions([]);
-          setContractions([]);
-          setAnomalies([]);
-          setStartTime(null); // Сбрасываем время начала
-          console.log("✅ Generator started successfully");
-        } catch (error) {
-          console.error("❌ Failed to start generator:", error);
-          alert(
-            "Не удалось запустить генератор данных. Проверьте подключение."
-          );
-        }
+        message.success("Генератор остановлен");
       } else {
-        console.error("❌ ML WebSocket not connected");
-        alert(
-          "ML сервис не подключен. Подождите подключения или перезагрузите страницу."
-        );
+        await startGenerator();
+        resetSession();
+        setIsRecording(true);
+        message.success("Генератор запущен");
       }
+    } catch (error) {
+      message.error("Не удалось выполнить операцию");
+      console.error(error);
+    } finally {
+      setActionPending(false);
     }
-  };
+  }, [actionPending, isRecording, resetSession]);
 
-  const handleSave = () => {
-    setIsRecording(false);
-    const duration = `${Math.floor(recordingTime / 60)}:${(recordingTime % 60)
-      .toString()
-      .padStart(2, "0")}`;
-    alert(
-      `Данные КТГ сохранены.\nПациентка: ${patientName}\nСрок: ${pregnancyWeek}н ${gestationDay}д\nДлительность: ${duration}`
-    );
-  };
-
-  const handleDelete = () => {
-    if (window.confirm("Вы уверены, что хотите удалить текущую запись?")) {
-      setIsRecording(false);
-      setRecordingTime(0);
-      setFetalHeartRate([]);
-      setUterineContractions([]);
-      setContractions([]);
-      setAnomalies([]);
-      setStartTime(null);
-      setSessionStartTime("");
+  const handleMarkFetalMovement = useCallback(() => {
+    if (!hasSamples) {
+      message.warning("Нет данных для отметки");
+      return;
     }
-  };
+    const time = lastTimestampRef.current;
+    const mark: CTGEvent = {
+      id: `mark-${Date.now()}`,
+      kind: "mark",
+      channel: "fhr",
+      start: time,
+      end: time + 1,
+      peak: time,
+      amplitude: 0,
+      severity: "info",
+      description: "Отмечено движение плода",
+    };
+    setManualEvents((prev) => [...prev, mark]);
+  }, [hasSamples]);
 
-  const handleNewSession = () => {
-    const confirmNew =
-      !sessionStartTime ||
-      window.confirm(
-        "Начать новое обследование? Текущие данные будут очищены."
-      );
-    if (confirmNew) {
-      setIsRecording(false);
-      setRecordingTime(0);
-      setFetalHeartRate([]);
-      setUterineContractions([]);
-      setContractions([]);
-      setAnomalies([]);
-      setStartTime(null);
-      setSessionStartTime("");
-    }
-  };
+  const handleSelectEvent = useCallback((event: CTGEvent) => {
+    const center = event.peak || event.start;
+    const start = Math.max(0, center - STATIC_WINDOW_HALF);
+    const end = center + STATIC_WINDOW_HALF;
+    setStaticWindow({ center, start, end, eventId: event.id });
+    setIsLive(false);
+  }, []);
 
-  // 🔄 Обновляем данные графиков и ML предсказания из WebSocket
-  useEffect(() => {
-    if (!mlData || !mlData.data || !isRecording) return;
-
-    // Инициализируем время начала записи при первых данных ТОЛЬКО если оно ещё не установлено
-    if (startTime === null && mlData.secFromStart) {
-      console.log(`⏰ Setting start time: ${mlData.secFromStart}`);
-      setStartTime(mlData.secFromStart);
-    }
-
-    // Обновляем графики с реальными данными
-    const newFHR = mlData.data.BPMChild || mlData.data.bpmChild || 140;
-    const newUC = mlData.data.uterus || 20;
-    const newSpasms = mlData.data.spasms || 10;
-
-    setFetalHeartRate((prev) => [...prev.slice(-299), newFHR]);
-    setUterineContractions((prev) => [...prev.slice(-299), newUC]);
-    setContractions((prev) => [...prev.slice(-299), newSpasms]);
-
-    // Обновляем ML предсказания если они есть
-    if (mlData.prediction) {
-      const pred = mlData.prediction;
-
-      // Преобразуем hypoxia_risk в наш формат
-      let riskLevel: "low" | "medium" | "high" = "low";
-      if (pred.hypoxia_risk === "critical" || pred.hypoxia_risk === "high") {
-        riskLevel = "high";
-      } else if (pred.hypoxia_risk === "medium") {
-        riskLevel = "medium";
+  const handleNavigateStatic = useCallback(
+    (direction: "prev" | "next") => {
+      if (!staticWindow) {
+        return;
       }
+      const idx = navigableEvents.findIndex((event) => event.id === staticWindow.eventId);
+      if (idx === -1) {
+        return;
+      }
+      const nextIndex = direction === "prev" ? idx - 1 : idx + 1;
+      const target = navigableEvents[nextIndex];
+      if (!target) {
+        return;
+      }
+      const center = target.peak || target.start;
+      const start = Math.max(0, center - STATIC_WINDOW_HALF);
+      const end = center + STATIC_WINDOW_HALF;
+      setStaticWindow({ center, start, end, eventId: target.id });
+    },
+    [staticWindow, navigableEvents]
+  );
 
-      // Генерируем текст следующего события
-      const nextEventText =
-        pred.hypoxia_risk === "low"
-          ? "Стабильное состояние"
-          : pred.hypoxia_risk === "medium"
-          ? "Требуется наблюдение"
-          : pred.hypoxia_risk === "high"
-          ? "ВНИМАНИЕ! Высокий риск"
-          : "ТРЕВОГА! Критический риск";
+  const handleCloseStatic = useCallback(() => {
+    setStaticWindow(null);
+    setIsLive(true);
+    const end = lastTimestampRef.current;
+    const start = Math.max(0, end - visibleWindowSec);
+    setVisibleRange({ start, end });
+  }, [visibleWindowSec]);
 
-      setAiPredictions({
-        riskLevel: riskLevel,
-        riskScore: Math.round(pred.hypoxia_probability * 100),
-        nextEvent: nextEventText,
-        confidence: Math.round(pred.confidence * 100),
-        recommendations:
-          pred.recommendations.length > 0
-            ? pred.recommendations
-            : ["Продолжить мониторинг"],
+  const handleToggleLive = useCallback(
+    (nextLive: boolean) => {
+      setIsLive(nextLive);
+      if (nextLive) {
+        const end = lastTimestampRef.current;
+        const start = Math.max(0, end - visibleWindowSec);
+        setVisibleRange({ start, end });
+        setStaticWindow(null);
+      }
+    },
+    [visibleWindowSec]
+  );
+
+  const handlePan = useCallback(
+    (deltaSeconds: number) => {
+      if (!hasSamples) {
+        return;
+      }
+      const latest = lastTimestampRef.current;
+      const width = visibleWindowSec;
+      setVisibleRange((range) => {
+        const maxStart = Math.max(earliestAvailable, latest - width);
+        let start = clamp(range.start + deltaSeconds, earliestAvailable, maxStart);
+        let end = start + width;
+        if (end > latest) {
+          end = latest;
+          start = Math.max(earliestAvailable, end - width);
+        }
+        setIsLive(Math.abs(end - latest) < 1);
+        return { start, end };
       });
+    },
+    [hasSamples, earliestAvailable, visibleWindowSec]
+  );
 
-      // Сохраняем данные для MLPredictionPanel
-      setMlPrediction(pred);
+  const handleChangeWindow = useCallback(
+    (seconds: number) => {
+      setVisibleWindowSec(seconds);
+      setVisibleRange((range) => {
+        const end = isLive ? lastTimestampRef.current : range.end;
+        const start = Math.max(earliestAvailable, end - seconds);
+        return { start, end };
+      });
+    },
+    [isLive, earliestAvailable]
+  );
 
-      // Создаем аномалии из реальных данных ML, а не из алертов
-      if (pred.alerts && pred.alerts.length > 0) {
-        const currentDataLength = fetalHeartRate.length;
-        const currentFHR = newFHR;
-        const currentUC = newUC;
+  const handlePaperSpeed = useCallback((speed: 1 | 3) => {
+    setPaperSpeed(speed);
+  }, []);
 
-        // Анализируем реальные критические значения из данных
-        const isCriticalFHR = currentFHR < 90 || currentFHR > 180; // Реальная брадикардия/тахикардия
-        const isCriticalUC = currentUC > 65; // Реальный гипертонус
-        const isCriticalSpasms = newSpasms > 70; // Сильные схватки
+  const handleClearSession = useCallback(() => {
+    resetSession();
+  }, [resetSession]);
 
-        const newAnomalies: any[] = [];
-
-        // Создаем аномалию только если есть реальная проблема в данных
-        if (isCriticalFHR) {
-          newAnomalies.push({
-            time: Math.max(0, currentDataLength - 5), // Чуть раньше текущего момента
-            type: "fhr" as const,
-            severity:
-              currentFHR < 80 || currentFHR > 200
-                ? ("critical" as const)
-                : ("warning" as const),
-            description:
-              currentFHR < 90
-                ? `Брадикардия: ${currentFHR.toFixed(0)} уд/мин`
-                : `Тахикардия: ${currentFHR.toFixed(0)} уд/мин`,
-          });
-        }
-
-        if (isCriticalUC) {
-          newAnomalies.push({
-            time: Math.max(0, currentDataLength - 5),
-            type: "uc" as const,
-            severity: "critical" as const,
-            description: `Гипертонус матки: ${currentUC.toFixed(0)} mmHg`,
-          });
-        }
-
-        if (isCriticalSpasms) {
-          newAnomalies.push({
-            time: Math.max(0, currentDataLength - 5),
-            type: "contractions" as const,
-            severity: "warning" as const,
-            description: `Интенсивные схватки: ${newSpasms.toFixed(0)} mmHg`,
-          });
-        }
-
-        console.log(
-          `🎯 Real anomalies detected: FHR=${currentFHR.toFixed(
-            0
-          )} UC=${currentUC.toFixed(0)} Spasms=${newSpasms.toFixed(0)}`
-        );
-
-        // Добавляем аномалии только если они реально есть
-        if (newAnomalies.length > 0) {
-          setAnomalies((prev) => {
-            // Проверяем, есть ли уже похожие аномалии в последних записях
-            const recentAnomalies = prev.slice(-5);
-            const hasRecentSimilar = recentAnomalies.some(
-              (existing) =>
-                Math.abs(existing.time - (currentDataLength - 5)) < 15 && // В пределах 15 точек
-                existing.type === newAnomalies[0]?.type
-            );
-
-            if (!hasRecentSimilar) {
-              console.log(
-                `➕ Adding ${newAnomalies.length} real anomalies at position ${
-                  currentDataLength - 5
-                }`
-              );
-              return [...prev.slice(-20), ...newAnomalies]; // Храним последние 20 аномалий
-            } else {
-              console.log(`⏭️ Skipping duplicate anomaly (similar exists)`);
-              return prev;
-            }
-          });
-        }
-      }
-    }
-  }, [mlData, isRecording, startTime]);
-
-  // Таймер записи (только для отображения времени)
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isRecording]);
-
-  // Получение рискового статуса
-  const getRiskStatus = () => {
-    if (fetalHeartRate.length === 0) return { status: "ok", score: 0 };
-
-    const currentFHR = fetalHeartRate[fetalHeartRate.length - 1];
-    const currentUC = uterineContractions[uterineContractions.length - 1];
-
-    let score = 0;
-    if (currentFHR < 110 || currentFHR > 160) score += 30;
-    if (currentUC > 80) score += 20;
-
-    if (score >= 50) return { status: "danger", score };
-    if (score >= 25) return { status: "warn", score };
-    return { status: "ok", score };
-  };
-
-  const risk = getRiskStatus();
-
-  // Читерская функция для принудительной генерации аномалии
-  const generateCheatAnomaly = () => {
-    const currentTime = fetalHeartRate.length;
-    const anomalyTypes = [
-      { type: "fhr", description: "Брадикардия плода", severity: "critical" },
-      { type: "fhr", description: "Тахикардия плода", severity: "warning" },
-      { type: "uc", description: "Гипертонус матки", severity: "critical" },
-      {
-        type: "contractions",
-        description: "Патологические схватки",
-        severity: "warning",
-      },
-    ];
-
-    const randomAnomaly =
-      anomalyTypes[Math.floor(Math.random() * anomalyTypes.length)];
-
-    const newAnomaly = {
-      time: currentTime,
-      type: randomAnomaly.type as "fhr" | "uc" | "contractions",
-      severity: randomAnomaly.severity as "warning" | "critical",
-      description: randomAnomaly.description,
-    };
-
-    setAnomalies((prev) => {
-      const updated = [...prev.slice(-10), newAnomaly];
-      return updated;
-    });
-  };
-
-  // Если показываем детальный анализ аномалии
-  if (showDetailedAnalysis && detailedAnalysisData) {
-    return (
-      <DetailedAnomalyAnalysis
-        data={detailedAnalysisData}
-        onBack={handleBackFromDetailedAnalysis}
-      />
-    );
-  }
-
-  // Если показываем страницу анализа
-  if (showAnalysisPage && analysisData) {
-    return (
-      <AnomalyAnalysisPage
-        data={analysisData}
-        onBack={handleBackFromAnalysis}
-      />
-    );
-  }
+  const windowLabel = `${formatClock(Math.max(0, visibleRange.start))} – ${formatClock(
+    Math.max(0, visibleRange.end)
+  )}`;
 
   return (
-    <div
-      style={{
-        padding: "12px",
-        background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Компактный заголовок страницы в розовой палитре */}
-      <Card
-        size="small"
-        style={{ marginBottom: "10px" }}
-        bodyStyle={{ padding: "8px 12px" }}
-        headStyle={{
-          padding: "6px 12px",
-          minHeight: "auto",
-          background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-          borderBottom: "1px solid #f3e8ff",
-        }}
-        title={
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Avatar
-                size={24}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
-                }}
-                icon={<HeartOutlined />}
-              />
-              <span
-                style={{ fontSize: "16px", fontWeight: 600, color: "#831843" }}
-              >
-                КТГ Мониторинг
-              </span>
-            </div>
-            <Space size="small">
-              <Tag
-                color={isRecording ? "error" : "default"}
-                className="text-sm"
-                style={{
-                  fontSize: "12px",
-                  padding: "4px 8px",
-                  background: isRecording ? "#fef2f2" : "#f8fafc",
-                  color: isRecording ? "#dc2626" : "#64748b",
-                  border: `1px solid ${isRecording ? "#fecaca" : "#e2e8f0"}`,
-                }}
-              >
-                {isRecording ? "ЗАПИСЬ" : "ОСТАНОВЛЕНО"}
-              </Tag>
-              {/* ML индикатор */}
-              <Tag
-                color={mlConnected ? "success" : "default"}
-                style={{
-                  fontSize: "11px",
-                  padding: "2px 6px",
-                  background: mlConnected ? "#f0fdf4" : "#f8fafc",
-                  color: mlConnected ? "#16a34a" : "#64748b",
-                  border: `1px solid ${mlConnected ? "#bbf7d0" : "#e2e8f0"}`,
-                }}
-              >
-                {mlConnected ? "🧠 ML" : "⚫ ML"}
-              </Tag>
-            </Space>
-          </div>
-        }
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <UserOutlined style={{ color: "#ec4899", fontSize: "14px" }} />
-              <span
-                style={{ fontSize: "13px", fontWeight: 600, color: "#831843" }}
-              >
-                {patientName}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <ClockCircleOutlined
-                style={{ color: "#ec4899", fontSize: "14px" }}
-              />
-              <span style={{ fontSize: "13px", color: "#831843" }}>
-                {pregnancyWeek}н {gestationDay}д
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <CalendarOutlined
-                style={{ color: "#ec4899", fontSize: "14px" }}
-              />
-              <span style={{ fontSize: "13px", color: "#831843" }}>
-                {sessionDate.format("DD.MM.YYYY")}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              style={{ fontSize: "14px", color: "#831843", fontWeight: "bold" }}
-            >
-              {Math.floor(recordingTime / 60)}:
-              {(recordingTime % 60).toString().padStart(2, "0")}
-            </span>
-            <div
-              className={`w-2 h-2 rounded-full ${
-                isRecording ? "bg-red-500" : "bg-gray-400"
-              } ${isRecording ? "animate-pulse" : ""}`}
-            ></div>
-          </div>
-        </div>
-      </Card>
+    <div style={{ padding: 16, background: "#f5f7fa", minHeight: "100%" }}>
+      {staticWindow && (
+        <CTGStaticWindow
+          open
+          samples={samples}
+          events={combinedEvents}
+          qualitySegments={qualitySegments}
+          baseline={metrics.baseline}
+          normZone={FHR_NORM}
+          start={staticWindow.start}
+          end={staticWindow.end}
+          paperSpeed={paperSpeed}
+          onClose={handleCloseStatic}
+          onNavigate={handleNavigateStatic}
+        />
+      )}
 
-      {/* Основная область с графиками и боковой панелью */}
-      <Row gutter={[12, 12]}>
-        {/* Графики КТГ - увеличенные для лучшего анализа */}
+      <Row gutter={16}>
         <Col span={18}>
-          <Card
-            size="small"
-            style={{ height: "600px" }}
-            bodyStyle={{ height: "570px", padding: "8px" }}
-            headStyle={{
-              padding: "6px 12px",
-              minHeight: "auto",
-              background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-              borderBottom: "1px solid #f3e8ff",
-            }}
-            title={
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <LineChartOutlined
-                    style={{ color: "#ec4899", fontSize: "16px" }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      color: "#831843",
-                    }}
+          <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            <Card bodyStyle={{ padding: "12px 16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Space size="middle" align="center">
+                  <Title level={5} style={{ margin: 0 }}>
+                    Кардиотокография
+                  </Title>
+                  <Tag color={isRecording ? "red" : "default"}>{isRecording ? "Запись" : "Пауза"}</Tag>
+                  <Tag icon={<WifiOutlined />} color={isConnected ? "green" : "volcano"}>
+                    {isConnected ? "WS: онлайн" : "WS: офлайн"}
+                  </Tag>
+                  <Tag icon={<ClockCircleOutlined />}>{formatClock(recordingSeconds)}</Tag>
+                  {wsError && <Tag color="red">{wsError}</Tag>}
+                </Space>
+                <Space>
+                  <Button
+                    type="primary"
+                    icon={isRecording ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                    onClick={handleStartStop}
+                    loading={actionPending}
                   >
-                    Графики КТГ
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#831843",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Базальная
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                        color: "#ec4899",
-                      }}
-                    >
-                      {fetalHeartRate.length > 10
-                        ? Math.round(
-                            fetalHeartRate
-                              .slice(-10)
-                              .reduce((a, b) => a + b, 0) / 10
-                          )
-                        : "--"}{" "}
-                      bpm
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "#831843",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Вариация
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                        color: "#a21caf",
-                      }}
-                    >
-                      {fetalHeartRate.length > 10
-                        ? Math.round(
-                            Math.max(...fetalHeartRate.slice(-10)) -
-                              Math.min(...fetalHeartRate.slice(-10))
-                          )
-                        : "--"}{" "}
-                      bpm
-                    </div>
-                  </div>
-                </div>
+                    {isRecording ? "Стоп" : "Старт"}
+                  </Button>
+                  <Button icon={<FlagOutlined />} onClick={handleMarkFetalMovement} disabled={!hasSamples}>
+                    MARK
+                  </Button>
+                  <Button icon={<SyncOutlined />} onClick={handleClearSession} disabled={!hasSamples && !isRecording}>
+                    Сбросить
+                  </Button>
+                </Space>
               </div>
-            }
-          >
+            </Card>
+
             <div
               style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
+                background: "#eef2f9",
+                border: "1px solid #e2e8f0",
+                borderRadius: 12,
+                padding: 16,
               }}
             >
-              {/* График ЧСС плода - розовый */}
-              <CTGChart
-                title="ЧСС плода"
-                unit="bpm"
-                color="#ec4899"
-                minValue={100}
-                maxValue={180}
-                height="calc(33.33% - 4px)"
-                data={fetalHeartRate}
-                dangerRanges={[{ min: 110, max: 160 }]}
-                chartType="fhr"
-                anomalies={anomalies}
-                onAnomalyClick={handleAnomalyClick}
+              <CTGStatsBar
+                metrics={metrics}
+                visibleWindowSec={visibleWindowSec}
+                windowLabel={windowLabel}
+                onChangeWindow={handleChangeWindow}
+                paperSpeed={paperSpeed}
+                onPaperSpeedChange={handlePaperSpeed}
+                onMarkFetalMovement={handleMarkFetalMovement}
               />
-
-              {/* График тонуса матки - фиолетовый */}
-              <CTGChart
-                title="Тонус матки"
-                unit="mmHg"
-                color="#a21caf"
-                minValue={0}
-                maxValue={100}
-                height="calc(33.33% - 4px)"
-                data={uterineContractions}
-                dangerRanges={[{ min: 0, max: 80 }]}
-                chartType="uc"
-                anomalies={anomalies}
-                onAnomalyClick={handleAnomalyClick}
-              />
-
-              {/* График схваток - малиновый */}
-              <CTGChart
-                title="Схватки"
-                unit="mmHg"
-                color="#be185d"
-                minValue={0}
-                maxValue={80}
-                height="calc(33.34% - 4px)"
-                data={contractions}
-                dangerRanges={[{ min: 0, max: 60 }]}
-                chartType="contractions"
-                anomalies={anomalies}
-                onAnomalyClick={handleAnomalyClick}
+              <CTGStrip
+                samples={samples}
+                visibleStart={visibleRange.start}
+                visibleEnd={visibleRange.end}
+                events={combinedEvents}
+                qualitySegments={qualitySegments}
+                baseline={metrics.baseline}
+                normZone={FHR_NORM}
+                paperSpeed={paperSpeed}
+                trackHeight={300}
+                compact
+                onSelectEvent={handleSelectEvent}
+                onPan={handlePan}
+                onToggleLive={handleToggleLive}
               />
             </div>
-          </Card>
+
+            <Card title="Последние события" bodyStyle={{ padding: 16 }}>
+              {eventsSidebar.length === 0 ? (
+                <Text type="secondary">Пока событий нет</Text>
+              ) : (
+                <Space direction="vertical" style={{ width: "100%" }} size={8}>
+                  {eventsSidebar.map((event) => (
+                    <div
+                      key={event.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "6px 8px",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 6,
+                        background: "#fff",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleSelectEvent(event)}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <Text strong>{event.description}</Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {event.kind.toUpperCase()} · {formatClock(event.start)}
+                        </Text>
+                      </div>
+                      <Tag color={severityColor[event.severity]}>{event.severity}</Tag>
+                    </div>
+                  ))}
+                </Space>
+              )}
+            </Card>
+          </Space>
         </Col>
 
-        {/* Правая колонка - компактные виджеты в розовой палитре */}
         <Col span={6}>
-          {/* ML Предсказания */}
-          <MLPredictionPanel
-            prediction={mlPrediction}
-            isAccumulating={!mlPrediction}
-          />
-
-          {/* Управление */}
-          <Card
-            size="small"
-            style={{ marginBottom: "10px" }}
-            bodyStyle={{ padding: "8px" }}
-            headStyle={{
-              padding: "4px 8px",
-              minHeight: "auto",
-              background: "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-              borderBottom: "1px solid #f3e8ff",
-            }}
-            title={
-              <div className="flex items-center gap-2">
-                <SettingOutlined
-                  style={{ color: "#ec4899", fontSize: "14px" }}
-                />
-                <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#831843",
-                  }}
-                >
-                  Управление
-                </span>
-              </div>
-            }
-          >
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-              <Button
-                type="primary"
-                danger={isRecording}
-                icon={
-                  isRecording ? <PauseCircleOutlined /> : <PlayCircleOutlined />
-                }
-                onClick={handleStartStop}
-                block
-                size="small"
-                style={{
-                  background: isRecording
-                    ? "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)"
-                    : "linear-gradient(135deg, #ec4899 0%, #be185d 100%)",
-                  border: "none",
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                  height: "32px",
-                }}
-              >
-                {isRecording ? "Стоп" : "Старт"}
-              </Button>
-
-              <Button
-                icon={<SaveOutlined />}
-                onClick={handleSave}
-                disabled={!sessionStartTime}
-                block
-                size="small"
-                style={{
-                  background: "#fef7ff",
-                  borderColor: "#f3e8ff",
-                  color: "#831843",
-                  fontSize: "13px",
-                  height: "32px",
-                }}
-              >
-                Сохранить
-              </Button>
-
-              <Button
-                icon={<DeleteOutlined />}
-                onClick={handleDelete}
-                disabled={!sessionStartTime && !isRecording}
-                block
-                size="small"
-                danger
-                style={{
-                  fontSize: "13px",
-                  height: "32px",
-                }}
-              >
-                Удалить
-              </Button>
-
-              <Button
-                icon={<PlusOutlined />}
-                onClick={handleNewSession}
-                block
-                size="small"
-                type="dashed"
-                style={{
-                  borderColor: "#f3e8ff",
-                  color: "#831843",
-                  fontSize: "13px",
-                  height: "32px",
-                }}
-              >
-                Новое обследование
-              </Button>
-            </Space>
-          </Card>
-
-          {/* Панель обнаруженных аномалий */}
-          <Card
-            size="small"
-            style={{ marginBottom: "10px" }}
-            bodyStyle={{ padding: "8px" }}
-            headStyle={{
-              padding: "4px 8px",
-              minHeight: "auto",
-              background: "linear-gradient(135deg, #fef2f2 0%, #ffffff 100%)",
-              borderBottom: "1px solid #fecaca",
-            }}
-            title={
-              <div className="flex items-center gap-2">
-                <AlertOutlined
-                  style={{
-                    color: "#dc2626",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  onClick={generateCheatAnomaly}
-                  className="hover:scale-110"
-                  title="Создать тестовую аномалию"
-                />
-                <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#831843",
-                  }}
-                >
-                  Аномалии ({anomalies.length})
-                </span>
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-              </div>
-            }
-          >
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {anomalies.length > 0 ? (
-                anomalies.slice(-5).map((anomaly, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleAnomalyClick(anomaly)}
-                    style={{
-                      padding: "6px 8px",
-                      border: `1px solid ${
-                        anomaly.severity === "critical" ? "#fecaca" : "#fef3c7"
-                      }`,
-                      borderRadius: "4px",
-                      background:
-                        anomaly.severity === "critical" ? "#fef2f2" : "#fefce8",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                    className="hover:shadow-sm"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {anomaly.severity === "critical" ? (
-                          <ExclamationCircleOutlined
-                            style={{ color: "#dc2626", fontSize: "14px" }}
-                          />
-                        ) : (
-                          <WarningOutlined
-                            style={{ color: "#d97706", fontSize: "14px" }}
-                          />
-                        )}
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            color:
-                              anomaly.severity === "critical"
-                                ? "#dc2626"
-                                : "#d97706",
-                          }}
-                        >
-                          {anomaly.description}
-                        </span>
-                      </div>
-                      <Tag
-                        color={
-                          anomaly.severity === "critical" ? "error" : "warning"
-                        }
-                        style={{
-                          fontSize: "10px",
-                          margin: 0,
-                          padding: "1px 4px",
-                        }}
-                      >
-                        {Math.floor(anomaly.time / 60)}:
-                        {(anomaly.time % 60).toString().padStart(2, "0")}
-                      </Tag>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div
-                  style={{
-                    padding: "12px",
-                    textAlign: "center",
-                    color: "#64748b",
-                    fontSize: "12px",
-                  }}
-                >
-                  Аномалии не обнаружены
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* Параметры сеанса - collapsed */}
-          <Collapse
-            size="small"
-            ghost
-            items={[
-              {
-                key: "1",
-                label: (
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      color: "#831843",
-                    }}
-                  >
-                    <SettingOutlined /> Параметры сеанса
-                  </span>
-                ),
-                children: (
-                  <div
-                    className="space-y-2 p-2 rounded"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%)",
-                      border: "1px solid #f3e8ff",
-                    }}
-                  >
-                    <div>
-                      <Text
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          color: "#831843",
-                        }}
-                      >
-                        ФИО:
-                      </Text>
-                      <Input
-                        size="small"
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                        style={{ fontSize: "13px", marginTop: "2px" }}
-                      />
-                    </div>
-                    <div>
-                      <Text
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          color: "#831843",
-                        }}
-                      >
-                        Тип КТГ:
-                      </Text>
-                      <Select
-                        size="small"
-                        value={sessionType}
-                        onChange={setSessionType}
-                        style={{ width: "100%", marginTop: "2px" }}
-                      >
-                        {sessionTypes.map((type) => (
-                          <Option key={type.value} value={type.value}>
-                            <span style={{ fontSize: "13px" }}>
-                              {type.label}
-                            </span>
-                          </Option>
-                        ))}
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Text
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            color: "#831843",
-                          }}
-                        >
-                          Недели:
-                        </Text>
-                        <Input
-                          size="small"
-                          type="number"
-                          value={pregnancyWeek}
-                          onChange={(e) =>
-                            setPregnancyWeek(Number(e.target.value))
-                          }
-                          style={{ marginTop: "2px" }}
-                        />
-                      </div>
-                      <div>
-                        <Text
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            color: "#831843",
-                          }}
-                        >
-                          Дни:
-                        </Text>
-                        <Input
-                          size="small"
-                          type="number"
-                          value={gestationDay}
-                          onChange={(e) =>
-                            setGestationDay(Number(e.target.value))
-                          }
-                          style={{ marginTop: "2px" }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ),
-              },
-            ]}
-          />
+          <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            <MLPredictionPanel
+              prediction={latestData?.prediction ?? null}
+              isAccumulating={!latestData?.prediction}
+            />
+            <Card title="Статус подключения" bodyStyle={{ padding: 16 }}>
+              <Space direction="vertical">
+                <Text>
+                  WebSocket: <Text strong>{isConnected ? "активен" : "нет сигнала"}</Text>
+                </Text>
+                <Text>
+                  Поток данных: <Text strong>{hasSamples ? "идёт" : "ожидание"}</Text>
+                </Text>
+                <Text>
+                  Окно обзора: <Text strong>{visibleWindowSec / 60} мин</Text>
+                </Text>
+                <Text>
+                  Скорость бумаги: <Text strong>{paperSpeed} см/мин</Text>
+                </Text>
+              </Space>
+            </Card>
+          </Space>
         </Col>
       </Row>
     </div>
   );
-}
+};
+
+export default CTGPage;
