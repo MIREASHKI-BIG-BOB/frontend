@@ -182,7 +182,8 @@ const CTGPage: React.FC = () => {
     setLastTimestamp(0);
     lastTimestampRef.current = 0;
     sessionOffsetRef.current = null;
-    setVisibleRange({ start: 0, end: visibleWindowSec });
+    // В самом начале показываем только доступную часть, без пустой простыни
+    setVisibleRange({ start: 0, end: 0 });
     setIsLive(true);
   }, [visibleWindowSec]);
 
@@ -264,7 +265,7 @@ const CTGPage: React.FC = () => {
     setStaticWindow(null);
     setIsLive(true);
     const end = lastTimestampRef.current;
-    const start = Math.max(0, end - visibleWindowSec);
+    const start = end < visibleWindowSec ? 0 : end - visibleWindowSec;
     setVisibleRange({ start, end });
   }, [visibleWindowSec]);
 
@@ -273,7 +274,7 @@ const CTGPage: React.FC = () => {
       setIsLive(nextLive);
       if (nextLive) {
         const end = lastTimestampRef.current;
-        const start = Math.max(0, end - visibleWindowSec);
+        const start = end < visibleWindowSec ? 0 : end - visibleWindowSec;
         setVisibleRange({ start, end });
         setStaticWindow(null);
       }
@@ -308,6 +309,10 @@ const CTGPage: React.FC = () => {
       setVisibleWindowSec(seconds);
       setVisibleRange((range) => {
         const end = isLive ? lastTimestampRef.current : range.end;
+        if (isLive) {
+          const start = end < seconds ? 0 : end - seconds;
+          return { start, end };
+        }
         const start = Math.max(earliestAvailable, end - seconds);
         return { start, end };
       });

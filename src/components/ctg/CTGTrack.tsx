@@ -69,20 +69,28 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
         return "";
       }
       let d = "";
+      let hasSegment = false;
       for (let i = 0; i < series.length; i += 1) {
         const value = series[i];
+        const x = (times[i] - visibleStart) / secondsPerPixel;
         if (value === null || Number.isNaN(value)) {
+          // разрыв сегмента
+          hasSegment = false;
           continue;
         }
-        const x = (times[i] - visibleStart) / secondsPerPixel;
         if (x < -2) {
           continue;
         }
         const clamped = Math.max(minValue, Math.min(maxValue, value));
         const y = valueToY(clamped);
-        d += `${d ? " L" : "M"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+        if (!hasSegment) {
+          d += ` ${d ? "" : ""}M ${x.toFixed(2)} ${y.toFixed(2)}`;
+          hasSegment = true;
+        } else {
+          d += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
+        }
       }
-      return d;
+      return d.trim();
     },
     [width, times, visibleStart, secondsPerPixel, minValue, maxValue, valueToY]
   );
@@ -106,13 +114,13 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
         const w =
           Math.min(width, (segment.end - visibleStart) / secondsPerPixel) - x;
         return (
-          <rect
+            <path
             key={`quality-${idx}`}
             x={x}
             y={0}
             width={Math.max(0, w)}
-            height={height}
-            fill={segment.quality === "lost" ? "rgba(148, 163, 184, 0.45)" : "rgba(251, 191, 36, 0.25)"}
+              strokeLinecap="butt"
+              strokeLinejoin="miter"
           />
         );
       });
@@ -181,8 +189,8 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
               fill="none"
               stroke="#fff"
               strokeWidth={1.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap="butt"
+              strokeLinejoin="miter"
               opacity={0.9}
             />
             <path
@@ -190,8 +198,8 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
               fill="none"
               stroke={color}
               strokeWidth={3.4}
-              strokeLinejoin="round"
-              strokeLinecap="round"
+              strokeLinejoin="miter"
+              strokeLinecap="butt"
             />
           </>
         )}

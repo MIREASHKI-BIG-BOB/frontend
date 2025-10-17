@@ -400,7 +400,7 @@ export default function CTGMultiChart({
               labelFormatter={(v) => timeFmt(v as number)}
               formatter={(value: number, name: string) => [Math.round(value), name]}
             />
-            <Legend wrapperStyle={{ fontSize: typography.fontSize['11px'] }} />
+            <Legend wrapperStyle={{ fontSize: typography.fontSize.xs }} />
             
             {/* Референсные линии */}
             {config.referenceLines.map((line, index) => (
@@ -451,7 +451,7 @@ export default function CTGMultiChart({
               size="small"
               strokeColor={riskColor}
               showInfo={false}
-              style={{ width: typography.sizes.components.width100 }}
+              style={{ width: '100%' }}
             />
           </Col>
         </Row>

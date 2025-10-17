@@ -207,7 +207,7 @@ export default function CTGChart({ fpsMs = 250, windowLengthSec = 180, onRiskCha
             <Tooltip labelFormatter={(v) => timeFmt(v as number)} />
             <Legend />
             {markers.map(m => (
-              <ReferenceLine key={m.t} x={m.t} stroke={m.minute ? colors.primary : colors.border.divider} strokeDasharray={m.minute ? undefined : '3 3'} strokeWidth={m.minute ? 2 : 1} label={m.minute ? { value: new Date(m.t).toLocaleTimeString('ru-RU', { minute: '2-digit' }), position: 'top', fill: colors.text.accent } : undefined} />
+              <ReferenceLine key={m.t} x={m.t} stroke={m.minute ? colors.primary : colors.border.divider} strokeDasharray={m.minute ? undefined : '3 3'} strokeWidth={m.minute ? 2 : 1} label={m.minute ? { value: new Date(m.t).toLocaleTimeString('ru-RU', { minute: '2-digit' }), position: 'top', fill: colors.text.secondary } : undefined} />
             ))}
             <Line type="monotone" yAxisId="left" dataKey="fhr" name="FHR" stroke={colors.chart.fhr} dot={false} strokeWidth={2} />
             <Line type="monotone" yAxisId="right" dataKey="uc" name="UC" stroke={colors.chart.uc} dot={false} strokeWidth={2} />

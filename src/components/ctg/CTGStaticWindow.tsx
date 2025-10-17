@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { CTGStrip } from ".";
+import CTGStrip from "./CTGStrip";
 import { CTGEvent, CTGQualitySegment, CTGSample } from "./types";
 
 interface CTGStaticWindowProps {
@@ -75,7 +75,6 @@ const CTGStaticWindow: React.FC<CTGStaticWindowProps> = ({
         normZone={normZone}
         paperSpeed={paperSpeed}
         trackHeight={280}
-        compact
         onSelectEvent={() => undefined}
         onPan={() => undefined}
         onToggleLive={() => undefined}

@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import CTGGrid, { TrackGridConfig } from "./CTGGrid";
 import CTGTrack from "./CTGTrack";
+import { PX_PER_CM } from ".";
 import { CTGChannel, CTGEvent, CTGQualitySegment } from "./types";
 
 interface CTGStripProps {
@@ -15,6 +16,7 @@ interface CTGStripProps {
   onSelectEvent: (event: CTGEvent) => void;
   onPan: (deltaSeconds: number) => void;
   onToggleLive: (isLive: boolean) => void;
+  trackHeight?: number;
 }
 
 const FHR_RANGE = { min: 50, max: 210 };
@@ -33,33 +35,21 @@ const CTGStrip: React.FC<CTGStripProps> = ({
   onSelectEvent,
   onPan,
   onToggleLive,
+  trackHeight,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
   const [hoverState, setHoverState] = useState<{
     time: number | null;
     value: number | null;
     channel: CTGChannel | null;
   }>({ time: null, value: null, channel: null });
 
-  const heightPerTrack = 220;
-  const totalHeight = heightPerTrack * 3;
-
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) {
-      return;
-    }
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.target === element) {
-          setWidth(entry.contentRect.width);
-        }
-      }
-    });
-    resizeObserver.observe(element);
-    return () => resizeObserver.disconnect();
-  }, []);
+  const heightPerTrack = trackHeight ?? 220;
+  const totalHeight = heightPerTrack * 2;
+  const duration = Math.max(1, visibleEnd - visibleStart);
+  const pxPerSecond = (paperSpeed * PX_PER_CM) / 60;
+  const width = Math.max(1, Math.round(duration * pxPerSecond));
+  const secondsPerPixel = pxPerSecond > 0 ? 1 / pxPerSecond : duration / width;
 
   const visibleSamples = useMemo(() => {
     const startIdx = samples.findIndex((sample) => sample.time >= visibleStart);
@@ -73,6 +63,7 @@ const CTGStrip: React.FC<CTGStripProps> = ({
   const tocoValues = visibleSamples.map((sample) => sample.toco ?? null);
   const ucValues = visibleSamples.map((sample) => sample.uc ?? null);
   const fhrSmoothed = useMemo(() => computeMovingAverage(fhrValues, 5), [fhrValues]);
+  const showFhrMA = false; // по умолчанию сглаживание отключено
   const trackQuality = useMemo(
     () =>
       qualitySegments.map((segment) => ({
@@ -90,8 +81,8 @@ const CTGStrip: React.FC<CTGStripProps> = ({
       height: heightPerTrack,
       minValue: FHR_RANGE.min,
       maxValue: FHR_RANGE.max,
-  minorStep: 10,
-  majorStep: 20,
+      minorStep: 10,
+      majorStep: 30,
       unit: "bpm",
       label: "FHR",
     },
@@ -101,28 +92,15 @@ const CTGStrip: React.FC<CTGStripProps> = ({
       height: heightPerTrack,
       minValue: TOCO_RANGE.min,
       maxValue: TOCO_RANGE.max,
-  minorStep: 10,
-  majorStep: 20,
+      minorStep: 10,
+      majorStep: 20,
       unit: "mmHg",
-      label: "TOCO",
-    },
-    {
-      channel: "uc",
-      top: heightPerTrack * 2,
-      height: heightPerTrack,
-      minValue: UC_RANGE.min,
-      maxValue: UC_RANGE.max,
-  minorStep: 10,
-  majorStep: 20,
-      unit: "mmHg",
-      label: "UC",
+      label: "UC/TOCO",
     },
   ];
 
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<{ startX: number; startVisibleStart: number; startVisibleEnd: number } | null>(null);
-
-  const duration = Math.max(1, visibleEnd - visibleStart);
 
   return (
     <div
@@ -131,10 +109,8 @@ const CTGStrip: React.FC<CTGStripProps> = ({
         position: "relative",
         width: "100%",
         height: totalHeight,
-        backgroundColor: "#fffaf7",
-        border: "1px solid #d4d4d8",
-        boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)",
-        overflow: "hidden",
+        overflowX: "auto",
+        overflowY: "hidden",
         userSelect: "none",
       }}
       onMouseDown={(event) => {
@@ -149,7 +125,6 @@ const CTGStrip: React.FC<CTGStripProps> = ({
       onMouseMove={(event) => {
         if (isDragging && dragRef.current && width > 0) {
           const deltaPx = event.clientX - dragRef.current.startX;
-          const secondsPerPixel = duration / width;
           const deltaSeconds = -deltaPx * secondsPerPixel;
           onPan(deltaSeconds);
         }
@@ -164,18 +139,19 @@ const CTGStrip: React.FC<CTGStripProps> = ({
       }}
       onDoubleClick={() => onToggleLive(true)}
     >
-      <CTGGrid
-        width={width}
-        height={totalHeight}
-        visibleStart={visibleStart}
-        visibleEnd={visibleEnd}
-  minorSeconds={10}
-  majorSeconds={60}
-        trackConfigs={trackConfigs}
-        paperSpeed={paperSpeed}
-      />
+  <div style={{ position: "relative", width: `${width}px`, height: totalHeight, backgroundColor: "#fffaf7", border: "1px solid #d4d4d8", boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)" }}>
+        <CTGGrid
+          width={width}
+          height={totalHeight}
+          visibleStart={visibleStart}
+          visibleEnd={visibleEnd}
+          minorSeconds={10}
+          majorSeconds={60}
+          trackConfigs={trackConfigs}
+          paperSpeed={paperSpeed}
+        />
 
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
         <CTGTrack
           width={width}
           height={heightPerTrack}
@@ -196,14 +172,18 @@ const CTGStrip: React.FC<CTGStripProps> = ({
           onSelectEvent={onSelectEvent}
           hoverTime={hoverState.time}
           onHover={(payload) => setHoverState(payload)}
-          overlays={[
-            {
-              values: fhrSmoothed,
-              color: "#7c3aed",
-              strokeWidth: 2,
-              opacity: 0.85,
-            },
-          ]}
+          overlays={
+            showFhrMA
+              ? [
+                  {
+                    values: fhrSmoothed,
+                    color: "#7c3aed",
+                    strokeWidth: 2,
+                    opacity: 0.7,
+                  },
+                ]
+              : undefined
+          }
         />
 
         <CTGTrack
@@ -217,7 +197,7 @@ const CTGStrip: React.FC<CTGStripProps> = ({
           minValue={TOCO_RANGE.min}
           maxValue={TOCO_RANGE.max}
           color="#7c3aed"
-          label="TOCO"
+          label="UC/TOCO"
           unit="mmHg"
           baseline={0}
           normZone={null}
@@ -226,48 +206,48 @@ const CTGStrip: React.FC<CTGStripProps> = ({
           onSelectEvent={onSelectEvent}
           hoverTime={hoverState.time}
           onHover={(payload) => setHoverState(payload)}
+          overlays={[
+            {
+              values: ucValues,
+              color: "#be123c",
+              strokeWidth: 2.2,
+              opacity: 0.9,
+              dasharray: "6 4",
+            },
+          ]}
         />
+        </div>
 
-        <CTGTrack
-          width={width}
-          height={heightPerTrack}
-          visibleStart={visibleStart}
-          visibleEnd={visibleEnd}
-          channel="uc"
-          data={ucValues}
-          times={times}
-          minValue={UC_RANGE.min}
-          maxValue={UC_RANGE.max}
-          color="#be123c"
-          label="UC"
-          unit="mmHg"
-          baseline={0}
-          normZone={null}
-          events={events}
-          qualitySegments={trackQuality}
-          onSelectEvent={onSelectEvent}
-          hoverTime={hoverState.time}
-          onHover={(payload) => setHoverState(payload)}
-        />
+        {width > 0 && (
+          <svg
+            width={width}
+            height={totalHeight}
+            style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+          >
+            <line
+              x1={width - 1}
+              x2={width - 1}
+              y1={0}
+              y2={totalHeight}
+              stroke="#94a3b8"
+              strokeDasharray="4 4"
+              opacity={0.7}
+            />
+
+            {hoverState.time !== null && hoverState.time >= visibleStart && hoverState.time <= visibleEnd && (
+              <line
+                x1={(hoverState.time - visibleStart) / secondsPerPixel}
+                x2={(hoverState.time - visibleStart) / secondsPerPixel}
+                y1={0}
+                y2={totalHeight}
+                stroke="#2563eb"
+                strokeDasharray="4 2"
+                opacity={0.6}
+              />
+            )}
+          </svg>
+        )}
       </div>
-
-      {width > 0 && (
-        <svg
-          width={width}
-          height={totalHeight}
-          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-        >
-          <line
-            x1={width - 1}
-            x2={width - 1}
-            y1={0}
-            y2={totalHeight}
-            stroke="#94a3b8"
-            strokeDasharray="4 4"
-            opacity={0.7}
-          />
-        </svg>
-      )}
 
       {hoverState.time !== null && hoverState.value !== null && (
         <div
