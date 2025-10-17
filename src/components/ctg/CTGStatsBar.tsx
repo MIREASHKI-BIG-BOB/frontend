@@ -8,7 +8,6 @@ interface CTGStatsBarProps {
   onChangeWindow: (seconds: number) => void;
   paperSpeed: 1 | 3;
   onPaperSpeedChange: (speed: 1 | 3) => void;
-  onMarkFetalMovement: () => void;
 }
 
 const presets = [600, 1200, 1800];
@@ -20,7 +19,6 @@ const CTGStatsBar: React.FC<CTGStatsBarProps> = ({
   onChangeWindow,
   paperSpeed,
   onPaperSpeedChange,
-  onMarkFetalMovement,
 }) => {
   return (
     <div
@@ -98,21 +96,6 @@ const CTGStatsBar: React.FC<CTGStatsBarProps> = ({
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={onMarkFetalMovement}
-          style={{
-            border: "1px solid #0ea5e9",
-            background: "#e0f2fe",
-            color: "#0369a1",
-            padding: "6px 10px",
-            borderRadius: 4,
-            fontWeight: 600,
-            fontSize: 12,
-          }}
-        >
-          MARK движение плода
-        </button>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from "react";
 import { CTGChannel } from "./types";
+import { PX_PER_CM } from "./constants";
 
 interface TrackGridConfig {
   channel: CTGChannel;
@@ -25,10 +26,10 @@ interface CTGGridProps {
 }
 
 const lineColors = {
-  minor: "rgba(148, 163, 184, 0.35)",
-  major: "rgba(107, 114, 128, 0.6)",
-  horizontalMinor: "rgba(148, 163, 184, 0.25)",
-  horizontalMajor: "rgba(107, 114, 128, 0.45)",
+  minor: "rgba(220, 165, 140, 0.25)", // Теплый оранжевый, как на бумаге
+  major: "rgba(200, 120, 90, 0.5)",   // Более темный оранжевый для жирных линий
+  horizontalMinor: "rgba(220, 165, 140, 0.2)",
+  horizontalMajor: "rgba(200, 120, 90, 0.4)",
 };
 
 const CTGGrid: React.FC<CTGGridProps> = ({
@@ -46,7 +47,13 @@ const CTGGrid: React.FC<CTGGridProps> = ({
   }
 
   const duration = Math.max(1, visibleEnd - visibleStart);
-  const pxPerSec = width / duration;
+  // Используем тот же расчет пикселей, что и в CTGCombinedStrip
+  const pxPerMinute = paperSpeed * PX_PER_CM;
+  const pxPerSec = pxPerMinute / 60;
+  
+  // Проверка: ширина должна соответствовать длительности
+  const expectedWidth = duration * pxPerSec;
+  const actualPxPerSec = width / duration;
 
   const verticalLines: Array<{
     x: number;
@@ -56,7 +63,7 @@ const CTGGrid: React.FC<CTGGridProps> = ({
 
   const firstMinor = Math.floor(visibleStart / minorSeconds) * minorSeconds;
   for (let t = firstMinor; t <= visibleEnd + minorSeconds; t += minorSeconds) {
-    const x = (t - visibleStart) * pxPerSec;
+    const x = (t - visibleStart) * actualPxPerSec;
     if (x < -1 || x > width + 1) {
       continue;
     }
@@ -94,7 +101,7 @@ const CTGGrid: React.FC<CTGGridProps> = ({
 
   return (
     <svg width={width} height={height} style={{ position: "absolute", inset: 0 }}>
-      <rect width={width} height={height} fill="#fffaf7" />
+      <rect width={width} height={height} fill="#fef9f5" />
 
       {verticalLines.map((line, idx) => (
         <React.Fragment key={`v-${idx}`}>

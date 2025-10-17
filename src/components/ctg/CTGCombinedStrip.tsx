@@ -47,7 +47,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   combinedHeight = 380,
   toneHeight = 160,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [hoverState, setHoverState] = useState<{
     time: number | null;
     value: number | null;
@@ -59,10 +58,16 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   const ucHeight = combinedHeight - fhrHeight;
   const totalHeight = combinedHeight + toneHeight;
 
+  // ФИКСИРОВАННЫЙ МАСШТАБ: пиксели на секунду из скорости бумаги
+  // 1 см/мин = ~38 пикселей/см (стандартное разрешение экрана)
+  // 3 см/мин = то же, но бумага быстрее
+  const pxPerMinute = paperSpeed * PX_PER_CM; // пикселей на минуту
+  const pxPerSecond = pxPerMinute / 60; // пикселей на секунду
+  
   const duration = Math.max(1, visibleEnd - visibleStart);
-  const pxPerSecond = (paperSpeed * PX_PER_CM) / 60;
+  // Ширина ленты = длительность × пиксели/сек (НЕ зависит от ширины контейнера!)
   const width = Math.max(1, Math.round(duration * pxPerSecond));
-  const secondsPerPixel = pxPerSecond > 0 ? 1 / pxPerSecond : duration / width;
+  const secondsPerPixel = 1 / pxPerSecond;
 
   // Фильтрация видимых данных
   const visibleSamples = useMemo(() => {
@@ -133,6 +138,18 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     startVisibleEnd: number;
   } | null>(null);
 
+  // Автоматическая прокрутка к правому краю (только для live режима)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  React.useEffect(() => {
+    // Прокручиваем к правому краю при новых данных (имитируя движение ленты)
+    if (scrollContainerRef.current && samples.length > 0) {
+      const container = scrollContainerRef.current;
+      // Прокрутка к правому краю
+      container.scrollLeft = container.scrollWidth - container.clientWidth;
+    }
+  }, [samples.length, visibleEnd]);
+
   const handleMouseDown = (event: React.MouseEvent) => {
     setIsDragging(true);
     dragRef.current = {
@@ -160,12 +177,12 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
 
   return (
     <div
-      ref={containerRef}
+      ref={scrollContainerRef}
       style={{
         position: "relative",
         width: "100%",
         height: totalHeight,
-        backgroundColor: "#fffaf7",
+        backgroundColor: "#fef9f5",
         border: "1px solid #d4d4d8",
         boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)",
         overflowX: "auto",

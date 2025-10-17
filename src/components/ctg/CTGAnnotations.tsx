@@ -43,7 +43,9 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
           y={valueToY(normZone.to)}
           width={width}
           height={valueToY(normZone.from) - valueToY(normZone.to)}
-          fill="rgba(86, 186, 86, 0.15)"
+          fill="rgba(72, 187, 120, 0.12)"
+          stroke="rgba(72, 187, 120, 0.3)"
+          strokeWidth={1}
         />
       )}
 

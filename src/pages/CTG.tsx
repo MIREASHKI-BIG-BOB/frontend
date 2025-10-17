@@ -80,6 +80,7 @@ const CTGPage: React.FC = () => {
   const [isLive, setIsLive] = useState(true);
   const [lastTimestamp, setLastTimestamp] = useState(0);
   const [actionPending, setActionPending] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0); // Смещение для прокрутки назад/вперед
 
   const lastTimestampRef = useRef(0);
   const sessionOffsetRef = useRef<number | null>(null);
@@ -167,12 +168,13 @@ const CTGPage: React.FC = () => {
 
     setManualEvents((prev) => prev.filter((event) => event.end >= time - MAX_HISTORY_SEC));
 
-    if (isLive) {
+    if (isLive && scrollOffset === 0) {
+      // В режиме live правый край всегда = текущее время
       const end = time;
       const start = Math.max(0, end - visibleWindowSec);
       setVisibleRange({ start, end });
     }
-  }, [latestData, isRecording, isLive, visibleWindowSec]);
+  }, [latestData, isRecording, isLive, visibleWindowSec, scrollOffset]);
 
   const resetSession = useCallback(() => {
     setSamples([]);
@@ -184,6 +186,7 @@ const CTGPage: React.FC = () => {
     sessionOffsetRef.current = null;
     setVisibleRange({ start: 0, end: visibleWindowSec });
     setIsLive(true);
+    setScrollOffset(0);
   }, [visibleWindowSec]);
 
   const handleStartStop = useCallback(async () => {
@@ -272,6 +275,7 @@ const CTGPage: React.FC = () => {
     (nextLive: boolean) => {
       setIsLive(nextLive);
       if (nextLive) {
+        setScrollOffset(0);
         const end = lastTimestampRef.current;
         const start = Math.max(0, end - visibleWindowSec);
         setVisibleRange({ start, end });
@@ -287,33 +291,50 @@ const CTGPage: React.FC = () => {
         return;
       }
       const latest = lastTimestampRef.current;
-      const width = visibleWindowSec;
-      setVisibleRange((range) => {
-        const maxStart = Math.max(earliestAvailable, latest - width);
-        let start = clamp(range.start + deltaSeconds, earliestAvailable, maxStart);
-        let end = start + width;
-        if (end > latest) {
-          end = latest;
-          start = Math.max(earliestAvailable, end - width);
-        }
-        setIsLive(Math.abs(end - latest) < 1);
-        return { start, end };
+      
+      // Изменяем смещение прокрутки
+      setScrollOffset((prevOffset) => {
+        const newOffset = prevOffset + deltaSeconds;
+        // Ограничиваем: не можем прокрутить дальше текущего момента и не дальше начала данных
+        const maxOffset = 0; // Не дальше текущего момента
+        const minOffset = -(latest - visibleWindowSec); // Не дальше начала данных
+        return Math.max(minOffset, Math.min(maxOffset, newOffset));
       });
+      
+      // Если прокручиваем назад, выходим из live режима
+      if (deltaSeconds < 0) {
+        setIsLive(false);
+      }
     },
-    [hasSamples, earliestAvailable, visibleWindowSec]
+    [hasSamples, visibleWindowSec]
   );
 
   const handleChangeWindow = useCallback(
     (seconds: number) => {
       setVisibleWindowSec(seconds);
-      setVisibleRange((range) => {
-        const end = isLive ? lastTimestampRef.current : range.end;
-        const start = Math.max(earliestAvailable, end - seconds);
-        return { start, end };
-      });
+      if (isLive && scrollOffset === 0) {
+        const end = lastTimestampRef.current;
+        const start = Math.max(0, end - seconds);
+        setVisibleRange({ start, end });
+      }
     },
-    [isLive, earliestAvailable]
+    [isLive, scrollOffset]
   );
+
+  // Обновляем visibleRange при изменении scrollOffset
+  useEffect(() => {
+    if (!isRecording) return;
+    
+    const latest = lastTimestampRef.current;
+    const end = latest + scrollOffset;
+    const start = Math.max(0, end - visibleWindowSec);
+    setVisibleRange({ start, end });
+    
+    // Если scrollOffset = 0, включаем live режим
+    if (scrollOffset === 0) {
+      setIsLive(true);
+    }
+  }, [scrollOffset, isRecording, visibleWindowSec]);
 
   const handlePaperSpeed = useCallback((speed: 1 | 3) => {
     setPaperSpeed(speed);
@@ -370,9 +391,6 @@ const CTGPage: React.FC = () => {
                   >
                     {isRecording ? "Стоп" : "Старт"}
                   </Button>
-                  <Button icon={<FlagOutlined />} onClick={handleMarkFetalMovement} disabled={!hasSamples}>
-                    MARK
-                  </Button>
                   <Button icon={<SyncOutlined />} onClick={handleClearSession} disabled={!hasSamples && !isRecording}>
                     Сбросить
                   </Button>
@@ -388,7 +406,6 @@ const CTGPage: React.FC = () => {
                 onChangeWindow={handleChangeWindow}
                 paperSpeed={paperSpeed}
                 onPaperSpeedChange={handlePaperSpeed}
-                onMarkFetalMovement={handleMarkFetalMovement}
               />
               <CTGCombinedStrip
                 samples={samples}
@@ -399,12 +416,74 @@ const CTGPage: React.FC = () => {
                 baseline={metrics.baseline}
                 normZone={FHR_NORM}
                 paperSpeed={paperSpeed}
-                combinedHeight={380}
-                toneHeight={160}
+                combinedHeight={600}
+                toneHeight={260}
                 onSelectEvent={handleSelectEvent}
                 onPan={handlePan}
                 onToggleLive={handleToggleLive}
               />
+              
+              {/* Кнопки управления под графиками */}
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: 16,
+                paddingTop: 16,
+                borderTop: "1px solid #e5e7eb"
+              }}>
+                {/* Информация о позиции */}
+                <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <Text type="secondary">
+                    Записано: <Text strong>{formatClock(recordingSeconds)}</Text>
+                    {scrollOffset !== 0 && (
+                      <span> • Смещение: <Text strong>{scrollOffset > 0 ? '+' : ''}{scrollOffset}с</Text></span>
+                    )}
+                  </Text>
+                </div>
+
+                {/* Кнопки навигации */}
+                <div style={{ display: "flex", gap: 12 }}>
+                  <Button 
+                    icon={<FlagOutlined />} 
+                    onClick={handleMarkFetalMovement} 
+                    disabled={!hasSamples}
+                    size="large"
+                    type="primary"
+                    style={{ minWidth: 120 }}
+                  >
+                    MARK
+                  </Button>
+                  <Button 
+                    onClick={() => handlePan(-30)} 
+                    disabled={!hasSamples}
+                    size="large"
+                    style={{ minWidth: 120 }}
+                  >
+                    ← Назад (30с)
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setScrollOffset(0);
+                      setIsLive(true);
+                    }} 
+                    disabled={!hasSamples || (isLive && scrollOffset === 0)}
+                    size="large"
+                    type={isLive && scrollOffset === 0 ? "primary" : "default"}
+                    style={{ minWidth: 140 }}
+                  >
+                    {isLive && scrollOffset === 0 ? "● LIVE" : "⟳ В LIVE"}
+                  </Button>
+                  <Button 
+                    onClick={() => handlePan(30)} 
+                    disabled={!hasSamples || scrollOffset >= 0}
+                    size="large"
+                    style={{ minWidth: 120 }}
+                  >
+                    Вперед (30с) →
+                  </Button>
+                </div>
+              </div>
             </Card>
 
             <Card title="Последние события" bodyStyle={{ padding: 16 }}>

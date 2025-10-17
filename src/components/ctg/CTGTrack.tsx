@@ -132,6 +132,16 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
 
   const currentValue = currentIndex >= 0 ? data[currentIndex] : null;
 
+  // Получаем последнее непустое значение для отображения справа
+  const lastValidValue = useMemo(() => {
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (data[i] !== null && !Number.isNaN(data[i])) {
+        return data[i];
+      }
+    }
+    return null;
+  }, [data]);
+
   return (
     <div
       style={{
@@ -190,17 +200,17 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
               d={pathD}
               fill="none"
               stroke="#fff"
-              strokeWidth={channel === "tone" ? 0.8 : 1.6}
+              strokeWidth={channel === "tone" ? 0.5 : 0.8}
               strokeLinecap="butt"
               strokeLinejoin="miter"
               opacity={0.9}
             />
-            {/* Основная линия */}
+            {/* Основная линия - тонкая */}
             <path
               d={pathD}
               fill="none"
               stroke={color}
-              strokeWidth={channel === "tone" ? 1.5 : 3.4}
+              strokeWidth={channel === "tone" ? 1 : 1.5}
               strokeLinejoin="miter"
               strokeLinecap="butt"
             />
@@ -247,6 +257,26 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
         <span>{label}</span>
         <span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7 }}>{unit}</span>
       </div>
+
+      {/* Большие цифры текущего значения справа сверху */}
+      {lastValidValue !== null && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 16,
+            fontSize: channel === "fhr" ? 56 : 42,
+            fontWeight: 700,
+            color: color,
+            textShadow: "0 2px 4px rgba(0,0,0,0.1), 0 0 2px rgba(255,255,255,0.8)",
+            fontFamily: "'Roboto Mono', monospace",
+            letterSpacing: "-1px",
+            lineHeight: 1,
+          }}
+        >
+          {Math.round(lastValidValue)}
+        </div>
+      )}
     </div>
   );
 };

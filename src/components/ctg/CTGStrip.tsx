@@ -20,7 +20,7 @@ interface CTGStripProps {
   isLive?: boolean;
 }
 
-const FHR_RANGE = { min: 50, max: 210 };
+const FHR_RANGE = { min: 90, max: 190 };
 const TOCO_RANGE = { min: 0, max: 100 };
 const UC_RANGE = { min: 0, max: 80 };
 
