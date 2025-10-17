@@ -41,7 +41,7 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
           y={valueToY(normZone.to)}
           width={width}
           height={valueToY(normZone.from) - valueToY(normZone.to)}
-          fill="rgba(34, 197, 94, 0.18)"
+          fill="rgba(134, 239, 172, 0.28)"
         />
       )}
 
@@ -51,9 +51,9 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
           y1={valueToY(baseline)}
           x2={width}
           y2={valueToY(baseline)}
-          stroke="#3b82f6"
-          strokeWidth={1}
-          strokeDasharray="6 4"
+          stroke="#2563eb"
+          strokeWidth={1.2}
+          strokeDasharray="8 4"
         />
       )}
 
@@ -77,7 +77,7 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
                 width={Math.min(width, x2) - Math.max(0, x1)}
                 height={height}
                 fill={color}
-                opacity={0.1}
+                opacity={0.08}
               />
               <line
                 x1={xPeak}
@@ -85,16 +85,16 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
                 x2={xPeak}
                 y2={height}
                 stroke={color}
-                strokeWidth={1.6}
-                strokeDasharray="4 3"
+                strokeWidth={1.4}
+                strokeDasharray="6 4"
               />
               <circle
                 cx={xPeak}
                 cy={height / 2}
-                r={7}
+                r={8}
                 fill={color}
                 stroke="#fff"
-                strokeWidth={2}
+                strokeWidth={2.2}
                 onClick={() => onSelectEvent && onSelectEvent(event)}
                 style={{ cursor: "pointer" }}
               />

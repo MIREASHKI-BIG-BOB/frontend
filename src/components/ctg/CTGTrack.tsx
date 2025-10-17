@@ -1,6 +1,14 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import CTGAnnotations from "./CTGAnnotations";
 import { CTGChannel, CTGEvent } from "./types";
+
+interface LineOverlay {
+  values: Array<number | null>;
+  color: string;
+  strokeWidth: number;
+  opacity?: number;
+  dasharray?: string;
+}
 
 interface CTGTrackProps {
   width: number;
@@ -22,8 +30,7 @@ interface CTGTrackProps {
   onSelectEvent?: (event: CTGEvent) => void;
   hoverTime: number | null;
   onHover: (payload: { time: number | null; value: number | null; channel: CTGChannel }) => void;
-  smooth?: boolean;
-  strokeWidth?: number;
+  overlays?: LineOverlay[];
 }
 
 const CTGTrack: React.FC<CTGTrackProps> = ({
@@ -43,45 +50,54 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
   normZone,
   events,
   qualitySegments,
-    smooth = false,
-  strokeWidth = 3.4,
   onSelectEvent,
   hoverTime,
   onHover,
+  overlays,
 }) => {
   const duration = Math.max(1, visibleEnd - visibleStart);
-  const secondsPerPixel = width > 0 ? duration / width : 1;
+  const secondsPerPixel = width > 0 ? duration / width : duration;
 
-  const valueToY = (value: number) =>
-    height - ((value - minValue) / (maxValue - minValue)) * height;
-
-  const points = useMemo(() => {
-    if (!data.length || width === 0) {
-      return [] as Array<{ x: number; y: number }>;
-    }
-    const pts: Array<{ x: number; y: number }> = [];
-    for (let i = 0; i < data.length; i += 1) {
-      const value = data[i];
-      if (value === null || Number.isNaN(value)) {
-        continue;
-      }
-      const x = (times[i] - visibleStart) / secondsPerPixel;
-      if (x < -4 || x > width + 4) {
-        continue;
-      }
-      const clamped = Math.max(minValue, Math.min(maxValue, value));
-      pts.push({ x, y: valueToY(clamped) });
-    }
-    return pts;
-  }, [data, times, visibleStart, secondsPerPixel, minValue, maxValue, width, valueToY]);
-
-  const pathD = useMemo(
-    () => (smooth ? buildSmoothPath(points) : buildLinearPath(points)),
-    [points, smooth]
+  const valueToY = useCallback(
+    (value: number) => height - ((value - minValue) / (maxValue - minValue)) * height,
+    [height, minValue, maxValue]
   );
 
+  const buildPath = useCallback(
+    (series: Array<number | null>) => {
+      if (!series.length || width === 0) {
+        return "";
+      }
+      let d = "";
+      for (let i = 0; i < series.length; i += 1) {
+        const value = series[i];
+        if (value === null || Number.isNaN(value)) {
+          continue;
+        }
+        const x = (times[i] - visibleStart) / secondsPerPixel;
+        if (x < -2) {
+          continue;
+        }
+        const clamped = Math.max(minValue, Math.min(maxValue, value));
+        const y = valueToY(clamped);
+        d += `${d ? " L" : "M"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+      }
+      return d;
+    },
+    [width, times, visibleStart, secondsPerPixel, minValue, maxValue, valueToY]
+  );
 
-  
+  const pathD = useMemo(() => buildPath(data), [buildPath, data]);
+
+  const overlayPaths = useMemo(
+    () =>
+      (overlays ?? []).map((overlay) => ({
+        path: buildPath(overlay.values),
+        config: overlay,
+      })),
+    [overlays, buildPath]
+  );
+
   const qualityRects = useMemo(() => {
     return qualitySegments
       .filter((segment) => segment.end >= visibleStart && segment.start <= visibleEnd)
@@ -96,16 +112,12 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
             y={0}
             width={Math.max(0, w)}
             height={height}
-            fill={
-              segment.quality === "lost"
-                ? "rgba(148, 163, 184, 0.35)"
-                : "rgba(250, 204, 21, 0.18)"
-            }
+            fill={segment.quality === "lost" ? "rgba(148, 163, 184, 0.45)" : "rgba(251, 191, 36, 0.25)"}
           />
         );
       });
   }, [qualitySegments, visibleStart, visibleEnd, secondsPerPixel, width, height]);
-  
+
   const currentIndex = hoverTime
     ? times.findIndex((t) => Math.abs(t - hoverTime) <= secondsPerPixel)
     : -1;
@@ -146,7 +158,43 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
           onSelectEvent={onSelectEvent}
         />
 
-<path d={pathD} fill="none" stroke="#ffffff" strokeWidth={1.6} opacity={0.9}/>
+        {overlayPaths.map(({ path, config }, idx) =>
+          path ? (
+            <path
+              key={`overlay-${idx}`}
+              d={path}
+              fill="none"
+              stroke={config.color}
+              strokeWidth={config.strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={config.opacity ?? 1}
+              strokeDasharray={config.dasharray}
+            />
+          ) : null
+        )}
+
+        {pathD && (
+          <>
+            <path
+              d={pathD}
+              fill="none"
+              stroke="#fff"
+              strokeWidth={1.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={0.9}
+            />
+            <path
+              d={pathD}
+              fill="none"
+              stroke={color}
+              strokeWidth={3.4}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </>
+        )}
 
         {hoverTime !== null && currentValue !== null && (
           <g>
@@ -163,10 +211,10 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
               cy={
                 height - ((currentValue - minValue) / (maxValue - minValue)) * height
               }
-              r={6}
+              r={5}
               fill="#fff"
               stroke={color}
-              strokeWidth={3}
+              strokeWidth={2}
             />
           </g>
         )}
@@ -212,37 +260,5 @@ function findNearestIndex(times: number[], time: number) {
   const diffPrev = Math.abs(times[prev] - time);
   return diffCandidate <= diffPrev ? candidate : prev;
 }
-function buildLinearPath(points: Array<{x:number;y:number}>) {
-  if (!points.length) return "";
-  return points
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(" ");
-}
 
-function buildSmoothPath(points: Array<{ x: number; y: number }>) {
-  if (!points.length) {
-    return "";
-  }
-  if (points.length < 3) {
-    return points
-      .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-      .join(" ");
-  }
-
-  let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[i - 1] ?? points[i];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[i + 2] ?? p2;
-
-    const control1X = p1.x + (p2.x - p0.x) / 6;
-    const control1Y = p1.y + (p2.y - p0.y) / 6;
-    const control2X = p2.x - (p3.x - p1.x) / 6;
-    const control2Y = p2.y - (p3.y - p1.y) / 6;
-
-    d += ` C ${control1X.toFixed(2)} ${control1Y.toFixed(2)}, ${control2X.toFixed(2)} ${control2Y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
-  }
-  return d;
-}
 export default CTGTrack;

@@ -9,7 +9,8 @@ import {
   WifiOutlined,
 } from "@ant-design/icons";
 
-import { CTGStatsBar, CTGStrip } from "../components/ctg";
+import CTGStrip from "../components/ctg/CTGStrip";
+import CTGStatsBar from "../components/ctg/CTGStatsBar";
 import CTGStaticWindow from "../components/ctg/CTGStaticWindow";
 import { CTGEvent, CTGSample, StaticWindowState } from "../components/ctg/types";
 import MLPredictionPanel from "../components/MLPredictionPanel";
@@ -379,14 +380,7 @@ const CTGPage: React.FC = () => {
               </div>
             </Card>
 
-            <div
-              style={{
-                background: "#eef2f9",
-                border: "1px solid #e2e8f0",
-                borderRadius: 12,
-                padding: 16,
-              }}
-            >
+            <Card bodyStyle={{ padding: 16 }}>
               <CTGStatsBar
                 metrics={metrics}
                 visibleWindowSec={visibleWindowSec}
@@ -405,13 +399,11 @@ const CTGPage: React.FC = () => {
                 baseline={metrics.baseline}
                 normZone={FHR_NORM}
                 paperSpeed={paperSpeed}
-                trackHeight={300}
-                compact
                 onSelectEvent={handleSelectEvent}
                 onPan={handlePan}
                 onToggleLive={handleToggleLive}
               />
-            </div>
+            </Card>
 
             <Card title="Последние события" bodyStyle={{ padding: 16 }}>
               {eventsSidebar.length === 0 ? (

@@ -74,9 +74,6 @@ const CTGStatsBar: React.FC<CTGStatsBarProps> = ({
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ fontSize: 12, color: "#475569", fontWeight: 600, minWidth: 110 }}>
-          {windowLabel}
-        </div>
         <div style={{ display: "flex", gap: 4 }}>
           {presets.map((seconds) => (
             <button
