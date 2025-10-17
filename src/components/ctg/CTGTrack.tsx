@@ -179,17 +179,30 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
 
         {overlayPaths.map(({ path, config }, idx) =>
           path ? (
-            <path
-              key={`overlay-${idx}`}
-              d={path}
-              fill="none"
-              stroke={config.color}
-              strokeWidth={config.strokeWidth}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity={config.opacity ?? 1}
-              strokeDasharray={config.dasharray}
-            />
+            <g key={`overlay-${idx}`}>
+              {/* Видимая линия */}
+              <path
+                d={path}
+                fill="none"
+                stroke={config.color}
+                strokeWidth={config.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={config.opacity ?? 1}
+                strokeDasharray={config.dasharray}
+                pointerEvents="none"
+              />
+              {/* Невидимая широкая линия для hover */}
+              <path
+                d={path}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={Math.max(10, config.strokeWidth * 3)}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ cursor: 'crosshair' }}
+              />
+            </g>
           ) : null
         )}
 

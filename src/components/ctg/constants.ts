@@ -1,1 +1,1 @@
-export const PX_PER_CM = 37.8;
+export const PX_PER_CM = 38; // 96 DPI ~= 37.8 px/см, округляем до целого

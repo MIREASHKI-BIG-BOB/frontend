@@ -16,6 +16,7 @@ export interface CTGDataPoint {
     bpmChild?: number;  // Формат от генератора
     uterus: number;
     spasms: number;
+    tone?: number;      // Тонус матки
   };
   prediction: MLPrediction | null;
   status: 'ok' | 'warning' | 'critical' | 'error';
@@ -68,7 +69,8 @@ export function useMLWebSocket(): UseMLWebSocketReturn {
               console.log('📊 CTG Data:', {
                 BPM: bpmValue?.toFixed(1),
                 uterus: data.data.uterus?.toFixed(1),
-                spasms: data.data.spasms?.toFixed(1)
+                spasms: data.data.spasms?.toFixed(1),
+                tone: data.data.tone?.toFixed(1)
               });
               
               // Логируем ML предсказание если есть

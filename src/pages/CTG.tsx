@@ -10,7 +10,6 @@ import {
 } from "@ant-design/icons";
 
 import CTGCombinedStrip from "../components/ctg/CTGCombinedStrip";
-import CTGStatsBar from "../components/ctg/CTGStatsBar";
 import CTGStaticWindow from "../components/ctg/CTGStaticWindow";
 import { CTGEvent, CTGSample, StaticWindowState } from "../components/ctg/types";
 import MLPredictionPanel from "../components/MLPredictionPanel";
@@ -132,8 +131,9 @@ const CTGPage: React.FC = () => {
     const bpm = latestData.data?.BPMChild ?? latestData.data?.bpmChild ?? null;
     const toco = latestData.data?.uterus ?? null;
     const uc = latestData.data?.spasms ?? null;
+    const tone = latestData.data?.tone ?? null;
 
-    if (bpm === null && toco === null && uc === null) {
+    if (bpm === null && toco === null && uc === null && tone === null) {
       return;
     }
 
@@ -153,7 +153,8 @@ const CTGPage: React.FC = () => {
       time,
       typeof bpm === "number" ? bpm : null,
       typeof toco === "number" ? toco : null,
-      typeof uc === "number" ? uc : null
+      typeof uc === "number" ? uc : null,
+      typeof tone === "number" ? tone : null
     );
 
     lastTimestampRef.current = time;
@@ -399,14 +400,6 @@ const CTGPage: React.FC = () => {
             </Card>
 
             <Card bodyStyle={{ padding: 16 }}>
-              <CTGStatsBar
-                metrics={metrics}
-                visibleWindowSec={visibleWindowSec}
-                windowLabel={windowLabel}
-                onChangeWindow={handleChangeWindow}
-                paperSpeed={paperSpeed}
-                onPaperSpeedChange={handlePaperSpeed}
-              />
               <CTGCombinedStrip
                 samples={samples}
                 visibleStart={visibleRange.start}
@@ -417,7 +410,6 @@ const CTGPage: React.FC = () => {
                 normZone={FHR_NORM}
                 paperSpeed={paperSpeed}
                 combinedHeight={600}
-                toneHeight={260}
                 onSelectEvent={handleSelectEvent}
                 onPan={handlePan}
                 onToggleLive={handleToggleLive}
@@ -523,6 +515,77 @@ const CTGPage: React.FC = () => {
 
         <Col span={6}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            {/* Текущие значения */}
+            <Card title="Текущие значения" bodyStyle={{ padding: 16 }}>
+              <Space direction="horizontal" size={12} style={{ width: "100%", justifyContent: "space-between" }}>
+                {/* FHR */}
+                {latestData?.data?.bpmChild != null && (
+                  <div
+                    style={{
+                      flex: 1,
+                      background: "rgba(220, 38, 38, 0.08)",
+                      border: "2px solid #dc2626",
+                      borderRadius: 8,
+                      padding: "12px 8px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ fontSize: 10, color: "#991b1b", fontWeight: 600, marginBottom: 4 }}>
+                      FHR
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "#dc2626", fontFamily: "monospace", lineHeight: 1 }}>
+                      {Math.round(latestData.data.bpmChild)}
+                    </div>
+                    <div style={{ fontSize: 9, color: "#991b1b", marginTop: 4 }}>bpm</div>
+                  </div>
+                )}
+                
+                {/* TOCO */}
+                {latestData?.data?.uterus != null && (
+                  <div
+                    style={{
+                      flex: 1,
+                      background: "rgba(249, 115, 22, 0.08)",
+                      border: "2px solid #f97316",
+                      borderRadius: 8,
+                      padding: "12px 8px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ fontSize: 10, color: "#c2410c", fontWeight: 600, marginBottom: 4 }}>
+                      TOCO
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "#f97316", fontFamily: "monospace", lineHeight: 1 }}>
+                      {Math.round(latestData.data.uterus)}
+                    </div>
+                    <div style={{ fontSize: 9, color: "#c2410c", marginTop: 4 }}>mmHg</div>
+                  </div>
+                )}
+
+                {/* UC */}
+                {latestData?.data?.spasms != null && (
+                  <div
+                    style={{
+                      flex: 1,
+                      background: "rgba(37, 99, 235, 0.08)",
+                      border: "2px solid #2563eb",
+                      borderRadius: 8,
+                      padding: "12px 8px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ fontSize: 10, color: "#1e40af", fontWeight: 600, marginBottom: 4 }}>
+                      UC
+                    </div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "#2563eb", fontFamily: "monospace", lineHeight: 1 }}>
+                      {Math.round(latestData.data.spasms)}
+                    </div>
+                    <div style={{ fontSize: 9, color: "#1e40af", marginTop: 4 }}>mmHg</div>
+                  </div>
+                )}
+              </Space>
+            </Card>
+
             <MLPredictionPanel
               prediction={latestData?.prediction ?? null}
               isAccumulating={!latestData?.prediction}

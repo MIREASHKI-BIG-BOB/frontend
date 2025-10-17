@@ -337,7 +337,7 @@ export function buildSample(
     fhr,
     toco,
     uc,
-    tone: tone ?? generateToneValue(), // генерируем значение tone если не передано
+    tone: tone ?? null, // НЕ генерируем, берём только с бэкенда
     quality: classifyQuality(fhr),
   };
 }

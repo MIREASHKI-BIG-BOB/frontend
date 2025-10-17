@@ -12,6 +12,7 @@ interface TrackGridConfig {
   majorStep: number;
   unit: string;
   label: string;
+  gridValues?: number[];
 }
 
 interface CTGGridProps {
@@ -68,10 +69,12 @@ const CTGGrid: React.FC<CTGGridProps> = ({
       continue;
     }
     const isMajor = t % majorSeconds === 0;
+    // Метки времени на каждой секунде
+    const hasLabel = t % 1 === 0; // каждую секунду
     verticalLines.push({
       x,
       isMajor,
-      label: isMajor ? formatMinuteLabel(t) : undefined,
+      label: hasLabel ? formatSecondLabel(t) : undefined,
     });
   }
 
@@ -82,19 +85,37 @@ const CTGGrid: React.FC<CTGGridProps> = ({
   }> = [];
 
   trackConfigs.forEach((track) => {
-    const scale = track.height / (track.maxValue - track.minValue);
-    const minorCount = Math.floor(
-      (track.maxValue - track.minValue) / track.minorStep
-    );
+    const extent = track.maxValue - track.minValue;
+    if (extent <= 0) {
+      return;
+    }
+    const scale = track.height / extent;
+    const values = track.gridValues && track.gridValues.length > 0
+      ? [...new Set(track.gridValues)]
+          .filter((value) => value >= track.minValue && value <= track.maxValue)
+          .sort((a, b) => b - a)
+      : [];
 
-    for (let i = 0; i <= minorCount; i += 1) {
-      const value = track.minValue + i * track.minorStep;
+    if (values.length) {
+      values.forEach((value) => {
+        const y = track.top + track.height - (value - track.minValue) * scale;
+        horizontalLines.push({
+          y,
+          isMajor: true,
+          label: `${value}`,
+        });
+      });
+      return;
+    }
+
+    const majorCount = Math.floor(extent / track.majorStep);
+    for (let i = 0; i <= majorCount; i += 1) {
+      const value = track.minValue + i * track.majorStep;
       const y = track.top + track.height - (value - track.minValue) * scale;
-      const isMajor = value % track.majorStep === 0;
       horizontalLines.push({
         y,
-        isMajor,
-        label: isMajor ? `${value}` : "",
+        isMajor: true,
+        label: `${value}`,
       });
     }
   });
@@ -115,11 +136,12 @@ const CTGGrid: React.FC<CTGGridProps> = ({
           />
           {line.label && (
             <text
-              x={line.x + 3}
-              y={height - 6}
-              fontSize={12}
-              fill="#475569"
-              opacity={0.9}
+              x={line.x + 2}
+              y={height - 4}
+              fontSize={10}
+              fill="#64748b"
+              opacity={0.8}
+              style={{ fontFamily: 'monospace' }}
             >
               {line.label}
             </text>
@@ -167,13 +189,13 @@ const CTGGrid: React.FC<CTGGridProps> = ({
   );
 };
 
-function formatMinuteLabel(seconds: number) {
+function formatSecondLabel(seconds: number) {
   if (seconds < 0) {
     return "";
   }
   const minutes = Math.floor(seconds / 60);
   const remainder = seconds % 60;
-  return `${minutes}:${remainder.toString().padStart(2, "0")}`;
+  return `${minutes.toString().padStart(2, "0")}:${remainder.toString().padStart(2, "0")}`;
 }
 
 export type { TrackGridConfig };
