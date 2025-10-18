@@ -32,7 +32,7 @@ interface CTGCombinedStripProps {
 
 // Диапазоны значений согласно ТЗ
 const FHR_RANGE = { min: 60, max: 210 };
-const UC_TONE_RANGE = { min: 0, max: 30 }; // Объединенный диапазон для UC и Tone
+const UC_TONE_RANGE = { min: 5, max: 30 }; // Объединенный диапазон для UC и Tone
 const SECOND_SPACING_CM: Record<1 | 3, number> = {
   1: 5,
   3: 3,
@@ -124,7 +124,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       majorStep: 5,
       unit: "mmHg",
       label: "UC/TOCO",
-      gridValues: [30, 25, 20, 15, 10, 5, 0],
+      gridValues: [30, 25, 20, 15, 10],
     },
   ];
 
@@ -381,8 +381,9 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       >
         <svg width={50} height={totalHeight}>
           {/* FHR деления */}
-          {[210, 180, 150, 120, 90, 60, 30].map((val, idx) => {
-            const yPos = 8 + (fhrHeight - 16) * (idx / 6);
+          {[210, 180, 150, 120, 90, 60].map((val) => {
+            const normalizedValue = (val - FHR_RANGE.min) / (FHR_RANGE.max - FHR_RANGE.min);
+            const yPos = fhrHeight - (normalizedValue * fhrHeight);
             return (
               <text
                 key={`fhr-${val}`}
@@ -400,8 +401,9 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
           })}
 
           {/* UC деления */}
-          {[30, 25, 20, 15, 10, 5, 0].map((val, idx) => {
-            const yPos = fhrHeight + timeStripHeight + 8 + (ucHeight - 16) * (idx / 6);
+          {[30, 25, 20, 15, 10].map((val) => {
+            const normalizedValue = (val - UC_TONE_RANGE.min) / (UC_TONE_RANGE.max - UC_TONE_RANGE.min);
+            const yPos = fhrHeight + timeStripHeight + 43 + ucHeight - (normalizedValue * ucHeight);
             return (
               <text
                 key={`uc-${val}`}

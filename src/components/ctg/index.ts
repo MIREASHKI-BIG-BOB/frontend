@@ -6,3 +6,4 @@ export * from "./types";
 export { PX_PER_CM } from "./constants";
 export { default as CTGStrip } from "./CTGStrip";
 export { default as CTGCombinedStrip } from "./CTGCombinedStrip";
+export { default as CTGFullStripExport } from "./CTGFullStripExport";

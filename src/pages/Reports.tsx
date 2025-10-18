@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { PrinterOutlined, DownloadOutlined, UserOutlined, CheckCircleOutlined, RobotOutlined, EditOutlined, SaveOutlined, FileTextOutlined, ThunderboltOutlined, HeartOutlined, WarningOutlined, SafetyOutlined } from '@ant-design/icons';
 import { colors, typography } from '../theme';
 import { useMLDataContext } from '../contexts/MLDataContext';
+import CTGCombinedStrip from '../components/ctg/CTGCombinedStrip';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -132,11 +133,36 @@ export default function ReportsPage() {
   // Состояние для просмотра CTG ленты
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [isCTGModalVisible, setIsCTGModalVisible] = useState(false);
+  
+  // Состояние для управления лентами в отчёте
+  const [selectedStripsForReport, setSelectedStripsForReport] = useState<number[]>([]);
 
   // Обработчик клика на сеанс
   const handleSessionClick = (session: any) => {
     setSelectedSession(session);
     setIsCTGModalVisible(true);
+  };
+
+  // Добавление/удаление ленты в отчёт
+  const toggleStripInReport = (sessionId: number) => {
+    setSelectedStripsForReport(prev => {
+      if (prev.includes(sessionId)) {
+        return prev.filter(id => id !== sessionId);
+      } else {
+        return [...prev, sessionId];
+      }
+    });
+    message.success(
+      selectedStripsForReport.includes(sessionId) 
+        ? 'Лента удалена из отчёта' 
+        : 'Лента добавлена в отчёт'
+    );
+  };
+
+  // Удаление ленты из отчёта
+  const removeStripFromReport = (sessionId: number) => {
+    setSelectedStripsForReport(prev => prev.filter(id => id !== sessionId));
+    message.info('Лента удалена из отчёта');
   };
 
   // Закрытие модального окна
@@ -613,49 +639,81 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 </Tag>
               </div>
               <Divider style={{ margin: `${typography.spacing.sm} 0` }} />
-              {ctgSessions.map((session, idx) => (
+              {ctgSessions.map((session: any, idx: number) => (
                 <div 
                   key={session.id} 
-                  onClick={() => handleSessionClick(session)}
                   style={{
                     padding: typography.spacing.sm,
-                    background: colors.primaryPale,
+                    background: selectedStripsForReport.includes(session.id) 
+                      ? `${colors.primary}10` 
+                      : colors.primaryPale,
                     borderRadius: '8px',
-                    border: `1px solid ${colors.border.light}`,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
+                    border: `1px solid ${selectedStripsForReport.includes(session.id) 
+                      ? colors.primary 
+                      : colors.border.light}`,
+                    position: 'relative',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: typography.spacing.xs }}>
-                    <Text strong style={{ fontSize: typography.fontSize.sm, color: colors.text.primary }}>
-                      Сеанс #{idx + 1}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
-                      {session.date.format('DD.MM.YYYY')}
-                    </Text>
+                  <div 
+                    onClick={() => handleSessionClick(session)}
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selectedStripsForReport.includes(session.id)) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.15)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: typography.spacing.xs }}>
+                      <Text strong style={{ fontSize: typography.fontSize.sm, color: colors.text.primary }}>
+                        Сеанс #{idx + 1}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
+                        {session.date.format('DD.MM.YYYY')}
+                      </Text>
+                    </div>
+                    <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginBottom: 4 }}>
+                      ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
+                    </div>
+                    <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>
+                      Длительность: {session.duration ? `${session.duration} мин (${session.duration * 60} сек)` : 'N/A'}
+                    </div>
+                    {session.anomalies.length > 0 && (
+                      <Tag style={{ 
+                        fontSize: typography.fontSize.xs,
+                        marginTop: typography.spacing.xs,
+                        border: 'none',
+                        background: `${colors.warning}10`,
+                        color: colors.warning
+                      }}>
+                        {session.anomalies[0].description}
+                      </Tag>
+                    )}
                   </div>
-                  <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>
-                    ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
-                  </div>
-                  {session.anomalies.length > 0 && (
-                    <Tag style={{ 
-                      fontSize: typography.fontSize.xs,
+                  
+                  {/* Кнопка добавления в отчёт */}
+                  <Button
+                    size="small"
+                    type={selectedStripsForReport.includes(session.id) ? 'primary' : 'default'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleStripInReport(session.id);
+                    }}
+                    style={{
                       marginTop: typography.spacing.xs,
-                      border: 'none',
-                      background: `${colors.warning}10`,
-                      color: colors.warning
-                    }}>
-                      {session.anomalies[0].description}
-                    </Tag>
-                  )}
+                      width: '100%',
+                      fontSize: typography.fontSize.xs
+                    }}
+                  >
+                    {selectedStripsForReport.includes(session.id) ? '✓ В отчёте' : '+ В отчёт'}
+                  </Button>
                 </div>
               ))}
             </Space>
@@ -973,6 +1031,95 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 )}
               </Card>
 
+              {/* Выбранные CTG ленты для отчёта */}
+              {selectedStripsForReport.length > 0 && (
+                <Card
+                  size="small"
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                        <HeartOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                        <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                          Графики КТГ в отчёте
+                        </span>
+                        <Badge 
+                          count={selectedStripsForReport.length}
+                          style={{ backgroundColor: colors.primary }}
+                        />
+                      </div>
+                    </div>
+                  }
+                  headStyle={{ 
+                    padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                    background: colors.primaryPale,
+                    borderBottom: `1px solid ${colors.border.light}`
+                  }}
+                  bodyStyle={{ padding: typography.spacing.lg }}
+                >
+                  <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                    {selectedStripsForReport.map((sessionId: number) => {
+                      const session = ctgSessions.find((s: any) => s.id === sessionId);
+                      if (!session || !session.fullData) return null;
+                      
+                      return (
+                        <div key={sessionId} style={{ 
+                          border: `1px solid ${colors.border.light}`,
+                          borderRadius: 8,
+                          overflow: 'hidden'
+                        }}>
+                          {/* Заголовок ленты */}
+                          <div style={{ 
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: typography.spacing.md,
+                            background: colors.primaryPale,
+                            borderBottom: `1px solid ${colors.border.light}`
+                          }}>
+                            <div>
+                              <Text strong>КТГ от {session.date.format('DD.MM.YYYY HH:mm')}</Text>
+                              <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: 4 }}>
+                                Длительность: {session.duration} мин ({session.duration * 60} сек) • ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
+                              </div>
+                            </div>
+                            <Button
+                              danger
+                              size="small"
+                              onClick={() => removeStripFromReport(sessionId)}
+                            >
+                              Удалить
+                            </Button>
+                          </div>
+                          
+                          {/* График CTG */}
+                          <div style={{ 
+                            background: '#fff',
+                            minHeight: 400
+                          }}>
+                            {session.fullData.samples && session.fullData.samples.length > 0 && (
+                              <CTGCombinedStrip
+                                samples={session.fullData.samples}
+                                visibleStart={session.fullData.samples[0].time}
+                                visibleEnd={session.fullData.samples[session.fullData.samples.length - 1].time}
+                                events={session.fullData.events || []}
+                                qualitySegments={[]}
+                                baseline={session.fullData.metrics?.baseline || null}
+                                normZone={{ from: 110, to: 160 }}
+                                paperSpeed={3}
+                                combinedHeight={400}
+                                onSelectEvent={() => {}}
+                                onPan={() => {}}
+                                onToggleLive={() => {}}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </Space>
+                </Card>
+              )}
+
               {/* Кнопки действий */}
               <Card bodyStyle={{ padding: typography.spacing.lg }}>
                 <Row gutter={16}>
@@ -1171,59 +1318,39 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               </Card>
             )}
 
-            {/* CTG График - отображаем простую визуализацию */}
+            {/* CTG График - отображаем полную ленту */}
             <Card size="small" title="График КТГ" style={{ marginBottom: 16 }}>
               <div style={{ 
-                height: 400, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
+                minHeight: 600,
                 background: '#fff',
                 borderRadius: 8,
-                border: '1px solid #e5e7eb'
+                border: '1px solid #e5e7eb',
+                overflow: 'hidden'
               }}>
                 {selectedSession.fullData.samples && selectedSession.fullData.samples.length > 0 ? (
-                  <div style={{ width: '100%', height: '100%', padding: 16 }}>
-                    <svg width="100%" height="100%" viewBox="0 0 1000 400">
-                      {/* FHR график */}
-                      <text x="10" y="20" fontSize="12" fill="#666">ЧСС плода (уд/мин)</text>
-                      <line x1="0" y1="40" x2="1000" y2="40" stroke="#ddd" strokeWidth="1"/>
-                      <line x1="0" y1="190" x2="1000" y2="190" stroke="#ddd" strokeWidth="1"/>
-                      <polyline
-                        points={selectedSession.fullData.samples
-                          .filter((s: any) => s.fhr !== null)
-                          .map((s: any, i: number) => {
-                            const x = (i / selectedSession.fullData.samples.length) * 1000;
-                            const y = 190 - ((s.fhr - 60) / 150) * 150;
-                            return `${x},${y}`;
-                          })
-                          .join(' ')}
-                        fill="none"
-                        stroke={colors.primary}
-                        strokeWidth="2"
-                      />
-
-                      {/* UC график */}
-                      <text x="10" y="220" fontSize="12" fill="#666">Тонус матки (mmHg)</text>
-                      <line x1="0" y1="240" x2="1000" y2="240" stroke="#ddd" strokeWidth="1"/>
-                      <line x1="0" y1="390" x2="1000" y2="390" stroke="#ddd" strokeWidth="1"/>
-                      <polyline
-                        points={selectedSession.fullData.samples
-                          .filter((s: any) => s.uc !== null)
-                          .map((s: any, i: number) => {
-                            const x = (i / selectedSession.fullData.samples.length) * 1000;
-                            const y = 390 - ((s.uc || 0) / 100) * 150;
-                            return `${x},${y}`;
-                          })
-                          .join(' ')}
-                        fill="none"
-                        stroke="#f97316"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </div>
+                  <CTGCombinedStrip
+                    samples={selectedSession.fullData.samples}
+                    visibleStart={selectedSession.fullData.samples[0].time}
+                    visibleEnd={selectedSession.fullData.samples[selectedSession.fullData.samples.length - 1].time}
+                    events={selectedSession.fullData.events || []}
+                    qualitySegments={[]}
+                    baseline={selectedSession.fullData.metrics?.baseline || null}
+                    normZone={{ from: 110, to: 160 }}
+                    paperSpeed={3}
+                    combinedHeight={600}
+                    onSelectEvent={() => {}}
+                    onPan={() => {}}
+                    onToggleLive={() => {}}
+                  />
                 ) : (
-                  <Text type="secondary">Нет данных для отображения графика</Text>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    height: 400
+                  }}>
+                    <Text type="secondary">Нет данных для отображения графика</Text>
+                  </div>
                 )}
               </div>
             </Card>

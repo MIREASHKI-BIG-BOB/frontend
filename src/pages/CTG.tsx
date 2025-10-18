@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Card, Col, Row, Space, Tag, Typography, message } from "antd";
+import { Button, Card, Col, Row, Space, Tag, Typography, message, Modal } from "antd";
 import {
   ClockCircleOutlined,
   FlagOutlined,
@@ -8,15 +8,18 @@ import {
   SaveOutlined,
   SyncOutlined,
   WifiOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 
 import CTGCombinedStrip from "../components/ctg/CTGCombinedStrip";
+import CTGFullStripExport from "../components/ctg/CTGFullStripExport";
 import CTGStaticWindow from "../components/ctg/CTGStaticWindow";
 import { CTGEvent, CTGSample, StaticWindowState } from "../components/ctg/types";
 import MLPredictionPanel from "../components/MLPredictionPanel";
 import { useMLWebSocket } from "../hooks/useMLWebSocket";
 import { startGenerator, stopGenerator } from "../services/sensorApi";
 import { buildSample, computeCTGMetrics } from "../utils/ctgMetrics";
+import { exportLongCTGToPDF } from "../utils/ctgPdfExport";
 
 const { Text, Title } = Typography;
 
@@ -81,9 +84,11 @@ const CTGPage: React.FC = () => {
   const [lastTimestamp, setLastTimestamp] = useState(0);
   const [actionPending, setActionPending] = useState(false);
   const [scrollOffset, setScrollOffset] = useState(0); // Смещение для прокрутки назад/вперед
+  const [isExporting, setIsExporting] = useState(false); // Состояние экспорта PDF
 
   const lastTimestampRef = useRef(0);
   const sessionOffsetRef = useRef<number | null>(null);
+  const exportStripRef = useRef<HTMLDivElement>(null); // Ref для компонента экспорта
 
   const hasSamples = samples.length > 0;
   const earliestAvailable = samples.length ? samples[0].time : 0;
@@ -308,6 +313,37 @@ const CTGPage: React.FC = () => {
     message.success('Сессия сохранена! Перейдите во вкладку "Отчеты" для просмотра.');
   }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData, manualEvents]);
 
+  const handlePrintFullStrip = useCallback(async () => {
+    if (!hasSamples) {
+      message.warning("Нет данных для печати");
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      message.loading({ content: 'Подготовка ленты для печати...', key: 'export', duration: 0 });
+
+      // Ждём немного для рендера компонента
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      if (!exportStripRef.current) {
+        throw new Error('Не удалось подготовить ленту для экспорта');
+      }
+
+      await exportLongCTGToPDF(
+        exportStripRef.current,
+        `CTG-Strip-${new Date().toISOString().split('T')[0]}.pdf`
+      );
+
+      message.success({ content: 'PDF успешно создан!', key: 'export' });
+    } catch (error) {
+      console.error('Ошибка при экспорте в PDF:', error);
+      message.error({ content: 'Не удалось создать PDF', key: 'export' });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [hasSamples, samples, combinedEvents, qualitySegments, metrics]);
+
   const handleSelectEvent = useCallback((event: CTGEvent) => {
     // Если событие опасное (critical/warning) - переходим на страницу анализа
     const isDangerous = event.severity === 'critical' || event.severity === 'warning';
@@ -503,9 +539,6 @@ const CTGPage: React.FC = () => {
                   >
                     {isRecording ? "Стоп" : "Старт"}
                   </Button>
-                  <Button icon={<SyncOutlined />} onClick={handleClearSession} disabled={!hasSamples && !isRecording}>
-                    Сбросить
-                  </Button>
                 </Space>
               </div>
             </Card>
@@ -553,9 +586,19 @@ const CTGPage: React.FC = () => {
                     disabled={!hasSamples}
                     size="large"
                     type="primary"
-                    style={{ minWidth: 120 }}
+                    style={{ minWidth: 100 }}
                   >
                     MARK
+                  </Button>
+                  <Button 
+                    icon={<SyncOutlined />} 
+                    onClick={handleClearSession} 
+                    disabled={!hasSamples && !isRecording}
+                    size="large"
+                    danger
+                    style={{ minWidth: 100 }}
+                  >
+                    Удалить
                   </Button>
                   <Button 
                     icon={<SaveOutlined />} 
@@ -564,15 +607,17 @@ const CTGPage: React.FC = () => {
                     size="large"
                     style={{ minWidth: 120 }}
                   >
-                    Export
+                    Сохранить
                   </Button>
                   <Button 
-                    onClick={() => handlePan(-30)} 
+                    icon={<PrinterOutlined />} 
+                    onClick={handlePrintFullStrip} 
                     disabled={!hasSamples}
+                    loading={isExporting}
                     size="large"
-                    style={{ minWidth: 120 }}
+                    style={{ minWidth: 140 }}
                   >
-                    ← Назад (30с)
+                    Печать ленты
                   </Button>
                   <Button 
                     onClick={() => {
@@ -582,17 +627,9 @@ const CTGPage: React.FC = () => {
                     disabled={!hasSamples || (isLive && scrollOffset === 0)}
                     size="large"
                     type={isLive && scrollOffset === 0 ? "primary" : "default"}
-                    style={{ minWidth: 140 }}
+                    style={{ minWidth: 100 }}
                   >
-                    {isLive && scrollOffset === 0 ? "● LIVE" : "⟳ В LIVE"}
-                  </Button>
-                  <Button 
-                    onClick={() => handlePan(30)} 
-                    disabled={!hasSamples || scrollOffset >= 0}
-                    size="large"
-                    style={{ minWidth: 120 }}
-                  >
-                    Вперед (30с) →
+                    {isLive && scrollOffset === 0 ? "● LIVE" : "LIVE"}
                   </Button>
                 </div>
               </div>
@@ -711,6 +748,22 @@ const CTGPage: React.FC = () => {
           </Space>
         </Col>
       </Row>
+
+      {/* Скрытый компонент для экспорта в PDF */}
+      {isExporting && (
+        <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+          <CTGFullStripExport
+            ref={exportStripRef}
+            samples={samples}
+            events={combinedEvents}
+            qualitySegments={qualitySegments}
+            baseline={metrics.baseline}
+            normZone={FHR_NORM}
+            paperSpeed={paperSpeed}
+            combinedHeight={600}
+          />
+        </div>
+      )}
     </div>
   );
 };
