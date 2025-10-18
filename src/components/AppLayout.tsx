@@ -43,20 +43,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
   
   const menuItems = [
     {
-      key: 'monitoring',
-      icon: <MonitorOutlined style={{ fontSize: '16px' }} />,
-      label: 'Мониторинг устройства',
-      type: 'submenu' as const,
-      children: [
-        {
-          key: '#/dashboard',
-          icon: <RadarChartOutlined />,
-          label: 'MoniPuck (Live)',
-          badge: true,
-        },
-      ],
-    },
-    {
+      
       key: 'analytics',
       icon: <FundOutlined style={{ fontSize: '16px' }} />,
       label: 'Анализ данных',
@@ -65,7 +52,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
         {
           key: '#/ctg',
           icon: <LineChartOutlined />,
-          label: 'КТГ Анализ',
+          label: 'Клиническая сессия КТГ',
+        },
+                {
+          key: '#/dashboard',
+          icon: <LineChartOutlined />,
+          label: 'Домашний КТГ-Мониторинг',
         },
         {
           key: '#/ai-analysis',
