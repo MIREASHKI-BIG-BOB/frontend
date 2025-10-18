@@ -31,7 +31,7 @@ interface CTGCombinedStripProps {
 }
 
 // Диапазоны значений согласно ТЗ
-const FHR_RANGE = { min: 30, max: 210 };
+const FHR_RANGE = { min: 60, max: 210 };
 const UC_TONE_RANGE = { min: 0, max: 30 }; // Объединенный диапазон для UC и Tone
 const SECOND_SPACING_CM: Record<1 | 3, number> = {
   1: 5,

@@ -241,29 +241,50 @@ const CTGPage: React.FC = () => {
       return;
     }
     
-    // Создаем объект с данными для отчета
-    const reportData = {
-      timestamp: new Date().toISOString(),
-      duration: recordingSeconds,
-      samples: samples,
-      events: combinedEvents,
-      metrics: metrics,
-      prediction: latestData?.prediction || null,
-    };
-
-    // Сохраняем в localStorage для доступа из вкладки "Отчеты"
-    const existingReports = JSON.parse(localStorage.getItem('ctg_reports') || '[]');
-    const newReport = {
-      id: `report-${Date.now()}`,
+    // Определяем опасные участки (decelerations, anomalies)
+    const criticalEvents = combinedEvents.filter(e => 
+      e.severity === 'critical' || e.severity === 'warning'
+    );
+    
+    // Создаем объект в формате ctgSessions для Reports
+    const newSession = {
+      id: Date.now(),
       date: new Date().toISOString(),
-      duration: recordingSeconds,
-      data: reportData,
+      duration: Math.round(recordingSeconds / 60), // в минутах
+      basalFHR: Math.round(metrics.baseline || 140),
+      variability: Math.round(metrics.variabilityAmplitude || 15),
+      accelerations: metrics.accelerations?.count || 0,
+      decelerations: metrics.decelerations?.count || 0,
+      movements: manualEvents.filter(e => e.kind === 'mark').length,
+      score: latestData?.prediction?.hypoxia_risk === 'low' ? 10 : 
+             latestData?.prediction?.hypoxia_risk === 'medium' ? 8 :
+             latestData?.prediction?.hypoxia_risk === 'high' ? 6 : 4,
+      conclusion: latestData?.prediction?.hypoxia_risk === 'low' ? 'Нормальный' :
+                  latestData?.prediction?.hypoxia_risk === 'medium' ? 'Подозрительный' :
+                  latestData?.prediction?.hypoxia_risk === 'high' ? 'Патологический' : 'Критический',
+      risk: latestData?.prediction?.hypoxia_risk || 'low',
+      anomalies: criticalEvents.map(e => ({
+        type: e.kind === 'deceleration' ? 'decel' : e.kind,
+        time: `${Math.floor(e.start / 60)}:${String(Math.floor(e.start % 60)).padStart(2, '0')}`,
+        severity: e.severity,
+        description: e.description || 'Обнаружена аномалия',
+      })),
+      // Сохраняем полные данные для детального просмотра
+      fullData: {
+        samples: samples,
+        events: combinedEvents,
+        metrics: metrics,
+        prediction: latestData?.prediction || null,
+      }
     };
-    existingReports.push(newReport);
-    localStorage.setItem('ctg_reports', JSON.stringify(existingReports));
 
-    message.success('Отчет сохранен! Перейдите во вкладку "Отчеты" для просмотра.');
-  }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData]);
+    // Сохраняем в localStorage
+    const existingSessions = JSON.parse(localStorage.getItem('ctg_sessions') || '[]');
+    existingSessions.push(newSession);
+    localStorage.setItem('ctg_sessions', JSON.stringify(existingSessions));
+
+    message.success('Сессия сохранена! Перейдите во вкладку "Отчеты" для просмотра.');
+  }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData, manualEvents]);
 
   const handleSelectEvent = useCallback((event: CTGEvent) => {
     const center = event.peak || event.start;

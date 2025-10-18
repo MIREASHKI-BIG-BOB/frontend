@@ -41,56 +41,80 @@ export default function ReportsPage() {
     experience: 15
   });
 
-  // Симулированные данные КТГ сеансов
-  const [ctgSessions] = useState([
-    {
-      id: 1,
-      date: dayjs().subtract(3, 'day'),
-      duration: 40,
-      basalFHR: 142,
-      variability: 15,
-      accelerations: 8,
-      decelerations: 0,
-      anomalies: [],
-      conclusion: 'КТГ в норме'
-    },
-    {
-      id: 2,
-      date: dayjs().subtract(1, 'day'),
-      duration: 45,
-      basalFHR: 138,
-      variability: 12,
-      accelerations: 6,
-      decelerations: 1,
-      anomalies: [
-        {
-          time: '14:23',
-          type: 'bradycardia',
-          description: 'Кратковременная брадикардия',
-          duration: 45
-        }
-      ],
-      conclusion: 'Требуется наблюдение'
-    },
-    {
-      id: 3,
-      date: dayjs(),
-      duration: 50,
-      basalFHR: 145,
-      variability: 18,
-      accelerations: 10,
-      decelerations: 0,
-      anomalies: [
-        {
-          time: '10:18',
-          type: 'tachycardia',
-          description: 'Умеренная тахикардия',
-          duration: 120
-        }
-      ],
-      conclusion: 'Требуется контроль'
+  // Загружаем CTG сеансы из localStorage
+  const [ctgSessions, setCtgSessions] = useState(() => {
+    const saved = localStorage.getItem('ctg_sessions');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.map((s: any) => ({
+          ...s,
+          date: dayjs(s.date)
+        }));
+      } catch (e) {
+        console.error('Failed to parse ctg_sessions:', e);
+      }
     }
-  ]);
+    // Fallback к симулированным данным
+    return [
+      {
+        id: 1,
+        date: dayjs().subtract(3, 'day'),
+        duration: 40,
+        basalFHR: 142,
+        variability: 15,
+        accelerations: 8,
+        decelerations: 0,
+        movements: 5,
+        score: 10,
+        risk: 'low',
+        anomalies: [],
+        conclusion: 'Нормальный'
+      },
+      {
+        id: 2,
+        date: dayjs().subtract(1, 'day'),
+        duration: 45,
+        basalFHR: 138,
+        variability: 12,
+        accelerations: 6,
+        decelerations: 1,
+        movements: 4,
+        score: 8,
+        risk: 'medium',
+        anomalies: [
+          {
+            time: '14:23',
+            type: 'bradycardia',
+            severity: 'warning',
+            description: 'Кратковременная брадикардия',
+          }
+        ],
+        conclusion: 'Подозрительный'
+      },
+      {
+        id: 3,
+        date: dayjs(),
+        duration: 50,
+        basalFHR: 145,
+        variability: 18,
+        accelerations: 10,
+        decelerations: 0,
+        movements: 6,
+        score: 9,
+        risk: 'low',
+        anomalies: [
+          {
+            time: '10:18',
+            type: 'tachycardia',
+            severity: 'warning',
+            description: 'Умеренная тахикардия',
+          }
+        ],
+        conclusion: 'Нормальный'
+      }
+    ];
+  });
 
   // Состояние для генерации отчёта
   const [isGenerating, setIsGenerating] = useState(false);
