@@ -74,8 +74,8 @@ const CTGPage: React.FC = () => {
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [visibleWindowSec, setVisibleWindowSec] = useState(10); // 10 секунд
-  const [paperSpeed, setPaperSpeed] = useState<1 | 3>(3); // 3 см/сек
+  const [visibleWindowSec, setVisibleWindowSec] = useState(600);
+  const [paperSpeed, setPaperSpeed] = useState<1 | 3>(3);
   const [visibleRange, setVisibleRange] = useState<Range>({ start: 0, end: 600 });
   const [samples, setSamples] = useState<CTGSample[]>([]);
   const [manualEvents, setManualEvents] = useState<CTGEvent[]>([]);
@@ -522,31 +522,7 @@ const CTGPage: React.FC = () => {
       <Row gutter={16}>
         <Col span={18}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Card bodyStyle={{ padding: "12px 16px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Space size="middle" align="center">
-                  <Title level={5} style={{ margin: 0 }}>
-                    Кардиотокография
-                  </Title>
-                  <Tag color={isRecording ? "red" : "default"}>{isRecording ? "Запись" : "Пауза"}</Tag>
-                  <Tag icon={<WifiOutlined />} color={isConnected ? "green" : "volcano"}>
-                    {isConnected ? "WS: онлайн" : "WS: офлайн"}
-                  </Tag>
-                  <Tag icon={<ClockCircleOutlined />}>{formatClock(recordingSeconds)}</Tag>
-                  {wsError && <Tag color="red">{wsError}</Tag>}
-                </Space>
-                <Space>
-                  <Button
-                    type="primary"
-                    icon={isRecording ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-                    onClick={handleStartStop}
-                    loading={actionPending}
-                  >
-                    {isRecording ? "Стоп" : "Старт"}
-                  </Button>
-                </Space>
-              </div>
-            </Card>
+
 
             <Card bodyStyle={{ padding: 16 }}>
               <CTGCombinedStrip
@@ -585,12 +561,22 @@ const CTGPage: React.FC = () => {
 
                 {/* Кнопки навигации */}
                 <div style={{ display: "flex", gap: 12 }}>
+                  <Button
+                    type="primary"
+                    icon={isRecording ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                    onClick={handleStartStop}
+                    loading={actionPending}
+                    size="large"
+                    style={{ minWidth: 120 }}
+                  >
+                    {isRecording ? "Стоп" : "Старт"}
+                  </Button>
                   <Button 
                     icon={<FlagOutlined />} 
                     onClick={handleMarkFetalMovement} 
                     disabled={!hasSamples}
                     size="large"
-                    type="primary"
+                    type="default"
                     style={{ minWidth: 100 }}
                   >
                     MARK
@@ -639,14 +625,64 @@ const CTGPage: React.FC = () => {
                 </div>
               </div>
             </Card>
-
-
           </Space>
         </Col>
 
         <Col span={6}>
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            {/* Текущие значения - 4 блока без заголовка */}
+            {/* Блок метрик (плитки 3 в ряд, как "Текущие значения") */}
+              {(() => {
+                const now = lastTimestampRef.current;
+                const windowStart = Math.max(0, now - 60); // последние 60 секунд
+                const recentSamples = samples.filter(s => s.time >= windowStart && s.fhr != null);
+                const baseline = recentSamples.length
+                  ? Math.round(recentSamples.reduce((sum, s) => sum + (s.fhr || 0), 0) / recentSamples.length)
+                  : null;
+
+                const accelCount = combinedEvents.filter(e => e.kind === "acceleration").length;
+                const decelCount = combinedEvents.filter(e => e.kind === "deceleration").length;
+                const goodSamples = samples.filter(s => s.quality === "good").length;
+                const qualityPercent = samples.length ? (goodSamples / samples.length * 100).toFixed(1) : null;
+                const movementsCount = manualEvents.filter(e => e.kind === 'mark').length;
+
+                return (
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: "1px",
+                    padding: "12px",
+                    background: "#fff",
+                    borderRadius: 8,
+                    border: "1px solid #e5e7eb"
+                  }}>
+                    {/* Baseline */}
+                    <div style={{ textAlign: "center", padding: "12px" }}>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, marginBottom: 4 }}>Baseline</div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#0f172a", fontFamily: "monospace", lineHeight: 1 }}>
+                        {baseline != null ? `${baseline}` : '—'}
+                      </div>
+                    </div>
+
+                    {/* Акцелерации */}
+                    <div style={{ textAlign: "center", padding: "12px" }}>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, marginBottom: 4 }}>Акцелерации</div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#16a34a", fontFamily: "monospace", lineHeight: 1 }}>
+                        {accelCount > 0 ? accelCount : '—'}
+                      </div>
+                    </div>
+
+                    {/* Децелерации */}
+                    <div style={{ textAlign: "center", padding: "12px" }}>
+                      <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, marginBottom: 4 }}>Децелерации</div>
+                      <div style={{ fontSize: 40, fontWeight: 700, color: "#dc2626", fontFamily: "monospace", lineHeight: 1 }}>
+                        {decelCount > 0 ? decelCount : '—'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+            {/* Текущие значения - 3 блока без заголовка */}
             {(() => {
               const lastSample = samples.length > 0 ? samples[samples.length - 1] : null;
               return (

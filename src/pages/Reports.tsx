@@ -215,12 +215,23 @@ export default function ReportsPage() {
         throw new Error('Не найден элемент отчёта для экспорта');
       }
 
+      // Скрываем все элементы с классом no-print
+      const noPrintElements = reportElement.querySelectorAll('.no-print');
+      noPrintElements.forEach((el: any) => {
+        el.style.display = 'none';
+      });
+
       // Создаём canvas из HTML
       const canvas = await html2canvas(reportElement, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
+      });
+
+      // Возвращаем видимость элементов
+      noPrintElements.forEach((el: any) => {
+        el.style.display = '';
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -531,7 +542,6 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
     <div style={{ 
       padding: typography.spacing.md,
       background: colors.background.secondary,
-      minHeight: '100vh'
     }}>
       {/* Заголовок страницы */}
       <div style={{
@@ -970,6 +980,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                       <Button
                         size="small"
                         icon={<EditOutlined />}
+                        className="no-print"
                         onClick={() => setIsEditing(!isEditing)}
                         style={{
                           borderColor: colors.primary,
@@ -1152,6 +1163,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                             <Button
                               danger
                               size="small"
+                              className="no-print"
                               onClick={() => removeStripFromReport(sessionId)}
                             >
                               Удалить
@@ -1188,7 +1200,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               )}
 
               {/* Кнопки действий */}
-              <Card bodyStyle={{ padding: typography.spacing.lg }}>
+              <Card bodyStyle={{ padding: typography.spacing.lg }} className="no-print">
                 <Row gutter={16}>
                   <Col span={24}>
                     <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
@@ -1229,12 +1241,11 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
 
       {/* Модальное окно с CTG лентой */}
       <Modal
-        open={isCTGModalVisible}
+   open={isCTGModalVisible}
+  getContainer={undefined}
         onCancel={closeCTGModal}
         footer={null}
-        width="98%"
-        style={{ top: 10, maxWidth: 'none' }}
-        bodyStyle={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
+
         title={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -1247,6 +1258,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Button 
                 danger 
                 size="small"
+                className="no-print"
                 onClick={() => {
                   if (selectedSession) {
                     Modal.confirm({

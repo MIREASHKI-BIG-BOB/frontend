@@ -21,12 +21,14 @@ export async function exportCTGToPDF(
 
     // Создаём canvas с высоким разрешением
     const canvas = await html2canvas(element, {
-      scale: 2, // Увеличиваем разрешение для лучшего качества
+      scale: 3, // Увеличиваем разрешение для SVG текста
       useCORS: true,
       logging: false,
       backgroundColor: '#fefdfbff',
       width: elementWidth,
       height: elementHeight,
+      foreignObjectRendering: false, // Отключаем для лучшего рендеринга SVG
+      allowTaint: true,
     });
 
     const imgData = canvas.toDataURL('image/png');
@@ -88,12 +90,14 @@ export async function exportLongCTGToPDF(
 
     // Создаём canvas
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 3, // Увеличиваем разрешение для SVG текста
       useCORS: true,
       logging: false,
       backgroundColor: '#fefdfbff',
       width: elementWidth,
       height: elementHeight,
+      foreignObjectRendering: false, // Отключаем для лучшего рендеринга SVG
+      allowTaint: true,
     });
 
     const imgData = canvas.toDataURL('image/png');
