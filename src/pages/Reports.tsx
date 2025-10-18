@@ -129,6 +129,41 @@ export default function ReportsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [approvedByDoctor, setApprovedByDoctor] = useState(false);
 
+  // Состояние для просмотра CTG ленты
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [isCTGModalVisible, setIsCTGModalVisible] = useState(false);
+
+  // Обработчик клика на сеанс
+  const handleSessionClick = (session: any) => {
+    setSelectedSession(session);
+    setIsCTGModalVisible(true);
+  };
+
+  // Закрытие модального окна
+  const closeCTGModal = () => {
+    setIsCTGModalVisible(false);
+    setSelectedSession(null);
+  };
+
+  // Удаление CTG ленты
+  const handleDeleteSession = (sessionId: number) => {
+    const updatedSessions = ctgSessions.filter((s: any) => s.id !== sessionId);
+    setCtgSessions(updatedSessions);
+    
+    // Обновляем localStorage
+    localStorage.setItem('ctg_sessions', JSON.stringify(updatedSessions.map((s: any) => ({
+      ...s,
+      date: s.date.toISOString()
+    }))));
+    
+    message.success('Сеанс удалён');
+    
+    // Закрываем модалку если удалили текущий сеанс
+    if (selectedSession?.id === sessionId) {
+      closeCTGModal();
+    }
+  };
+
   // Автоматическое обновление рекомендаций из ML данных
   React.useEffect(() => {
     if (latestData && latestData.prediction && latestData.prediction.recommendations) {
@@ -579,12 +614,26 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               </div>
               <Divider style={{ margin: `${typography.spacing.sm} 0` }} />
               {ctgSessions.map((session, idx) => (
-                <div key={session.id} style={{
-                  padding: typography.spacing.sm,
-                  background: colors.primaryPale,
-                  borderRadius: '8px',
-                  border: `1px solid ${colors.border.light}`
-                }}>
+                <div 
+                  key={session.id} 
+                  onClick={() => handleSessionClick(session)}
+                  style={{
+                    padding: typography.spacing.sm,
+                    background: colors.primaryPale,
+                    borderRadius: '8px',
+                    border: `1px solid ${colors.border.light}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(236, 72, 153, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: typography.spacing.xs }}>
                     <Text strong style={{ fontSize: typography.fontSize.sm, color: colors.text.primary }}>
                       Сеанс #{idx + 1}
@@ -771,7 +820,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                           paddingLeft: typography.spacing.lg, 
                           color: colors.text.secondary 
                         }}>
-                          {riskAssessment.factors.map((factor: string, idx: number) => (
+                          {(riskAssessment?.factors || []).map((factor: string, idx: number) => (
                             <li key={idx} style={{ marginBottom: typography.spacing.xs }}>{factor}</li>
                           ))}
                         </ul>
@@ -963,6 +1012,259 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
           )}
         </Col>
       </Row>
+
+      {/* Модальное окно с CTG лентой */}
+      <Modal
+        open={isCTGModalVisible}
+        onCancel={closeCTGModal}
+        footer={null}
+        width="90%"
+        style={{ top: 20 }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <Text strong style={{ fontSize: 18 }}>
+                Сеанс КТГ #{selectedSession?.id}
+              </Text>
+              <Text type="secondary" style={{ marginLeft: 16, fontSize: 14 }}>
+                {selectedSession?.date?.format('DD.MM.YYYY HH:mm')}
+              </Text>
+            </div>
+            <Button 
+              danger 
+              size="small"
+              onClick={() => {
+                if (selectedSession) {
+                  Modal.confirm({
+                    title: 'Удалить сеанс?',
+                    content: 'Это действие нельзя отменить',
+                    okText: 'Удалить',
+                    cancelText: 'Отмена',
+                    okButtonProps: { danger: true },
+                    onOk: () => handleDeleteSession(selectedSession.id)
+                  });
+                }
+              }}
+            >
+              Удалить сеанс
+            </Button>
+          </div>
+        }
+      >
+        {selectedSession?.fullData ? (
+          <div style={{ 
+            maxHeight: '70vh', 
+            overflowY: 'auto',
+            background: '#f9fafb',
+            padding: 16,
+            borderRadius: 8
+          }}>
+            {/* Информация о сеансе */}
+            <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+              <Col span={6}>
+                <Card size="small" title="ЧСС базальная">
+                  <Text strong style={{ fontSize: 24, color: colors.primary }}>
+                    {selectedSession.basalFHR}
+                  </Text>
+                  <Text type="secondary"> уд/мин</Text>
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card size="small" title="Вариабельность">
+                  <Text strong style={{ fontSize: 24, color: colors.primary }}>
+                    {selectedSession.variability}
+                  </Text>
+                  <Text type="secondary"> уд/мин</Text>
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card size="small" title="Акцелерации">
+                  <Text strong style={{ fontSize: 24, color: colors.success }}>
+                    {selectedSession.accelerations}
+                  </Text>
+                </Card>
+              </Col>
+              <Col span={6}>
+                <Card size="small" title="Децелерации">
+                  <Text strong style={{ fontSize: 24, color: colors.error }}>
+                    {selectedSession.decelerations}
+                  </Text>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* ML Предикты */}
+            {selectedSession.fullData.prediction && (
+              <Card 
+                size="small" 
+                title={<><RobotOutlined /> ML Анализ</>}
+                style={{ marginBottom: 16 }}
+              >
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <div>
+                      <Text type="secondary">Риск гипоксии:</Text>
+                      <div>
+                        <Tag color={
+                          selectedSession.fullData.prediction.hypoxia_risk === 'high' ? 'red' :
+                          selectedSession.fullData.prediction.hypoxia_risk === 'medium' ? 'orange' : 'green'
+                        }>
+                          {selectedSession.fullData.prediction.hypoxia_risk === 'high' ? 'Высокий' :
+                           selectedSession.fullData.prediction.hypoxia_risk === 'medium' ? 'Средний' : 'Низкий'}
+                        </Tag>
+                        <Text strong>
+                          {Math.round((selectedSession.fullData.prediction.hypoxia_probability || 0) * 100)}%
+                        </Text>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div>
+                      <Text type="secondary">Уверенность модели:</Text>
+                      <div>
+                        <Progress 
+                          percent={Math.round((selectedSession.fullData.prediction.confidence || 0) * 100)} 
+                          size="small"
+                          strokeColor={colors.primary}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8}>
+                    <div>
+                      <Text type="secondary">Оповещения:</Text>
+                      <div>
+                        <Badge 
+                          count={selectedSession.fullData.prediction.alerts?.length || 0}
+                          style={{ backgroundColor: colors.warning }}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+
+                {selectedSession.fullData.prediction.alerts && selectedSession.fullData.prediction.alerts.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <Text strong>Критические показатели:</Text>
+                    <ul style={{ marginTop: 8 }}>
+                      {selectedSession.fullData.prediction.alerts.map((alert: string, idx: number) => (
+                        <li key={idx} style={{ color: colors.error }}>
+                          <WarningOutlined /> {alert}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {selectedSession.fullData.prediction.recommendations && selectedSession.fullData.prediction.recommendations.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <Text strong>Рекомендации ML:</Text>
+                    <ul style={{ marginTop: 8 }}>
+                      {selectedSession.fullData.prediction.recommendations.map((rec: string, idx: number) => (
+                        <li key={idx} style={{ color: colors.text.secondary }}>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* CTG График - отображаем простую визуализацию */}
+            <Card size="small" title="График КТГ" style={{ marginBottom: 16 }}>
+              <div style={{ 
+                height: 400, 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                background: '#fff',
+                borderRadius: 8,
+                border: '1px solid #e5e7eb'
+              }}>
+                {selectedSession.fullData.samples && selectedSession.fullData.samples.length > 0 ? (
+                  <div style={{ width: '100%', height: '100%', padding: 16 }}>
+                    <svg width="100%" height="100%" viewBox="0 0 1000 400">
+                      {/* FHR график */}
+                      <text x="10" y="20" fontSize="12" fill="#666">ЧСС плода (уд/мин)</text>
+                      <line x1="0" y1="40" x2="1000" y2="40" stroke="#ddd" strokeWidth="1"/>
+                      <line x1="0" y1="190" x2="1000" y2="190" stroke="#ddd" strokeWidth="1"/>
+                      <polyline
+                        points={selectedSession.fullData.samples
+                          .filter((s: any) => s.fhr !== null)
+                          .map((s: any, i: number) => {
+                            const x = (i / selectedSession.fullData.samples.length) * 1000;
+                            const y = 190 - ((s.fhr - 60) / 150) * 150;
+                            return `${x},${y}`;
+                          })
+                          .join(' ')}
+                        fill="none"
+                        stroke={colors.primary}
+                        strokeWidth="2"
+                      />
+
+                      {/* UC график */}
+                      <text x="10" y="220" fontSize="12" fill="#666">Тонус матки (mmHg)</text>
+                      <line x1="0" y1="240" x2="1000" y2="240" stroke="#ddd" strokeWidth="1"/>
+                      <line x1="0" y1="390" x2="1000" y2="390" stroke="#ddd" strokeWidth="1"/>
+                      <polyline
+                        points={selectedSession.fullData.samples
+                          .filter((s: any) => s.uc !== null)
+                          .map((s: any, i: number) => {
+                            const x = (i / selectedSession.fullData.samples.length) * 1000;
+                            const y = 390 - ((s.uc || 0) / 100) * 150;
+                            return `${x},${y}`;
+                          })
+                          .join(' ')}
+                        fill="none"
+                        stroke="#f97316"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  </div>
+                ) : (
+                  <Text type="secondary">Нет данных для отображения графика</Text>
+                )}
+              </div>
+            </Card>
+
+            {/* События и аномалии */}
+            {selectedSession.fullData.events && selectedSession.fullData.events.length > 0 && (
+              <Card size="small" title="События и аномалии">
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {selectedSession.fullData.events.map((event: any, idx: number) => (
+                    <Alert
+                      key={idx}
+                      message={
+                        event.kind === 'deceleration' ? 'Замедление' :
+                        event.kind === 'acceleration' ? 'Ускорение' :
+                        event.kind === 'mark' ? 'Отметка' : event.kind
+                      }
+                      description={`Время: ${Math.floor(event.start / 60)}:${String(Math.floor(event.start % 60)).padStart(2, '0')} - ${Math.floor(event.end / 60)}:${String(Math.floor(event.end % 60)).padStart(2, '0')}`}
+                      type={
+                        event.severity === 'critical' ? 'error' :
+                        event.severity === 'warning' ? 'warning' : 'info'
+                      }
+                      showIcon
+                    />
+                  ))}
+                </Space>
+              </Card>
+            )}
+          </div>
+        ) : (
+          <div style={{ 
+            padding: 48, 
+            textAlign: 'center',
+            color: colors.text.secondary
+          }}>
+            <FileTextOutlined style={{ fontSize: 64, color: colors.border.default }} />
+            <div style={{ marginTop: 16 }}>
+              <Text>Данные КТГ для этого сеанса не сохранены</Text>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
