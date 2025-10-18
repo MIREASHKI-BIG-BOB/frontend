@@ -128,14 +128,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     },
   ];
 
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{
-    startX: number;
-    startVisibleStart: number;
-    startVisibleEnd: number;
-    hasMoved?: boolean; // Флаг для отслеживания реального движения
-  } | null>(null);
-
   // Автоматическая прокрутка к правому краю (только для live режима)
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
@@ -147,38 +139,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       container.scrollLeft = container.scrollWidth - container.clientWidth;
     }
   }, [samples.length, visibleEnd]);
-
-  const handleMouseDown = (event: React.MouseEvent) => {
-    setIsDragging(true);
-    dragRef.current = {
-      startX: event.clientX,
-      startVisibleStart: visibleStart,
-      startVisibleEnd: visibleEnd,
-      hasMoved: false, // Флаг для отслеживания реального движения
-    };
-    // НЕ останавливаем график при клике, только при реальном драге
-  };
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (isDragging && dragRef.current && width > 0) {
-      const deltaPx = event.clientX - dragRef.current.startX;
-      // Увеличиваем порог до 15px чтобы избежать случайных срабатываний
-      if (Math.abs(deltaPx) > 15) {
-        // Останавливаем live режим только при первом реальном движении
-        if (!dragRef.current.hasMoved) {
-          onToggleLive(false);
-          dragRef.current.hasMoved = true;
-        }
-        const deltaSeconds = -deltaPx * secondsPerPixel;
-        onPan(deltaSeconds);
-      }
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    dragRef.current = null;
-  };
 
   const handleDoubleClick = () => onToggleLive(true);
 
@@ -200,10 +160,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
           display: "flex",
           flexDirection: "column",
         }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         onDoubleClick={handleDoubleClick}
       >
       {/* ==================== ОБЪЕДИНЁННЫЙ БЛОК FHR + UC ==================== */}

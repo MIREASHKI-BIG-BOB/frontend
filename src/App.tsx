@@ -1,6 +1,7 @@
 import { Layout, Button, Typography, Space } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import FimeaLogo from './components/FimeaLogo';
+import logoImg from './assets/logo.png';
 import { colors } from './theme';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
@@ -26,7 +27,7 @@ const { Header, Content, Footer } = Layout;
 
 export default function App() {
   const [route, setRoute] = useState<string>(location.hash || '#/');
-
+  const [logoFailed, setLogoFailed] = useState(false);
   useEffect(() => {
     const onHash = () => setRoute(location.hash || '#/');
     window.addEventListener('hashchange', onHash);
@@ -81,10 +82,14 @@ return (
     >
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4">
         <Space size="large" align="center">
-          <FimeaLogo size={28} color="white" />
-          <Typography.Title level={3} className="!text-white !mb-0">
-            FIMEA
-          </Typography.Title>
+          {/* Локальный логотип из src/assets (fallback — FimeaLogo) */}
+          <img
+            src={logoImg}
+            alt="FIMEA"
+            style={{ height: 32, width: 'auto', display: logoFailed ? 'none' : 'block' }}
+            onError={() => setLogoFailed(true)}
+          />
+          {logoFailed && <FimeaLogo size={28} color="white" />}
         </Space>
 
         <Button
@@ -95,19 +100,19 @@ return (
             color: colors.primary,
             border: 'none',
             borderRadius: 8,
-            padding: '0 20px',
             height: 44,
             fontWeight: 600,
+            padding: '0 20px'
           }}
-          onClick={() => (location.hash = '#/dashboard')}
+          onClick={() => (location.hash = '#/ctg')}
         >
-          Дешборд <ArrowRightOutlined />
+          Начать <ArrowRightOutlined />
         </Button>
       </div>
     </Header>
 
     <Content style={{ background: '#fff' }}>
-      <div className="space-y-24"> {/* вертикальные интервалы между секциями */}
+      <div className=''> {/* вертикальные интервалы между секциями */}
         <Hero />
         <DeviceShowcase />
         <ProblemSolution />

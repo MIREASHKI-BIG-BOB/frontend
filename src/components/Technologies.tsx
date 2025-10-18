@@ -52,7 +52,6 @@ const features = [
 export default function Technologies() {
   return (
     <section style={{ 
-      padding: '80px 0',
       background: colors.background.primary
     }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
@@ -66,6 +65,13 @@ export default function Technologies() {
             marginBottom: '24px'
           }}>
             <FimeaLogo size={48} color="#D86288" />
+
+          </div>
+          <Title level={2} style={{ 
+            fontSize: 'clamp(2rem, 3vw, 2.5rem)',
+            marginBottom: '16px',
+            color: colors.text.primary
+          }}>
             <div style={{
               fontSize: '28px',
               fontWeight: 700,
@@ -73,17 +79,9 @@ export default function Technologies() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              letterSpacing: '-0.5px'
-            }}>
-              FIMEA
-            </div>
-          </div>
-          <Title level={2} style={{ 
-            fontSize: 'clamp(2rem, 3vw, 2.5rem)',
-            marginBottom: '16px',
-            color: colors.text.primary
-          }}>
-            Передовые технологии
+              letterSpacing: '-0.5px',
+              display: 'inline-block'
+            }}>Передовые технологии</div>
           </Title>
           <Paragraph style={{ 
             fontSize: '18px', 

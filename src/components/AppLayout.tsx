@@ -180,62 +180,59 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
           borderRight: `1px solid ${colors.border.light}`,
         }}
       >
-        {/* Logo Area - с настоящим лого */}
-        <div 
-          style={{
-            height: '64px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            padding: collapsed ? '0' : '0 16px',
-            borderBottom: `1px solid ${colors.border.light}`,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            background: 'linear-gradient(135deg, rgba(216, 98, 136, 0.05) 0%, rgba(216, 98, 136, 0.1) 100%)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(216, 98, 136, 0.1) 0%, rgba(216, 98, 136, 0.15) 100%)';
-            e.currentTarget.style.transform = 'scale(1.02)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(216, 98, 136, 0.05) 0%, rgba(216, 98, 136, 0.1) 100%)';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          onClick={() => onNavigate('#/')}
-        >
-          {collapsed ? (
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '8px',
-              padding: '6px',
-              boxShadow: '0 2px 8px rgba(216, 98, 136, 0.2)',
-            }}>
-              <FimeaLogo size={32} color="#D86288" />
-            </div>
-          ) : (
-            <Space size="middle" align="center">
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                borderRadius: '12px',
-                padding: '8px',
-                boxShadow: '0 4px 12px rgba(216, 98, 136, 0.2)',
-              }}>
-                <FimeaLogo size={32} color="#D86288" />
-              </div>
-              <div style={{ 
-                fontSize: '20px', 
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #D86288, #B83280)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                letterSpacing: '-0.5px'
-              }}>
-                FIMEA
-              </div>
-            </Space>
-          )}
-        </div>
+<div
+  style={{
+    height: '64px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center', // ← ВСЕГДА центрируем, не flex-start
+    borderBottom: `1px solid ${colors.border.light}`,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    background: 'linear-gradient(135deg, rgba(216,98,136,0.05) 0%, rgba(216,98,136,0.1) 100%)',
+  }}
+  onClick={() => onNavigate('#/')}
+>
+  {collapsed ? (
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.9)',
+        borderRadius: '8px',
+        padding: '6px',
+        boxShadow: '0 2px 8px rgba(216,98,136,0.2)',
+      }}
+    >
+      <FimeaLogo size={32} color="#D86288" />
+    </div>
+  ) : (
+    <Space size="middle" align="center">
+      <div
+        style={{
+          background: 'rgba(255,255,255,0.9)',
+          borderRadius: '12px',
+          padding: '8px',
+          boxShadow: '0 4px 12px rgba(216,98,136,0.2)',
+        }}
+      >
+        <FimeaLogo size={32} color="#D86288" />
+      </div>
+
+      <div
+        style={{
+          fontSize: '20px',
+          fontWeight: 700,
+          background: 'linear-gradient(135deg,#D86288,#B83280)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.5px',
+        }}
+      >
+        FIMEA CTG
+      </div>
+    </Space>
+  )}
+</div>
+
 
         {/* Navigation Menu - улучшенный стиль */}
         <Menu

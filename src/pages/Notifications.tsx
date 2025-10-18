@@ -233,7 +233,7 @@ const formatTime = (timestamp: Date) => {
 
 export default function Notifications() {
   const { latestData: mlData } = useMLWebSocket();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [sourceFilter, setSourceFilter] = useState<NotificationSource | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<NotificationStatus | 'all'>('all');
   const [searchText, setSearchText] = useState('');

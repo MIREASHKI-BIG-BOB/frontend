@@ -931,19 +931,20 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 <Card
                   size="small"
                   title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm, marginBottom: '4px' }}>
                       <WarningOutlined style={{ color: colors.warning, fontSize: typography.fontSize.lg }} />
-                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary, whiteSpace: 'nowrap' }}>
                         Оценка рисков ИИ
                       </span>
                     </div>
                   }
                   headStyle={{ 
-                    padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                    padding: `${typography.spacing.md} ${typography.spacing.md}`,
                     background: colors.primaryPale,
-                    borderBottom: `1px solid ${colors.border.light}`
+                    borderBottom: `10px solid ${colors.border.light}`,
+                    minHeight: '48px'
                   }}
-                  bodyStyle={{ padding: typography.spacing.lg }}
+                  bodyStyle={{ padding: typography.spacing.lg, marginTop: typography.spacing.sm }}
                 >
                   <Row gutter={16} align="middle">
                     <Col span={12}>
@@ -1006,10 +1007,10 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
                       <FileTextOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
-                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                      <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary, whiteSpace: 'nowrap' }}>
                         Медицинское заключение
                       </span>
                     </div>
@@ -1030,11 +1031,12 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   </div>
                 }
                 headStyle={{ 
-                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  padding: `${typography.spacing.md} ${typography.spacing.md}`,
                   background: colors.primaryPale,
-                  borderBottom: `1px solid ${colors.border.light}`
+                  borderBottom: `1px solid ${colors.border.light}`,
+                  minHeight: '48px'
                 }}
-                bodyStyle={{ padding: typography.spacing.lg }}
+                bodyStyle={{ padding: typography.spacing.lg, marginTop: typography.spacing.sm }}
               >
                 {isEditing ? (
                   <TextArea
@@ -1062,19 +1064,20 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm, marginBottom: '4px' }}>
                     <SafetyOutlined style={{ color: colors.primaryDark, fontSize: typography.fontSize.lg }} />
-                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary, whiteSpace: 'nowrap' }}>
                       Рекомендации для врача
                     </span>
                   </div>
                 }
                 headStyle={{ 
-                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  padding: `${typography.spacing.md} ${typography.spacing.md}`,
                   background: colors.primaryPale,
-                  borderBottom: `1px solid ${colors.border.light}`
+                  borderBottom: `1px solid ${colors.border.light}`,
+                  minHeight: '48px'
                 }}
-                bodyStyle={{ padding: typography.spacing.lg }}
+                bodyStyle={{ padding: typography.spacing.lg, marginTop: typography.spacing.sm }}
               >
                 {isEditing ? (
                   <TextArea
@@ -1102,9 +1105,9 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Card
                 size="small"
                 title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: typography.spacing.sm, marginBottom: '4px' }}>
                     <HeartOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
-                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                    <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary, whiteSpace: 'nowrap' }}>
                       Рекомендации для пациентки
                     </span>
                     <Badge 
@@ -1118,11 +1121,12 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   </div>
                 }
                 headStyle={{ 
-                  padding: `${typography.spacing.sm} ${typography.spacing.md}`,
+                  padding: `${typography.spacing.md} ${typography.spacing.md}`,
                   background: colors.primaryPale,
-                  borderBottom: `1px solid ${colors.border.light}`
+                  borderBottom: `1px solid ${colors.border.light}`,
+                  minHeight: '48px'
                 }}
-                bodyStyle={{ padding: typography.spacing.lg }}
+                bodyStyle={{ padding: typography.spacing.lg, marginTop: typography.spacing.sm }}
               >
                 {isEditing ? (
                   <TextArea

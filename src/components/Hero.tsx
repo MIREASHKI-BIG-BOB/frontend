@@ -9,14 +9,29 @@ const { Title, Paragraph } = Typography;
 export default function Hero() {
   return (
     <section style={{ 
-      background: `linear-gradient(135deg, ${colors.primaryPale} 0%, ${colors.primaryLighter} 50%, ${colors.background.primary} 100%)`,
+      position: 'relative',
+      backgroundImage: `url(${fimeaDeviceImg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'right center',
+      backgroundSize: 'cover',
       minHeight: '80vh',
       display: 'flex',
       alignItems: 'center'
     }}>
-      <div className="mx-auto max-w-7xl px-4 md:px-6 py-16">
-        <Row gutter={[48, 32]} align="middle">
-          <Col xs={24} lg={12}>
+      {/* subtle left overlay to keep text readable but reveal device image on the right */}
+      <div aria-hidden style={{
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: '25%',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.25) 55%, rgba(255,255,255,0) 80%)',
+        pointerEvents: 'none',
+        zIndex: 1
+      }} />
+      <div className="mx-auto max-w-7xl px-4 md:px-6 py-16" style={{ height: '100%', paddingTop: 0, paddingBottom: 0 }}>
+        <Row gutter={[48, 32]} style={{ height: '100%' }} align="stretch">
+          <Col xs={24} lg={12} style={{ position: 'relative', zIndex: 3 }}>
             <div>
               {/* Логотип и брендинг */}
               <div style={{ 
@@ -50,7 +65,7 @@ export default function Hero() {
                     letterSpacing: '-0.02em',
                     textShadow: '0 4px 8px rgba(216, 98, 136, 0.3)'
                   }}>
-                    FIMEA CTG
+                    FIMEA
                   </div>
                   <div style={{
                     fontSize: '14px',
@@ -149,6 +164,7 @@ export default function Hero() {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = `0 8px 24px ${colors.primary}40`;
                   }}
+                  onClick={() => (location.hash = '#/ctg')}
                 >
                   Начать мониторинг
                 </Button>
@@ -164,7 +180,6 @@ export default function Hero() {
                     borderRadius: '12px',
                     border: `2px solid ${colors.border.default}`,
                     background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(10px)'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = colors.primary;
@@ -181,8 +196,8 @@ export default function Hero() {
             </div>
           </Col>
 
-          <Col xs={24} lg={12}>
-            <div style={{ position: 'relative' }}>
+          <Col xs={24} lg={12} style={{ height: '100%', position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'stretch', justifyContent: 'center', height: '100%', overflow: 'hidden' }}>
               {/* Декоративные элементы */}
               <div style={{
                 position: 'absolute',
@@ -190,9 +205,9 @@ export default function Hero() {
                 right: '-20px',
                 width: '100px',
                 height: '100px',
-                background: `linear-gradient(135deg, ${colors.primary}20, ${colors.primaryLight}40)`,
+              
                 borderRadius: '50%',
-                filter: 'blur(40px)',
+
                 zIndex: 0
               }} />
               
@@ -202,83 +217,12 @@ export default function Hero() {
                 left: '-30px',
                 width: '80px',
                 height: '80px',
-                background: `linear-gradient(135deg, ${colors.success}20, ${colors.info}20)`,
                 borderRadius: '50%',
-                filter: 'blur(30px)',
                 zIndex: 0
               }} />
 
-              {/* Главная карточка */}
-              <Card 
-                style={{ 
-                  borderRadius: '24px',
-                  border: 'none',
-                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  zIndex: 1,
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(20px)'
-                }}
-              >
-                <div style={{ 
-                  aspectRatio: '16/10', 
-                  background: `linear-gradient(135deg, ${colors.primaryPale} 0%, ${colors.primaryLighter} 100%)`,
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  padding: '0px'
-                }}>
-                  <img
-                    src={fimeaDeviceImg}
-                    alt="FIMEA Device"
-                    style={{
-                      width: '1000%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      objectPosition: 'center'
-                    }}
-                  />
-                </div>
-
-                {/* Статистика внизу карточки */}
-                <div style={{ 
-                  marginTop: '24px',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '16px',
-                  textAlign: 'center'
-                }}>
-                  {[
-                    { value: '99.7%', label: 'Точность ИИ' },
-                    { value: '24/7', label: 'Мониторинг' },
-                    { value: '250+', label: 'Клиник' }
-                  ].map((stat, index) => (
-                    <div key={index}>
-                      <div style={{ 
-                        fontSize: '20px', 
-                        fontWeight: 700, 
-                        background: 'linear-gradient(135deg, #D86288, #B83280)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        marginBottom: '4px'
-                      }}>
-                        {stat.value}
-                      </div>
-                      <div style={{ 
-                        fontSize: '12px', 
-                        color: colors.text.secondary 
-                      }}>
-                        {stat.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              {/* декоративный фон-контейнер оставляем пустым (фон секции) */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 1 }} aria-hidden />
             </div>
           </Col>
         </Row>

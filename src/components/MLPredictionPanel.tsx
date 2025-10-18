@@ -55,7 +55,7 @@ export default function MLPredictionPanel({ prediction, isAccumulating = false }
             color: '#831843',
             opacity: 0.7
           }}>
-            Анализирую поступающие данные...
+            Анализирую поступающие данные, подождите ≈2 минуты...
           </div>
         </div>
       </Card>

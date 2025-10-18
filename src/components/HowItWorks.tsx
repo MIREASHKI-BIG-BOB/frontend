@@ -1,32 +1,35 @@
-import { Card, Typography, Row, Col, Space } from 'antd';
+import { Card, Typography, Row, Col } from 'antd';
 import { MobileOutlined, AimOutlined, SoundOutlined, ShareAltOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { colors } from '../theme';
+import FimeaLogo from './FimeaLogo';
+
+const placeholderCtgUrl = new URL('../assets/placeholder-ctg-monitor.png', import.meta.url).href;
 
 const { Title, Paragraph } = Typography;
 
 const steps = [
   { 
     icon: <MobileOutlined />, 
-    title: 'Подключите', 
-    desc: 'Соедините FIMEA со смартфоном по WiFi и откройте приложение.',
+    title: 'Подключите',
+    desc: 'Включите FIMEA, подключите по Wi-Fi и откройте монитор КТГ с предиктивной аналитикой.',
     color: colors.primary
   },
   { 
     icon: <AimOutlined />, 
-    title: 'Установите', 
-    desc: 'Расположите датчик на животе — система автоматически подскажет оптимальное место.',
+    title: 'Установите датчик',
+    desc: 'Расположите датчик на животе. Система подскажет корректность сигнала и качество контакта.',
     color: colors.info
   },
   { 
     icon: <SoundOutlined />, 
-    title: 'Слушайте', 
-    desc: 'В реальном времени наблюдайте и записывайте сердцебиение малыша.',
+    title: 'Наблюдайте онлайн',
+    desc: 'На КТГ-ленте в реальном времени отображаются ЧСС плода, токограмма и автоматическая разметка событий.',
     color: colors.success
   },
   { 
     icon: <ShareAltOutlined />, 
-    title: 'Делитесь', 
-    desc: 'Отправляйте результаты врачу или сохраняйте в облаке одним касанием.',
+    title: 'Получайте заключение',
+    desc: 'ИИ анализирует эпизоды, вычисляет риски и формирует отчёт. Отправьте врачу или сохраните в облако.',
     color: colors.warning
   },
 ];
@@ -34,18 +37,43 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section style={{ 
-      padding: '80px 0',
-      background: colors.background.secondary
+    padding: '60px 0',
+    background: `${colors.background.secondary}`,
+    backgroundImage: `linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url(${placeholderCtgUrl})`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',      // ← тянет по ширине и высоте с обрезкой
     }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
+        
         {/* Заголовок секции */}
+        {/* Заголовок с лого */}
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            <FimeaLogo size={48} color="#D86288" />
+
+          </div>
           <Title level={2} style={{ 
             fontSize: 'clamp(2rem, 3vw, 2.5rem)',
             marginBottom: '16px',
             color: colors.text.primary
           }}>
-            Как это работает
+            <div style={{
+              fontSize: '28px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #D86288, #B83280)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.5px',
+              display: 'inline-block'
+            }}>Как работает КТГ-монитор с ИИ</div>
           </Title>
           <Paragraph style={{ 
             fontSize: '18px', 
@@ -53,11 +81,11 @@ export default function HowItWorks() {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            Простой процесс из 4 шагов для начала мониторинга здоровья вашего малыша
+            FIMEA записывает ЧСС плода и токограмму, нейросеть в реальном времени анализирует паттерны и формирует интерпретацию
           </Paragraph>
         </div>
 
-        {/* Шаги */}
+        {/* Карточки шагов */}
         <Row gutter={[24, 32]}>
           {steps.map((step, index) => (
             <Col key={index} xs={24} sm={12} lg={6}>
@@ -133,7 +161,7 @@ export default function HowItWorks() {
                   {step.desc}
                 </Paragraph>
 
-                {/* Стрелка для всех кроме последнего */}
+                {/* Стрелка между шагами */}
                 {index < steps.length - 1 && (
                   <div style={{
                     position: 'absolute',
@@ -160,6 +188,8 @@ export default function HowItWorks() {
             </Col>
           ))}
         </Row>
+
+
       </div>
     </section>
   );
