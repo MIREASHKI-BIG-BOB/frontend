@@ -56,79 +56,65 @@ const patientInfo: PatientInfo = {
   currentDay: 4
 };
 
-// Моковые данные КТГ-сессий для одного пациента
-const initialSessions: CTGSession[] = [
-  {
-    id: 'ctg-001',
-    date: '2025-10-01 14:30',
-    duration: 45,
-    week: 35,
-    day: 4,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-002',
-    date: '2025-09-29 11:15',
-    duration: 40,
-    week: 35,
-    day: 2,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-003',
-    date: '2025-09-27 16:45',
-    duration: 50,
-    week: 34,
-    day: 7,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-004',
-    date: '2025-09-25 09:20',
-    duration: 42,
-    week: 34,
-    day: 5,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-005',
-    date: '2025-09-23 13:00',
-    duration: 38,
-    week: 34,
-    day: 3,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-006',
-    date: '2025-09-21 10:30',
-    duration: 43,
-    week: 34,
-    day: 1,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
-  },
-  {
-    id: 'ctg-007',
-    date: '2025-09-19 14:15',
-    duration: 47,
-    week: 33,
-    day: 6,
-    status: 'pending',
-    score: null,
-    aiAnalysis: null
+// Загружаем реальные КТГ-сессии из localStorage (созданные на странице CTG)
+const loadRealSessions = (): CTGSession[] => {
+  try {
+    const saved = localStorage.getItem('ctg_sessions');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map((session: any) => ({
+        id: `ctg-${session.id}`,
+        date: new Date(session.date).toLocaleString('ru-RU'),
+        duration: Math.round(session.durationSeconds / 60) || session.duration,
+        week: patientInfo.currentWeek,
+        day: patientInfo.currentDay,
+        status: 'pending' as const,
+        score: null,
+        aiAnalysis: null,
+        // Сохраняем полные данные для последующего анализа
+        fullData: session.fullData
+      }));
+    }
+  } catch (e) {
+    console.error('Failed to load CTG sessions:', e);
   }
-];
+  
+  // Возвращаем моковые данные если нет реальных
+  return [
+    {
+      id: 'ctg-001',
+      date: '2025-10-01 14:30',
+      duration: 45,
+      week: 35,
+      day: 4,
+      status: 'pending',
+      score: null,
+      aiAnalysis: null
+    },
+    {
+      id: 'ctg-002',
+      date: '2025-09-29 11:15',
+      duration: 40,
+      week: 35,
+      day: 2,
+      status: 'pending',
+      score: null,
+      aiAnalysis: null
+    },
+    {
+      id: 'ctg-003',
+      date: '2025-09-27 16:45',
+      duration: 50,
+      week: 34,
+      day: 7,
+      status: 'pending',
+      score: null,
+      aiAnalysis: null
+    }
+  ];
+};
+
+const initialSessions: CTGSession[] = loadRealSessions();
 
 // Моковые результаты ИИ-анализа
 const mockAIResults: Record<string, Omit<CTGSession, 'id' | 'date' | 'duration' | 'week' | 'day'>> = {

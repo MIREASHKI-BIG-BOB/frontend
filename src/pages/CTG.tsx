@@ -74,8 +74,8 @@ const CTGPage: React.FC = () => {
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [visibleWindowSec, setVisibleWindowSec] = useState(600);
-  const [paperSpeed, setPaperSpeed] = useState<1 | 3>(3);
+  const [visibleWindowSec, setVisibleWindowSec] = useState(10); // 10 секунд
+  const [paperSpeed, setPaperSpeed] = useState<1 | 3>(3); // 3 см/сек
   const [visibleRange, setVisibleRange] = useState<Range>({ start: 0, end: 600 });
   const [samples, setSamples] = useState<CTGSample[]>([]);
   const [manualEvents, setManualEvents] = useState<CTGEvent[]>([]);
@@ -640,38 +640,7 @@ const CTGPage: React.FC = () => {
               </div>
             </Card>
 
-            <Card title="Последние события" bodyStyle={{ padding: 16 }}>
-              {eventsSidebar.length === 0 ? (
-                <Text type="secondary">Пока событий нет</Text>
-              ) : (
-                <Space direction="vertical" style={{ width: "100%" }} size={8}>
-                  {eventsSidebar.map((event) => (
-                    <div
-                      key={event.id}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "6px 8px",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: 6,
-                        background: "#fff",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleSelectEvent(event)}
-                    >
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <Text strong>{event.description}</Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {event.kind.toUpperCase()} · {formatClock(event.start)}
-                        </Text>
-                      </div>
-                      <Tag color={severityColor[event.severity]}>{event.severity}</Tag>
-                    </div>
-                  ))}
-                </Space>
-              )}
-            </Card>
+
           </Space>
         </Col>
 
@@ -734,22 +703,6 @@ const CTGPage: React.FC = () => {
               prediction={latestData?.prediction ?? null}
               isAccumulating={!latestData?.prediction}
             />
-            <Card title="Статус подключения" bodyStyle={{ padding: 16 }}>
-              <Space direction="vertical">
-                <Text>
-                  WebSocket: <Text strong>{isConnected ? "активен" : "нет сигнала"}</Text>
-                </Text>
-                <Text>
-                  Поток данных: <Text strong>{hasSamples ? "идёт" : "ожидание"}</Text>
-                </Text>
-                <Text>
-                  Окно обзора: <Text strong>{visibleWindowSec / 60} мин</Text>
-                </Text>
-                <Text>
-                  Скорость бумаги: <Text strong>{paperSpeed} см/мин</Text>
-                </Text>
-              </Space>
-            </Card>
           </Space>
         </Col>
       </Row>

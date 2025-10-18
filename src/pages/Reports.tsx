@@ -193,6 +193,69 @@ export default function ReportsPage() {
     }
   };
 
+  // Экспорт утверждённого отчёта в PDF
+  const handleExportApprovedReport = async () => {
+    if (!approvedByDoctor) {
+      message.warning('Отчёт должен быть утверждён перед экспортом');
+      return;
+    }
+
+    try {
+      message.loading({ content: 'Генерация PDF...', key: 'pdfExport', duration: 0 });
+
+      // Динамический импорт тяжелых библиотек
+      const html2canvasModule: any = await import('html2canvas');
+      const html2canvas = html2canvasModule?.default ?? html2canvasModule;
+      const pdfModule: any = await import('jspdf');
+      const jsPDF = pdfModule?.jsPDF ?? pdfModule?.default ?? pdfModule;
+
+      // Находим элемент с отчётом
+      const reportElement = document.getElementById('approved-report-content');
+      if (!reportElement) {
+        throw new Error('Не найден элемент отчёта для экспорта');
+      }
+
+      // Создаём canvas из HTML
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Создаём PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Добавляем первую страницу
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Добавляем дополнительные страницы если нужно
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Сохраняем PDF
+      const filename = `Отчет_КТГ_${patientData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+
+      message.success({ content: 'PDF успешно сохранён!', key: 'pdfExport' });
+    } catch (error) {
+      console.error('Ошибка при экспорте PDF:', error);
+      message.error({ content: 'Не удалось создать PDF', key: 'pdfExport' });
+    }
+  };
+
   // Автоматическое обновление рекомендаций из ML данных
   React.useEffect(() => {
     if (latestData && latestData.prediction && latestData.prediction.recommendations) {
@@ -499,7 +562,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <>
                 <Button 
                   icon={<PrinterOutlined />} 
-                  onClick={() => message.info('Печать отчёта')}
+                  onClick={() => window.print()}
                   style={{
                     borderColor: colors.primary,
                     color: colors.text.primary
@@ -510,7 +573,8 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                 <Button 
                   type="primary"
                   icon={<DownloadOutlined />}
-                  onClick={() => message.info('Экспорт в PDF')}
+                  onClick={handleExportApprovedReport}
+                  disabled={!approvedByDoctor}
                   style={{
                     background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
                     border: 'none'
@@ -803,7 +867,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             </Card>
           ) : (
             // Сгенерированный отчёт
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }} id="approved-report-content">
               {/* Статус утверждения */}
               {approvedByDoctor && (
                 <Alert
@@ -1168,36 +1232,37 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
         open={isCTGModalVisible}
         onCancel={closeCTGModal}
         footer={null}
-        width="90%"
-        style={{ top: 20 }}
+        width="98%"
+        style={{ top: 10, maxWidth: 'none' }}
+        bodyStyle={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
         title={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <Text strong style={{ fontSize: 18 }}>
                 Сеанс КТГ #{selectedSession?.id}
               </Text>
-              <Text type="secondary" style={{ marginLeft: 16, fontSize: 14 }}>
+              <Text type="secondary" style={{ fontSize: 14 }}>
                 {selectedSession?.date?.format('DD.MM.YYYY HH:mm')}
               </Text>
+              <Button 
+                danger 
+                size="small"
+                onClick={() => {
+                  if (selectedSession) {
+                    Modal.confirm({
+                      title: 'Удалить сеанс?',
+                      content: 'Это действие нельзя отменить',
+                      okText: 'Удалить',
+                      cancelText: 'Отмена',
+                      okButtonProps: { danger: true },
+                      onOk: () => handleDeleteSession(selectedSession.id)
+                    });
+                  }
+                }}
+              >
+                Удалить сеанс
+              </Button>
             </div>
-            <Button 
-              danger 
-              size="small"
-              onClick={() => {
-                if (selectedSession) {
-                  Modal.confirm({
-                    title: 'Удалить сеанс?',
-                    content: 'Это действие нельзя отменить',
-                    okText: 'Удалить',
-                    cancelText: 'Отмена',
-                    okButtonProps: { danger: true },
-                    onOk: () => handleDeleteSession(selectedSession.id)
-                  });
-                }
-              }}
-            >
-              Удалить сеанс
-            </Button>
           </div>
         }
       >

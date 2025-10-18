@@ -191,8 +191,8 @@ export default function MLPredictionPanel({ prediction, isAccumulating = false }
         </div>
       )}
 
-      {/* Рекомендации */}
-      {prediction.recommendations && prediction.recommendations.length > 0 && prediction.hypoxia_risk !== 'low' && (
+      {/* Рекомендации - показываем всегда когда есть */}
+      {prediction.recommendations && prediction.recommendations.length > 0 && (
         <div style={{ 
           background: 'rgba(255,255,255,0.8)', 
           padding: '8px 12px', 
@@ -210,13 +210,34 @@ export default function MLPredictionPanel({ prediction, isAccumulating = false }
             gap: '6px'
           }}>
             <BulbOutlined style={{ color: '#ec4899' }} />
-            Действия:
+            Рекомендации:
           </div>
-          <div style={{ paddingLeft: '4px' }}>
-            {prediction.recommendations[0]}
-          </div>
+          {prediction.recommendations.map((rec, index) => (
+            <div key={index} style={{ paddingLeft: '4px', marginBottom: 2 }}>
+              • {rec}
+            </div>
+          ))}
         </div>
       )}
+
+      {/* Уверенность модели */}
+      <div style={{ 
+        background: 'rgba(255,255,255,0.6)', 
+        padding: '6px 12px', 
+        borderRadius: '6px',
+        fontSize: '12px',
+        color: '#831843',
+        marginTop: 8,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        border: '1px solid rgba(236, 72, 153, 0.15)'
+      }}>
+        <span>Уверенность модели:</span>
+        <span style={{ fontWeight: 'bold' }}>
+          {Math.round(prediction.confidence * 100)}%
+        </span>
+      </div>
     </Card>
   );
 }

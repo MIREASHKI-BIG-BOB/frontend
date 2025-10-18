@@ -180,46 +180,69 @@ const CTGFullStripExport = forwardRef<HTMLDivElement, CTGFullStripExportProps>(
               style={{
                 width: `${width}px`,
                 height: timeStripHeight,
-                backgroundColor: "#f8fafc",
-                borderTop: "1px solid #e2e8f0",
-                borderBottom: "1px solid #e2e8f0",
+                backgroundColor: "#ffffff",
+                borderTop: "2px solid #94a3b8",
+                borderBottom: "2px solid #94a3b8",
                 position: "relative",
                 flexShrink: 0,
               }}
             >
               <svg width={width} height={timeStripHeight}>
+                {/* Рисуем метки времени */}
                 {(() => {
                   const labels: JSX.Element[] = [];
                   const startSecond = Math.floor(visibleStart);
                   const endSecond = Math.ceil(visibleEnd);
 
+                  // Рисуем каждые 10 секунд
                   for (let sec = startSecond; sec <= endSecond; sec++) {
                     if (sec < 0) continue;
                     const x = (sec - visibleStart) / secondsPerPixel;
                     if (x < 0 || x > width) continue;
 
-                    // Отображаем каждую минуту
+                    // Главные метки - каждую минуту
                     if (sec % 60 === 0) {
                       const minutes = Math.floor(sec / 60);
                       const seconds = sec % 60;
-                      const label = `${minutes}:${String(seconds).padStart(
-                        2,
-                        "0"
-                      )}`;
+                      const label = `${minutes}:${String(seconds).padStart(2, "0")}`;
 
                       labels.push(
-                        <text
-                          key={sec}
-                          x={x}
-                          y={timeStripHeight / 2}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fill="#64748b"
-                          fontSize={9}
-                          fontFamily="monospace"
-                        >
-                          {label}
-                        </text>
+                        <g key={`main-${sec}`}>
+                          <line
+                            x1={x}
+                            y1={0}
+                            x2={x}
+                            y2={timeStripHeight}
+                            stroke="#475569"
+                            strokeWidth={1.5}
+                          />
+                          <text
+                            x={x}
+                            y={timeStripHeight / 2}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#1e293b"
+                            fontSize={11}
+                            fontFamily="monospace"
+                            fontWeight="bold"
+                          >
+                            {label}
+                          </text>
+                        </g>
+                      );
+                    }
+                    // Малые метки - каждые 10 секунд
+                    else if (sec % 10 === 0) {
+                      labels.push(
+                        <line
+                          key={`minor-${sec}`}
+                          x1={x}
+                          y1={timeStripHeight / 3}
+                          x2={x}
+                          y2={(timeStripHeight * 2) / 3}
+                          stroke="#94a3b8"
+                          strokeWidth={1}
+                        />
                       );
                     }
                   }
