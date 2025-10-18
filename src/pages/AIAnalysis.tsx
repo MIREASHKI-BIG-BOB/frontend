@@ -71,48 +71,17 @@ const loadRealSessions = (): CTGSession[] => {
         status: 'pending' as const,
         score: null,
         aiAnalysis: null,
-        // Сохраняем полные данные для последующего анализа
         fullData: session.fullData
       }));
     }
   } catch (e) {
     console.error('Failed to load CTG sessions:', e);
   }
-  
-  // Возвращаем моковые данные если нет реальных
-  return [
-    {
-      id: 'ctg-001',
-      date: '2025-10-01 14:30',
-      duration: 45,
-      week: 35,
-      day: 4,
-      status: 'pending',
-      score: null,
-      aiAnalysis: null
-    },
-    {
-      id: 'ctg-002',
-      date: '2025-09-29 11:15',
-      duration: 40,
-      week: 35,
-      day: 2,
-      status: 'pending',
-      score: null,
-      aiAnalysis: null
-    },
-    {
-      id: 'ctg-003',
-      date: '2025-09-27 16:45',
-      duration: 50,
-      week: 34,
-      day: 7,
-      status: 'pending',
-      score: null,
-      aiAnalysis: null
-    }
-  ];
+
+  // без моков
+  return [];
 };
+
 
 const initialSessions: CTGSession[] = loadRealSessions();
 

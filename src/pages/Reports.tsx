@@ -61,67 +61,7 @@ export default function ReportsPage() {
       }
     }
     // Fallback к симулированным данным
-    return [
-      {
-        id: 1,
-        date: dayjs().subtract(3, 'day'),
-        duration: 40,
-        durationSeconds: 40 * 60,
-        basalFHR: 142,
-        variability: 15,
-        accelerations: 8,
-        decelerations: 0,
-        movements: 5,
-        score: 10,
-        risk: 'low',
-        anomalies: [],
-        conclusion: 'Нормальный'
-      },
-      {
-        id: 2,
-        date: dayjs().subtract(1, 'day'),
-        duration: 45,
-        durationSeconds: 45 * 60,
-        basalFHR: 138,
-        variability: 12,
-        accelerations: 6,
-        decelerations: 1,
-        movements: 4,
-        score: 8,
-        risk: 'medium',
-        anomalies: [
-          {
-            time: '14:23',
-            type: 'bradycardia',
-            severity: 'warning',
-            description: 'Кратковременная брадикардия',
-          }
-        ],
-        conclusion: 'Подозрительный'
-      },
-      {
-        id: 3,
-        date: dayjs(),
-        duration: 50,
-        durationSeconds: 50 * 60,
-        basalFHR: 145,
-        variability: 18,
-        accelerations: 10,
-        decelerations: 0,
-        movements: 6,
-        score: 9,
-        risk: 'low',
-        anomalies: [
-          {
-            time: '10:18',
-            type: 'tachycardia',
-            severity: 'warning',
-            description: 'Умеренная тахикардия',
-          }
-        ],
-        conclusion: 'Нормальный'
-      }
-    ];
+    return [];
   });
 
   // Состояние для генерации отчёта
@@ -1394,17 +1334,6 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                           percent={Math.round((selectedSession.fullData.prediction.confidence || 0) * 100)} 
                           size="small"
                           strokeColor={colors.primary}
-                        />
-                      </div>
-                    </div>
-                  </Col>
-                  <Col span={8}>
-                    <div>
-                      <Text type="secondary">Оповещения:</Text>
-                      <div>
-                        <Badge 
-                          count={selectedSession.fullData.prediction.alerts?.length || 0}
-                          style={{ backgroundColor: colors.warning }}
                         />
                       </div>
                     </div>
