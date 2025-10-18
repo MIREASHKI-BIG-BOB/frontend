@@ -2,6 +2,7 @@ import { Button, Card, Typography, Space, Row, Col } from 'antd';
 import { PlayCircleOutlined, ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import FimeaLogo from './FimeaLogo';
 import { colors } from '../theme';
+import fimeaDeviceImg from '../assets/fimea-device.png';
 
 const { Title, Paragraph } = Typography;
 
@@ -49,7 +50,7 @@ export default function Hero() {
                     letterSpacing: '-0.02em',
                     textShadow: '0 4px 8px rgba(216, 98, 136, 0.3)'
                   }}>
-                    FIMEA
+                    FIMEA CTG
                   </div>
                   <div style={{
                     fontSize: '14px',
@@ -225,65 +226,21 @@ export default function Hero() {
                   background: `linear-gradient(135deg, ${colors.primaryPale} 0%, ${colors.primaryLighter} 100%)`,
                   borderRadius: '16px',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
-                  {/* Ваше лого в центре */}
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    borderRadius: '24px',
-                    padding: '24px',
-                    boxShadow: '0 12px 48px rgba(216, 98, 136, 0.2)',
-                    marginBottom: '16px',
-                    transform: 'rotate(2deg)',
-                    transition: 'transform 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1.05)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(2deg) scale(1)'}
-                  >
-                    <FimeaLogo size={80} color="#D86288" />
-                  </div>
-                  
-                  <div style={{
-                    fontSize: '24px',
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #D86288, #B83280)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    margin: 0,
-                    letterSpacing: '-0.01em'
-                  }}>
-                    FIMEA Device
-                  </div>
-                  <Paragraph style={{ color: colors.text.secondary, margin: '8px 0 0 0' }}>
-                    Беспроводной монитор нового поколения
-                  </Paragraph>
-
-                  {/* Декоративные элементы на карточке */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    width: '40px',
-                    height: '40px',
-                    border: `2px solid ${colors.primary}30`,
-                    borderRadius: '50%'
-                  }} />
-                  
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '20px',
-                    left: '20px',
-                    width: '24px',
-                    height: '24px',
-                    background: colors.success,
-                    borderRadius: '50%',
-                    opacity: 0.6
-                  }} />
+                  <img
+                    src={fimeaDeviceImg}
+                    alt="FIMEA Device"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'center'
+                    }}
+                  />
                 </div>
 
                 {/* Статистика внизу карточки */}

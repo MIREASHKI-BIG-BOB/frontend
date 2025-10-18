@@ -160,42 +160,6 @@ export default function HowItWorks() {
             </Col>
           ))}
         </Row>
-
-        {/* Дополнительная информация */}
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '64px',
-          padding: '40px',
-          background: 'rgba(255, 255, 255, 0.6)',
-          borderRadius: '20px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <Title level={4} style={{ 
-            color: colors.text.primary,
-            marginBottom: '16px'
-          }}>
-            Готовы начать?
-          </Title>
-          <Paragraph style={{ 
-            color: colors.text.secondary,
-            marginBottom: '24px',
-            fontSize: '16px'
-          }}>
-            Весь процесс займет не более 5 минут
-          </Paragraph>
-          <div style={{ 
-            display: 'inline-flex',
-            alignItems: 'center',
-            background: colors.success,
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '24px',
-            fontSize: '14px',
-            fontWeight: 600
-          }}>
-            ✓ Простая настройка без технических знаний
-          </div>
-        </div>
       </div>
     </section>
   );

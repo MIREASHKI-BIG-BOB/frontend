@@ -5,48 +5,27 @@ import { colors } from '../theme';
 
 const { Title, Paragraph } = Typography;
 
-const trustItems = [
-  {
-    icon: <SafetyCertificateOutlined />,
-    title: 'Медицинская сертификация',
-    desc: 'Одобрено Минздравом РФ и FDA',
-    color: colors.success
-  },
-  {
-    icon: <TeamOutlined />,
-    title: 'Доверие врачей',
-    desc: '500+ специалистов рекомендуют',
-    color: colors.info
-  },
-  {
-    icon: <HeartOutlined />,
-    title: 'Безопасность данных',
-    desc: 'Шифрование банковского уровня',
-    color: colors.primary
-  }
-];
-
 const testimonials = [
   {
-    name: 'Др. Анна Петрова',
+    name: 'Др. Евлампия Васильева',
     role: 'Акушер-гинеколог, к.м.н.',
     avatar: 'А',
     rating: 5,
-    text: 'FIMEA позволяет моим пациенткам чувствовать себя увереннее дома. Точность измерений сопоставима с больничным оборудованием.'
+    text: 'FIMEA позволяет моим пациенткам чувствовать себя увереннее дома. Точность измерений сопоставима с больничным оборудованием. И причем даже очень удобно!'
   },
   {
-    name: 'Мария Сидорова',
-    role: 'Мама двоих детей',
+    name: 'Мария Землянская (мать героина)',
+    role: 'Мама пяти детей',
     avatar: 'М',
     rating: 5,
-    text: 'Использовала FIMEA во время второй беременности. Огромное спокойствие от возможности контролировать состояние малыша дома.'
+    text: 'Была на приёме у врача, использовали новую технологию FIMEA, благодаря которой были вовремя обнаружены и устранены проблемы и у меня родился здоровый ребенок который теперь будет как и его отец посещать все лекции в университете и проводить вебинары. Сын, кстати, родился сразу с бакенбардами и усами, станет волшебником'
   },
   {
-    name: 'Др. Игорь Волков',
+    name: 'Анна Йожановна',
     role: 'Заведующий отделением',
     avatar: 'И',
     rating: 5,
-    text: 'Внедрили FIMEA в нашей клинике для домашнего мониторинга. Качество данных впечатляет, пациенты довольны.'
+    text: 'Использовала FIMEA во время четвертой беременности, это оказалось надежнее, чем мой муж, Иван. Огромное спокойствие от возможности контролировать состояние малыша дома.'
   }
 ];
 
@@ -80,81 +59,8 @@ export default function Trust() {
               FIMEA
             </div>
           </div>
-          <Title level={2} style={{ 
-            fontSize: 'clamp(2rem, 3vw, 2.5rem)',
-            marginBottom: '16px',
-            color: colors.text.primary
-          }}>
-            Доверие и безопасность
-          </Title>
-          <Paragraph style={{ 
-            fontSize: '18px', 
-            color: colors.text.secondary,
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
-            Тысячи семей и сотни врачей доверяют заботу о самом важном
-          </Paragraph>
         </div>
 
-        {/* Элементы доверия */}
-        <Row gutter={[24, 24]} style={{ marginBottom: '80px' }}>
-          {trustItems.map((item, index) => (
-            <Col key={index} xs={24} md={8}>
-              <Card 
-                style={{ 
-                  height: '100%',
-                  borderRadius: '16px',
-                  border: 'none',
-                  background: colors.background.primary,
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-                  textAlign: 'center',
-                  transition: 'all 0.3s ease'
-                }}
-                bodyStyle={{ padding: '32px 24px' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
-                }}
-              >
-                <div style={{
-                  width: '64px',
-                  height: '64px',
-                  background: `linear-gradient(135deg, ${item.color}, ${item.color}cc)`,
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 24px',
-                  fontSize: '28px',
-                  color: 'white',
-                  boxShadow: `0 8px 24px ${item.color}40`
-                }}>
-                  {item.icon}
-                </div>
-                
-                <Title level={4} style={{ 
-                  marginBottom: '12px',
-                  color: colors.text.primary
-                }}>
-                  {item.title}
-                </Title>
-                
-                <Paragraph style={{ 
-                  color: colors.text.secondary,
-                  marginBottom: 0,
-                  fontSize: '16px'
-                }}>
-                  {item.desc}
-                </Paragraph>
-              </Card>
-            </Col>
-          ))}
-        </Row>
 
         {/* Отзывы */}
         <div>

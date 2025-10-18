@@ -5,9 +5,11 @@ import {
   HistoryOutlined, 
   SettingOutlined, 
   ApiOutlined,
-  ThunderboltOutlined
+  ThunderboltOutlined,
+  AppstoreOutlined
 } from '@ant-design/icons';
 import Dashboard from './Dashboard';
+import DeviceSchematic from '../components/DeviceSchematic';
 
 const { TabPane } = Tabs;
 
@@ -70,6 +72,15 @@ export default function DeviceMonitoring() {
           <TabPane
             tab={
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <AppstoreOutlined style={{ fontSize: '14px', color: '#ec4899' }} />
+                <span>Схема устройства</span>
+              </span>
+            }
+            key="schematic"
+          />
+          <TabPane
+            tab={
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
                 <ApiOutlined style={{ fontSize: '14px', color: '#10b981' }} />
                 <span>Статус подключения</span>
               </span>
@@ -82,6 +93,8 @@ export default function DeviceMonitoring() {
       {/* Контент вкладок */}
       <div>
         {activeTab === 'live' && <Dashboard />}
+        
+        {activeTab === 'schematic' && <DeviceSchematic />}
         
         {activeTab === 'history' && (
           <Card

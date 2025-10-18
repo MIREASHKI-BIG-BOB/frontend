@@ -6,6 +6,8 @@ import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import Technologies from './components/Technologies';
 import Trust from './components/Trust';
+import ProblemSolution from './components/ProblemSolution';
+import DeviceShowcase from './components/DeviceShowcase';
 import AppLayout from './components/AppLayout';
 import Dashboard from './pages/Dashboard';
 import DeviceMonitoring from './pages/DeviceMonitoring';
@@ -65,33 +67,68 @@ export default function App() {
     );
   }
 
-  // Render landing page layout
-  return (
-    <Layout style={{ minHeight: '100%' }}>
-      <Header className="!bg-accent">
-        <div className="mx-auto max-w-7xl flex items-center justify-between py-2">
-          <Space size="large" align="center">
-            <FimeaLogo size={28} color="white" />
-            <Typography.Title level={3} className="!text-white !mb-0">FIMEA</Typography.Title>
-          </Space>
-          <Space>
-            <Button type="primary" size="large" style={{backgroundColor: 'white', color: colors.primary}} onMouseOver={(e) => {e.currentTarget.style.backgroundColor = colors.primaryPale}} onMouseOut={(e) => {e.currentTarget.style.backgroundColor = 'white'}} aria-label="Открыть дешборд" onClick={() => (location.hash = '#/dashboard') }>
-              Дешборд <ArrowRightOutlined />
-            </Button>
-          </Space>
-        </div>
-      </Header>
-      <Content>
+return (
+  <Layout style={{ minHeight: '100%', background: '#fff' }}>
+    <Header
+      style={{
+        background: colors.primary,
+        padding: '12px 0',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+      }}
+    >
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-4">
+        <Space size="large" align="center">
+          <FimeaLogo size={28} color="white" />
+          <Typography.Title level={3} className="!text-white !mb-0">
+            FIMEA
+          </Typography.Title>
+        </Space>
+
+        <Button
+          type="primary"
+          size="large"
+          style={{
+            backgroundColor: 'white',
+            color: colors.primary,
+            border: 'none',
+            borderRadius: 8,
+            padding: '0 20px',
+            height: 44,
+            fontWeight: 600,
+          }}
+          onClick={() => (location.hash = '#/dashboard')}
+        >
+          Дешборд <ArrowRightOutlined />
+        </Button>
+      </div>
+    </Header>
+
+    <Content style={{ background: '#fff' }}>
+      <div className="space-y-24"> {/* вертикальные интервалы между секциями */}
         <Hero />
+        <DeviceShowcase />
+        <ProblemSolution />
         <HowItWorks />
         <Technologies />
         <Trust />
-      </Content>
-      <Footer className="bg-white">
-        <div className="mx-auto max-w-7xl text-secondary text-sm">
-          © {new Date().getFullYear()} FIMEA. Медицинская технология у вас на ладони.
-        </div>
-      </Footer>
-    </Layout>
-  );
+      </div>
+    </Content>
+
+    <Footer
+      style={{
+        background: '#fff',
+        borderTop: '1px solid #f1f1f1',
+        padding: '24px 0',
+      }}
+    >
+      <div className="mx-auto max-w-7xl text-secondary text-sm px-4">
+        © {new Date().getFullYear()} FIMEA. Медицинская технология у вас на ладони.
+      </div>
+    </Footer>
+  </Layout>
+);
+
 }

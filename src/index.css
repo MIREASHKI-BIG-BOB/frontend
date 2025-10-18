@@ -59,3 +59,13 @@ body { @apply bg-bg text-text antialiased; }
 .ant-space-item {
   font-size: 14px !important;
 }
+.pdf-mode *[style*="position:sticky"],
+.pdf-mode *[style*="position:fixed"],
+.pdf-mode .sticky,
+.pdf-mode .ant-affix {
+  position: static !important;
+}
+
+.pdf-mode *[style*="transform"] {
+  transform: none !important;
+}
