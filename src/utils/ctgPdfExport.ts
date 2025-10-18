@@ -1,6 +1,4 @@
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
+// Импортируем явный ESM-бандл html2canvas и именованный jsPDF для надёжного разрешения при сборке
 /**
  * Экспортирует CTG ленту в PDF
  * @param element - DOM элемент для экспорта
@@ -11,6 +9,12 @@ export async function exportCTGToPDF(
   filename: string = 'ctg-strip.pdf'
 ): Promise<void> {
   try {
+    // Динамически импортируем heavy-зависимости, чтобы избежать проблем с резолвом при билде
+    const html2canvasModule: any = await import('html2canvas');
+    const html2canvas = html2canvasModule?.default ?? html2canvasModule;
+    const pdfModule: any = await import('jspdf');
+    const jsPDF = pdfModule?.jsPDF ?? pdfModule?.default ?? pdfModule;
+
     // Получаем размеры элемента
     const elementWidth = element.scrollWidth;
     const elementHeight = element.scrollHeight;
@@ -37,7 +41,7 @@ export async function exportCTGToPDF(
     const ratio = imgWidth / imgHeight;
 
     // Если лента очень длинная, создаём длинный PDF
-    let pdf: jsPDF;
+    let pdf: any;
     if (ratio > pdfWidth / pdfHeight) {
       // Длинная лента - создаём custom размер
       const customHeight = pdfWidth / ratio;
@@ -74,6 +78,11 @@ export async function exportLongCTGToPDF(
   filename: string = 'ctg-strip.pdf'
 ): Promise<void> {
   try {
+    const html2canvasModule: any = await import('html2canvas');
+    const html2canvas = html2canvasModule?.default ?? html2canvasModule;
+    const pdfModule: any = await import('jspdf');
+    const jsPDF = pdfModule?.jsPDF ?? pdfModule?.default ?? pdfModule;
+
     const elementWidth = element.scrollWidth;
     const elementHeight = element.scrollHeight;
 
