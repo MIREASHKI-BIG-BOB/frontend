@@ -62,6 +62,7 @@ export default function ReportsPage() {
         id: 1,
         date: dayjs().subtract(3, 'day'),
         duration: 40,
+        durationSeconds: 40 * 60,
         basalFHR: 142,
         variability: 15,
         accelerations: 8,
@@ -76,6 +77,7 @@ export default function ReportsPage() {
         id: 2,
         date: dayjs().subtract(1, 'day'),
         duration: 45,
+        durationSeconds: 45 * 60,
         basalFHR: 138,
         variability: 12,
         accelerations: 6,
@@ -97,6 +99,7 @@ export default function ReportsPage() {
         id: 3,
         date: dayjs(),
         duration: 50,
+        durationSeconds: 50 * 60,
         basalFHR: 145,
         variability: 18,
         accelerations: 10,
@@ -676,14 +679,14 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                         Сеанс #{idx + 1}
                       </Text>
                       <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
-                        {session.date.format('DD.MM.YYYY')}
+                        {session.date.format('DD.MM.YYYY HH:mm')}
                       </Text>
                     </div>
                     <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginBottom: 4 }}>
                       ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
                     </div>
                     <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>
-                      Длительность: {session.duration ? `${session.duration} мин (${session.duration * 60} сек)` : 'N/A'}
+                      Длительность: {session.durationSeconds ? `${Math.floor(session.durationSeconds / 60)} мин ${session.durationSeconds % 60} сек` : (session.duration ? `${session.duration} мин` : 'N/A')}
                     </div>
                     {session.anomalies.length > 0 && (
                       <Tag style={{ 
@@ -1077,9 +1080,9 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                             borderBottom: `1px solid ${colors.border.light}`
                           }}>
                             <div>
-                              <Text strong>КТГ от {session.date.format('DD.MM.YYYY HH:mm')}</Text>
+                              <Text strong>Сеанс #{ctgSessions.findIndex((s: any) => s.id === sessionId) + 1} - {session.date.format('DD.MM.YYYY HH:mm')}</Text>
                               <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: 4 }}>
-                                Длительность: {session.duration} мин ({session.duration * 60} сек) • ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
+                                Длительность: {session.durationSeconds ? `${Math.floor(session.durationSeconds / 60)} мин ${session.durationSeconds % 60} сек` : (session.duration ? `${session.duration} мин` : 'N/A')} • ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
                               </div>
                             </div>
                             <Button

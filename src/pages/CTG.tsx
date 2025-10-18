@@ -216,7 +216,11 @@ const CTGPage: React.FC = () => {
     setVisibleRange({ start: 0, end: visibleWindowSec });
     setIsLive(true);
     setScrollOffset(0);
-  }, [visibleWindowSec]);
+    // Сбрасываем предикты при новой сессии
+    if (latestData) {
+      latestData.prediction = null;
+    }
+  }, [visibleWindowSec, latestData]);
 
   const handleStartStop = useCallback(async () => {
     if (actionPending) {
@@ -277,7 +281,8 @@ const CTGPage: React.FC = () => {
     const newSession = {
       id: Date.now(),
       date: new Date().toISOString(),
-      duration: Math.round(recordingSeconds / 60), // в минутах
+      durationSeconds: recordingSeconds, // длительность в секундах
+      duration: Math.round(recordingSeconds / 60), // в минутах для совместимости
       basalFHR: Math.round(metrics.baseline || 140),
       variability: Math.round(metrics.variabilityAmplitude || 15),
       accelerations: metrics.accelerations?.count || 0,
