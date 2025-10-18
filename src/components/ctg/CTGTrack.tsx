@@ -201,6 +201,16 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{ cursor: 'crosshair' }}
+                onMouseMove={(event) => {
+                  const svg = event.currentTarget.ownerSVGElement;
+                  if (!svg) return;
+                  const rect = svg.getBoundingClientRect();
+                  const x = event.clientX - rect.left;
+                  const time = visibleStart + x * secondsPerPixel;
+                  const timeIdx = findNearestIndex(times, time);
+                  const val = timeIdx >= 0 ? config.values[timeIdx] : null;
+                  onHover({ time, value: val, channel });
+                }}
               />
             </g>
           ) : null

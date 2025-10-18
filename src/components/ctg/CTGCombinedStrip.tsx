@@ -173,114 +173,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
 
   return (
     <div style={{ position: "relative", width: "100%", height: totalHeight }}>
-      {/* Фиксированная левая панель с метками */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "80px",
-          background: "linear-gradient(to right, #fef9f5 85%, transparent)",
-          borderRight: "1px solid rgba(220, 165, 140, 0.3)",
-          zIndex: 10,
-          pointerEvents: "none",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* FHR метка */}
-        <div
-          style={{
-            height: fhrHeight,
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            paddingTop: 8,
-            paddingBottom: 8,
-            borderBottom: "1px solid rgba(220, 165, 140, 0.3)",
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#dc2626", marginBottom: 8, paddingLeft: 4 }}>
-            FHR
-          </div>
-          <div style={{ flex: 1, position: "relative" }}>
-            {[210, 180, 150, 120, 90, 60, 30].map((val, idx) => {
-              const yPos = (idx / 6) * 100;
-              return (
-                <div
-                  key={val}
-                  style={{
-                    position: "absolute",
-                    top: `${yPos}%`,
-                    right: 8,
-                    fontSize: 10,
-                    color: "#64748b",
-                    textAlign: "right",
-                    fontFamily: "monospace",
-                    transform: "translateY(-50%)",
-                  }}
-                >
-                  {val}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Временная полоса */}
-        <div
-          style={{
-            height: timeStripHeight,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "0 8px",
-            borderBottom: "1px solid rgba(220, 165, 140, 0.3)",
-          }}
-        >
-          <div style={{ fontSize: 9, color: "#94a3b8", fontWeight: 600 }}>TIME</div>
-        </div>
-
-        {/* UC метка */}
-        <div
-          style={{
-            height: ucHeight,
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            paddingTop: 8,
-            paddingBottom: 8,
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#2563eb", marginBottom: 8, paddingLeft: 4 }}>
-            UC
-          </div>
-          <div style={{ flex: 1, position: "relative" }}>
-            {[30, 25, 20, 15, 10, 5, 0].map((val, idx) => {
-              const yPos = (idx / 6) * 100;
-              return (
-                <div
-                  key={val}
-                  style={{
-                    position: "absolute",
-                    top: `${yPos}%`,
-                    right: 8,
-                    fontSize: 10,
-                    color: "#64748b",
-                    textAlign: "right",
-                    fontFamily: "monospace",
-                    transform: "translateY(-50%)",
-                  }}
-                >
-                  {val}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* Прокручиваемый контейнер */}
       <div
         ref={scrollContainerRef}
@@ -353,6 +245,53 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
             hoverTime={hoverState.time}
             onHover={(payload) => setHoverState(payload)}
           />
+
+          {/* Временная полоса с метками времени */}
+          <div
+            style={{
+              width: `${width}px`,
+              height: timeStripHeight,
+              backgroundColor: "#f8fafc",
+              borderTop: "1px solid #e2e8f0",
+              borderBottom: "1px solid #e2e8f0",
+              position: "relative",
+              flexShrink: 0,
+            }}
+          >
+            <svg width={width} height={timeStripHeight}>
+              {(() => {
+                const labels: JSX.Element[] = [];
+                const startSecond = Math.floor(visibleStart);
+                const endSecond = Math.ceil(visibleEnd);
+                
+                for (let sec = startSecond; sec <= endSecond; sec++) {
+                  if (sec < 0) continue;
+                  const x = (sec - visibleStart) / secondsPerPixel;
+                  if (x < 0 || x > width) continue;
+
+                  const minutes = Math.floor(sec / 60);
+                  const seconds = sec % 60;
+                  const label = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+                  labels.push(
+                    <text
+                      key={sec}
+                      x={x}
+                      y={timeStripHeight / 2}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#64748b"
+                      fontSize={9}
+                      fontFamily="monospace"
+                    >
+                      {label}
+                    </text>
+                  );
+                }
+                return labels;
+              })()}
+            </svg>
+          </div>
 
           {/* График UC (нижняя половина) */}
           <CTGTrack
