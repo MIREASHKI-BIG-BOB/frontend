@@ -351,12 +351,13 @@ export default function DeviceSchematic() {
                     border: '1px solid #f3e8ff'
                   }}
                 >
-                  <Statistic
-                    title={<Space><WifiOutlined style={{ color: wifiColor }} />WiFi Сигнал</Space>}
-                    value={deviceData.wifi.strength}
-                    suffix="%"
-                    valueStyle={{ color: wifiColor, fontSize: '24px', fontWeight: 700 }}
-                  />
+<Statistic
+  title={<Space><WifiOutlined style={{ color: wifiColor }} />WiFi Сигнал</Space>}
+  value={Math.round(deviceData.wifi.strength)}
+  suffix="%"
+  valueStyle={{ color: wifiColor, fontSize: '24px', fontWeight: 700 }}
+/>
+
                   <Badge 
                     status={deviceData.wifi.status === 'ok' ? 'success' : deviceData.wifi.status === 'weak' ? 'warning' : 'error'} 
                     text={deviceData.wifi.status === 'ok' ? 'Отлично' : deviceData.wifi.status === 'weak' ? 'Слабый' : 'Потерян'}
