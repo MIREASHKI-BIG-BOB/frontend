@@ -73,30 +73,39 @@ const CTGAnnotations: React.FC<CTGAnnotationsProps> = ({
 
           const color = getEventColor(event);
 
+          const isDangerous = event.severity === 'critical' || event.severity === 'warning';
+          const bgOpacity = isDangerous ? 0.25 : 0.1;
+          const bgColor = isDangerous ? '#dc2626' : color;
+
           return (
             <g key={event.id}>
+              {/* Фон события - красный для опасных */}
               <rect
                 x={Math.max(0, x1)}
                 y={0}
                 width={Math.min(width, x2) - Math.max(0, x1)}
                 height={height}
-                fill={color}
-                opacity={0.1}
+                fill={bgColor}
+                opacity={bgOpacity}
+                onClick={() => onSelectEvent && onSelectEvent(event)}
+                style={{ cursor: isDangerous ? 'pointer' : 'default' }}
               />
+              {/* Вертикальная линия пика */}
               <line
                 x1={xPeak}
                 y1={0}
                 x2={xPeak}
                 y2={height}
-                stroke={color}
-                strokeWidth={1.2}
+                stroke={isDangerous ? '#dc2626' : color}
+                strokeWidth={isDangerous ? 2 : 1.2}
                 strokeDasharray="4 3"
               />
+              {/* Круг-маркер */}
               <circle
                 cx={xPeak}
                 cy={height / 2}
-                r={6}
-                fill={color}
+                r={isDangerous ? 8 : 6}
+                fill={isDangerous ? '#dc2626' : color}
                 stroke="#fff"
                 strokeWidth={2}
                 onClick={() => onSelectEvent && onSelectEvent(event)}

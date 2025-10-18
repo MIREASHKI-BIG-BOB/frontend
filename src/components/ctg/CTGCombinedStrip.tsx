@@ -112,7 +112,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       majorStep: 30,
       unit: "bpm",
       label: "FHR",
-      gridValues: [210, 180, 150, 120, 90, 60, 30],
+      gridValues: [210, 180, 150, 120, 90, 60],
     },
     {
       channel: "uc",

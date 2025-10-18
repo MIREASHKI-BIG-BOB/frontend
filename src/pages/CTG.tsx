@@ -124,6 +124,28 @@ const CTGPage: React.FC = () => {
     [combinedEvents]
   );
 
+  // Восстановление состояния при возврате со страницы анализа
+  useEffect(() => {
+    const savedState = sessionStorage.getItem('ctg_state');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        setSamples(state.samples || []);
+        setManualEvents(state.events?.filter((e: CTGEvent) => e.kind === 'mark') || []);
+        setScrollOffset(state.scrollOffset || 0);
+        setIsLive(state.isLive !== undefined ? state.isLive : true);
+        setRecordingSeconds(state.recordingSeconds || 0);
+        if (state.staticWindow) {
+          setStaticWindow(state.staticWindow);
+        }
+        // Очищаем сохранённое состояние
+        sessionStorage.removeItem('ctg_state');
+      } catch (e) {
+        console.error('Failed to restore CTG state:', e);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (!isRecording || !latestData) {
       return;
@@ -287,12 +309,49 @@ const CTGPage: React.FC = () => {
   }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData, manualEvents]);
 
   const handleSelectEvent = useCallback((event: CTGEvent) => {
-    const center = event.peak || event.start;
-    const start = Math.max(0, center - STATIC_WINDOW_HALF);
-    const end = center + STATIC_WINDOW_HALF;
-    setStaticWindow({ center, start, end, eventId: event.id });
-    setIsLive(false);
-  }, []);
+    // Если событие опасное (critical/warning) - переходим на страницу анализа
+    const isDangerous = event.severity === 'critical' || event.severity === 'warning';
+    
+    if (isDangerous) {
+      // Сохраняем текущее состояние CTG для возврата
+      const ctgState = {
+        samples,
+        events: combinedEvents,
+        metrics,
+        scrollOffset,
+        isLive,
+        recordingSeconds,
+        staticWindow,
+      };
+      sessionStorage.setItem('ctg_state', JSON.stringify(ctgState));
+      
+      // Сохраняем данные опасного события
+      const center = event.peak || event.start;
+      const start = Math.max(0, center - STATIC_WINDOW_HALF);
+      const end = center + STATIC_WINDOW_HALF;
+      const eventSamples = samples.filter(s => s.time >= start && s.time <= end);
+      
+      const analysisData = {
+        event,
+        samples: eventSamples,
+        center,
+        start,
+        end,
+        metrics,
+      };
+      sessionStorage.setItem('ctg_analysis_data', JSON.stringify(analysisData));
+      
+      // Переход на страницу анализа
+      location.hash = '#/ctg-analysis';
+    } else {
+      // Обычное событие - показываем в статичном окне
+      const center = event.peak || event.start;
+      const start = Math.max(0, center - STATIC_WINDOW_HALF);
+      const end = center + STATIC_WINDOW_HALF;
+      setStaticWindow({ center, start, end, eventId: event.id });
+      setIsLive(false);
+    }
+  }, [samples, combinedEvents, metrics, scrollOffset, isLive, recordingSeconds, staticWindow]);
 
   const handleNavigateStatic = useCallback(
     (direction: "prev" | "next") => {
