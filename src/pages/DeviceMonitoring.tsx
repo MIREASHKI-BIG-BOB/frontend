@@ -155,7 +155,7 @@ export default function DeviceMonitoring() {
                 { title: 'Чувствительность допплера', value: 'Высокая', description: 'Уровень чувствительности датчика ЧСС' },
                 { title: 'Порог уведомлений', value: 'Средний', description: 'Когда отправлять критические уведомления' },
                 { title: 'Автоматическая калибровка', value: 'Включена', description: 'Автоподстройка при запуске сеанса' },
-                { title: 'Качество связи', value: 'Bluetooth 5.0', description: 'Протокол передачи данных' },
+                { title: 'Качество связи', value: 'WiFi 5.0', description: 'Протокол передачи данных' },
                 { title: 'Режим работы', value: 'Непрерывный', description: 'Домашний мониторинг 24/7' },
               ].map((setting, idx) => (
                 <div key={idx} style={{
@@ -214,7 +214,7 @@ export default function DeviceMonitoring() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 {[
                   { label: 'Батарея', value: '87%', color: '#10b981', status: 'Отлично' },
-                  { label: 'Сигнал Bluetooth', value: '92%', color: '#06b6d4', status: 'Отлично' },
+                  { label: 'Сигнал WiFi', value: '92%', color: '#06b6d4', status: 'Отлично' },
                   { label: 'Качество данных', value: '5/5', color: '#8b5cf6', status: 'Отлично' },
                   { label: 'Температура', value: '36.8°C', color: '#ec4899', status: 'Норма' },
                   { label: 'Время работы', value: '4ч 23м', color: '#f59e0b', status: 'Активен' },

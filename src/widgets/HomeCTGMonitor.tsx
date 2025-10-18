@@ -372,7 +372,7 @@ const HomeCTGMonitor: React.FC<HomeCTGMonitorProps> = ({ onRiskChange }) => {
         <div className="flex justify-between items-center">
           <span style={{ opacity: 0.8 }}>
             <ApiOutlined style={{ marginRight: '4px', color: isConnected ? '#10b981' : '#ef4444' }} />
-            {isConnected ? 'Bluetooth подключен' : 'Устройство отключено'}
+            {isConnected ? 'WiFi подключен' : 'Устройство отключено'}
           </span>
           <span style={{ opacity: 0.8 }}>
             Данных: <strong style={{ color: '#ec4899' }}>{data.length}</strong> точек

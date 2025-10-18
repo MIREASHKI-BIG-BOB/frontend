@@ -214,7 +214,7 @@ const DeviceStatus: React.FC<DeviceStatusProps> = ({
           <div style={{ textAlign: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: typography.spacing.xs, marginBottom: typography.spacing.sm }}>
               <WifiOutlined style={{ color: colors.primary, fontSize: typography.fontSize.sm }} />
-              <span style={{ fontSize: typography.fontSize.xs, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>Bluetooth</span>
+              <span style={{ fontSize: typography.fontSize.xs, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>WiFi</span>
             </div>
             <div style={{ fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.bold, color: signalStatus.color }}>
               {Math.round(signalQuality)}%

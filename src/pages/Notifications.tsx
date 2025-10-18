@@ -118,7 +118,7 @@ const mockNotifications: Notification[] = [
   {
     id: '6',
     title: 'Устройство: Слабый сигнал',
-    message: 'MoniPuck #002 - качество сигнала Bluetooth снижено до 45%',
+    message: 'MoniPuck #002 - качество сигнала WiFi снижено до 45%',
     level: 'warning',
     status: 'read',
     timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),

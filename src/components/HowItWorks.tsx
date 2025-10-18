@@ -8,7 +8,7 @@ const steps = [
   { 
     icon: <MobileOutlined />, 
     title: 'Подключите', 
-    desc: 'Соедините FIMEA со смартфоном по Bluetooth и откройте приложение.',
+    desc: 'Соедините FIMEA со смартфоном по WiFi и откройте приложение.',
     color: colors.primary
   },
   { 

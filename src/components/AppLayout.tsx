@@ -329,21 +329,21 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, currentRoute, onNavigat
         backgroundColor: colors.background.secondary,
       }}>
         {/* Top Header - минималистичный */}
-        <Header 
-          style={{
-            background: '#ffffff',
-            padding: '0 24px',
-            height: '64px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-            borderBottom: `1px solid ${colors.border.light}`,
-            position: 'sticky',
-            top: 0,
-            zIndex: 50,
-          }}
-        >
+<Header
+  style={{
+    background: '#ffffff',
+    padding: '0 24px',
+    height: '64px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+    borderBottom: `1px solid ${colors.border.light}`,
+    position: currentRoute === '#/ctg' ? 'static' : 'sticky',
+    top: currentRoute === '#/ctg' ? undefined : 0,
+    zIndex: 50,
+  }}
+>
           <Space size="middle" align="center">
             <Button
               type="text"

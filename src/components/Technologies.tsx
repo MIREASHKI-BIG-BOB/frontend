@@ -8,7 +8,7 @@ const { Title, Paragraph } = Typography;
 const technologies = [
   {
     icon: <WifiOutlined />,
-    title: 'Bluetooth 5.0',
+    title: 'WiFi 5.0',
     desc: 'Стабильное подключение с низким энергопотреблением',
     progress: 95,
     color: colors.info

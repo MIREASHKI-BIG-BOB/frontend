@@ -85,7 +85,7 @@ function generateDeviceAlerts(): DeviceAlert[] {
       type: 'signal',
       level: 'warning',
       title: 'Слабый сигнал',
-      description: 'Bluetooth соединение нестабильно (42%).',
+      description: 'WiFi соединение нестабильно (42%).',
       timestamp: new Date(Date.now() - 22 * 60 * 1000),
       resolved: false,
       value: 42
