@@ -133,6 +133,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     startX: number;
     startVisibleStart: number;
     startVisibleEnd: number;
+    hasMoved?: boolean; // Флаг для отслеживания реального движения
   } | null>(null);
 
   // Автоматическая прокрутка к правому краю (только для live режима)
@@ -153,6 +154,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       startX: event.clientX,
       startVisibleStart: visibleStart,
       startVisibleEnd: visibleEnd,
+      hasMoved: false, // Флаг для отслеживания реального движения
     };
     // НЕ останавливаем график при клике, только при реальном драге
   };
@@ -160,9 +162,13 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   const handleMouseMove = (event: React.MouseEvent) => {
     if (isDragging && dragRef.current && width > 0) {
       const deltaPx = event.clientX - dragRef.current.startX;
-      // Останавливаем график только если реально двигаем (больше 5px)
-      if (Math.abs(deltaPx) > 5) {
-        onToggleLive(false);
+      // Увеличиваем порог до 15px чтобы избежать случайных срабатываний
+      if (Math.abs(deltaPx) > 15) {
+        // Останавливаем live режим только при первом реальном движении
+        if (!dragRef.current.hasMoved) {
+          onToggleLive(false);
+          dragRef.current.hasMoved = true;
+        }
         const deltaSeconds = -deltaPx * secondsPerPixel;
         onPan(deltaSeconds);
       }

@@ -638,7 +638,7 @@ export default function AIAnalysis() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                       <Text strong style={{ fontSize: '14px', color: '#831843' }}>
-                        КТГ-сессия #{session.id.split('-')[1]}
+                        Сеанс КТГ #{session.id.split('-')[1]}
                       </Text>
                       <Tag 
                         icon={getStatusIcon(session.status)}
@@ -732,7 +732,7 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#831843' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                             <HeartOutlined style={{ marginRight: '6px', color: '#ec4899' }} />
                             Анализ частоты сердечных сокращений плода
                           </span>
@@ -741,7 +741,7 @@ export default function AIAnalysis() {
                         style={{ marginBottom: '12px', background: '#fdf2f8' }}
                         bodyStyle={{ padding: '12px' }}
                       >
-                        <Paragraph style={{ fontSize: '11px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
+                        <Paragraph style={{ fontSize: '13px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
                           {session.aiAnalysis.fhrAnalysis}
                         </Paragraph>
                       </Card>
@@ -750,7 +750,7 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#831843' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                             <LineChartOutlined style={{ marginRight: '6px', color: '#be185d' }} />
                             Анализ сокращений матки
                           </span>
@@ -759,7 +759,7 @@ export default function AIAnalysis() {
                         style={{ marginBottom: '12px', background: '#fce7f3' }}
                         bodyStyle={{ padding: '12px' }}
                       >
-                        <Paragraph style={{ fontSize: '11px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
+                        <Paragraph style={{ fontSize: '13px', color: '#64748b', marginBottom: 0, lineHeight: '1.6' }}>
                           {session.aiAnalysis.ucAnalysis}
                         </Paragraph>
                       </Card>
@@ -768,7 +768,7 @@ export default function AIAnalysis() {
                       <Card 
                         size="small" 
                         title={
-                          <span style={{ fontSize: '12px', color: '#831843' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#831843' }}>
                             <CheckCircleOutlined style={{ marginRight: '6px', color: '#10b981' }} />
                             Рекомендации
                           </span>
@@ -780,7 +780,7 @@ export default function AIAnalysis() {
                         <ul style={{ 
                           margin: 0, 
                           paddingLeft: '20px', 
-                          fontSize: '11px', 
+                          fontSize: '13px', 
                           color: '#64748b',
                           lineHeight: '1.8'
                         }}>

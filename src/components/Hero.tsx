@@ -229,15 +229,16 @@ export default function Hero() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  padding: '0px'
                 }}>
                   <img
                     src={fimeaDeviceImg}
                     alt="FIMEA Device"
                     style={{
-                      width: '100%',
+                      width: '1000%',
                       height: '100%',
-                      objectFit: 'cover',
+                      objectFit: 'contain',
                       objectPosition: 'center'
                     }}
                   />

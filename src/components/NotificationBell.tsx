@@ -108,10 +108,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToNotific
                   avatar={getNotificationIcon(notification.level)}
                   title={
                     <Text 
-                      className="text-sm font-medium line-clamp-1"
                       style={{ 
+                        fontSize: '14px',
+                        fontWeight: 600,
                         color: notification.level === 'critical' ? '#dc2626' : 
-                               notification.level === 'warning' ? '#ea580c' : '#374151' 
+                               notification.level === 'warning' ? '#ea580c' : '#374151',
+                        lineHeight: '1.4'
                       }}
                     >
                       {notification.title}
@@ -119,15 +121,15 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ onNavigateToNotific
                   }
                   description={
                     <div>
-                      <Text className="text-xs text-gray-600 line-clamp-2">
+                      <Text style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.5' }}>
                         {notification.message}
                       </Text>
                       <div className="flex justify-between items-center mt-1">
-                        <Text className="text-xs text-gray-500">
+                        <Text style={{ fontSize: '12px', color: '#94a3b8' }}>
                           {formatTime(notification.timestamp)} назад
                         </Text>
                         {notification.patient && (
-                          <Text className="text-xs text-gray-500">
+                          <Text style={{ fontSize: '12px', color: '#94a3b8' }}>
                             {notification.patient}
                           </Text>
                         )}

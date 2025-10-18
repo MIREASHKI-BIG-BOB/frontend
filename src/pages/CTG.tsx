@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Card, Col, Row, Space, Tag, Typography, message, Modal } from "antd";
+import { Button, Card, Col, Row, Space, Tag, Typography, message, Modal, Alert } from "antd";
 import {
   ClockCircleOutlined,
   FlagOutlined,
@@ -9,6 +9,9 @@ import {
   SyncOutlined,
   WifiOutlined,
   PrinterOutlined,
+  LoadingOutlined,
+  PushpinOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 
 import CTGCombinedStrip from "../components/ctg/CTGCombinedStrip";
@@ -150,6 +153,32 @@ const CTGPage: React.FC = () => {
       }
     }
   }, []);
+
+  // Остановка генератора при размонтировании компонента или обновлении страницы
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (isRecording) {
+        try {
+          await stopGenerator();
+        } catch (error) {
+          console.error("Ошибка при остановке генератора:", error);
+        }
+      }
+    };
+
+    // Обработчик для обновления/закрытия страницы
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup при размонтировании компонента
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (isRecording) {
+        stopGenerator().catch((error) => {
+          console.error("Ошибка при остановке генератора:", error);
+        });
+      }
+    };
+  }, [isRecording]);
 
   useEffect(() => {
     if (!isRecording || !latestData) {
@@ -493,9 +522,20 @@ const CTGPage: React.FC = () => {
     setPaperSpeed(speed);
   }, []);
 
-  const handleClearSession = useCallback(() => {
-    resetSession();
-  }, [resetSession]);
+  const handleClearSession = useCallback(async () => {
+    try {
+      // Останавливаем генератор если он запущен
+      if (isRecording) {
+        await stopGenerator();
+        setIsRecording(false);
+      }
+      resetSession();
+      message.success("Сессия очищена");
+    } catch (error) {
+      console.error("Ошибка при очистке сессии:", error);
+      message.error("Не удалось остановить генератор");
+    }
+  }, [resetSession, isRecording]);
 
   const windowLabel = `${formatClock(Math.max(0, visibleRange.start))} – ${formatClock(
     Math.max(0, visibleRange.end)
@@ -586,14 +626,14 @@ const CTGPage: React.FC = () => {
                     {isRecording ? "Стоп" : "Старт"}
                   </Button>
                   <Button 
-                    icon={<FlagOutlined />} 
+                    icon={<PushpinOutlined />} 
                     onClick={handleMarkFetalMovement} 
                     disabled={!hasSamples}
                     size="large"
                     type="default"
                     style={{ minWidth: 100 }}
                   >
-                    MARK
+                    Метка
                   </Button>
                   <Button 
                     icon={<SyncOutlined />} 
@@ -625,6 +665,7 @@ const CTGPage: React.FC = () => {
                     Печать ленты
                   </Button>
                   <Button 
+                    icon={<VideoCameraOutlined />}
                     onClick={() => {
                       setScrollOffset(0);
                       setIsLive(true);
@@ -632,9 +673,9 @@ const CTGPage: React.FC = () => {
                     disabled={!hasSamples || (isLive && scrollOffset === 0)}
                     size="large"
                     type={isLive && scrollOffset === 0 ? "primary" : "default"}
-                    style={{ minWidth: 100 }}
+                    style={{ minWidth: 120 }}
                   >
-                    {isLive && scrollOffset === 0 ? "● LIVE" : "LIVE"}
+                    {isLive && scrollOffset === 0 ? "● Эфир" : "Эфир"}
                   </Button>
                 </div>
               </div>

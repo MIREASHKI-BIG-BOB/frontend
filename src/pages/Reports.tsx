@@ -787,7 +787,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: typography.spacing.xs }}>
                       <Text strong style={{ fontSize: typography.fontSize.sm, color: colors.text.primary }}>
-                        Сеанс #{idx + 1}
+                        Сеанс КТГ #{session.id}
                       </Text>
                       <Text type="secondary" style={{ fontSize: typography.fontSize.xs }}>
                         {session.date.format('DD.MM.YYYY HH:mm')}
@@ -1192,7 +1192,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
                             borderBottom: `1px solid ${colors.border.light}`
                           }}>
                             <div>
-                              <Text strong>Сеанс #{ctgSessions.findIndex((s: any) => s.id === sessionId) + 1} - {session.date.format('DD.MM.YYYY HH:mm')}</Text>
+                              <Text strong>Сеанс КТГ #{session.id} - {session.date.format('DD.MM.YYYY HH:mm')}</Text>
                               <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, marginTop: 4 }}>
                                 Длительность: {session.durationSeconds ? `${Math.floor(session.durationSeconds / 60)} мин ${session.durationSeconds % 60} сек` : (session.duration ? `${session.duration} мин` : 'N/A')} • ЧСС: {session.basalFHR} bpm • Вариабельность: {session.variability} bpm
                               </div>
