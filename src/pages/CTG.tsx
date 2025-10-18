@@ -5,6 +5,7 @@ import {
   FlagOutlined,
   PauseCircleOutlined,
   PlayCircleOutlined,
+  SaveOutlined,
   SyncOutlined,
   WifiOutlined,
 } from "@ant-design/icons";
@@ -234,6 +235,36 @@ const CTGPage: React.FC = () => {
     setManualEvents((prev) => [...prev, mark]);
   }, [hasSamples]);
 
+  const handleExportReport = useCallback(() => {
+    if (!hasSamples) {
+      message.warning("Нет данных для экспорта");
+      return;
+    }
+    
+    // Создаем объект с данными для отчета
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      duration: recordingSeconds,
+      samples: samples,
+      events: combinedEvents,
+      metrics: metrics,
+      prediction: latestData?.prediction || null,
+    };
+
+    // Сохраняем в localStorage для доступа из вкладки "Отчеты"
+    const existingReports = JSON.parse(localStorage.getItem('ctg_reports') || '[]');
+    const newReport = {
+      id: `report-${Date.now()}`,
+      date: new Date().toISOString(),
+      duration: recordingSeconds,
+      data: reportData,
+    };
+    existingReports.push(newReport);
+    localStorage.setItem('ctg_reports', JSON.stringify(existingReports));
+
+    message.success('Отчет сохранен! Перейдите во вкладку "Отчеты" для просмотра.');
+  }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData]);
+
   const handleSelectEvent = useCallback((event: CTGEvent) => {
     const center = event.peak || event.start;
     const start = Math.max(0, center - STATIC_WINDOW_HALF);
@@ -445,6 +476,15 @@ const CTGPage: React.FC = () => {
                     style={{ minWidth: 120 }}
                   >
                     MARK
+                  </Button>
+                  <Button 
+                    icon={<SaveOutlined />} 
+                    onClick={handleExportReport} 
+                    disabled={!hasSamples}
+                    size="large"
+                    style={{ minWidth: 120 }}
+                  >
+                    Export
                   </Button>
                   <Button 
                     onClick={() => handlePan(-30)} 

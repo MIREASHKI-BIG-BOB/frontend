@@ -27,10 +27,10 @@ interface CTGGridProps {
 }
 
 const lineColors = {
-  minor: "rgba(220, 165, 140, 0.25)", // Теплый оранжевый, как на бумаге
+  minor: "rgba(0, 0, 0, 0.25)", // Теплый оранжевый, как на бумаге
   major: "rgba(200, 120, 90, 0.5)",   // Более темный оранжевый для жирных линий
-  horizontalMinor: "rgba(220, 165, 140, 0.2)",
-  horizontalMajor: "rgba(200, 120, 90, 0.4)",
+  horizontalMinor: "rgba(0, 0, 0, 0.2)",
+  horizontalMajor: "rgba(0, 0, 0, 0.4)",
 };
 
 const CTGGrid: React.FC<CTGGridProps> = ({
@@ -122,7 +122,7 @@ const CTGGrid: React.FC<CTGGridProps> = ({
 
   return (
     <svg width={width} height={height} style={{ position: "absolute", inset: 0 }}>
-      <rect width={width} height={height} fill="#fef9f5" />
+      <rect width={width} height={height} fill="#fdf2ee" />
 
       {verticalLines.map((line, idx) => (
         <React.Fragment key={`v-${idx}`}>

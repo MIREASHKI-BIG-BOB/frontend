@@ -58,6 +58,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     channel: CTGChannel | null;
     clientX?: number;
     clientY?: number;
+    overlayIndex?: number; // Индекс overlay, если наведение на него
   }>({ time: null, value: null, channel: null });
 
   // Разделение объединённого блока: верхняя половина FHR, временная полоса, нижняя UC
@@ -153,14 +154,18 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       startVisibleStart: visibleStart,
       startVisibleEnd: visibleEnd,
     };
-    onToggleLive(false);
+    // НЕ останавливаем график при клике, только при реальном драге
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (isDragging && dragRef.current && width > 0) {
       const deltaPx = event.clientX - dragRef.current.startX;
-      const deltaSeconds = -deltaPx * secondsPerPixel;
-      onPan(deltaSeconds);
+      // Останавливаем график только если реально двигаем (больше 5px)
+      if (Math.abs(deltaPx) > 5) {
+        onToggleLive(false);
+        const deltaSeconds = -deltaPx * secondsPerPixel;
+        onPan(deltaSeconds);
+      }
     }
   };
 
@@ -180,7 +185,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
           position: "relative",
           width: "100%",
           height: totalHeight,
-          backgroundColor: "#fef9f5",
+          backgroundColor: "#fefdfbff",
           border: "1px solid #d4d4d8",
           boxShadow: "0 2px 8px rgba(15, 23, 42, 0.08)",
           overflowX: "auto",
@@ -361,6 +366,60 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       </div>
       </div>
 
+      {/* Фиксированные цифры делений слева */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: "50px",
+          height: totalHeight,
+          pointerEvents: "none",
+          zIndex: 10,
+          background: "linear-gradient(to right, rgba(254, 249, 245, 0.95) 70%, transparent)",
+        }}
+      >
+        <svg width={50} height={totalHeight}>
+          {/* FHR деления */}
+          {[210, 180, 150, 120, 90, 60, 30].map((val, idx) => {
+            const yPos = 8 + (fhrHeight - 16) * (idx / 6);
+            return (
+              <text
+                key={`fhr-${val}`}
+                x={42}
+                y={yPos}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fontSize={10}
+                fill="#475569"
+                opacity={0.85}
+              >
+                {val}
+              </text>
+            );
+          })}
+
+          {/* UC деления */}
+          {[30, 25, 20, 15, 10, 5, 0].map((val, idx) => {
+            const yPos = fhrHeight + timeStripHeight + 8 + (ucHeight - 16) * (idx / 6);
+            return (
+              <text
+                key={`uc-${val}`}
+                x={42}
+                y={yPos}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fontSize={10}
+                fill="#475569"
+                opacity={0.85}
+              >
+                {val}
+              </text>
+            );
+          })}
+        </svg>
+      </div>
+
       {/* Информация при наведении - зафиксирована */}
       {hoverState.time !== null && hoverState.value !== null && (
         <div
@@ -383,10 +442,14 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
         >
           <span style={{ fontWeight: 600 }}>
             {formatTime(hoverState.time)} · {hoverState.value.toFixed(1)}{" "}
-            {hoverState.channel === "fhr" ? "bpm" : "mmHg"}
+            {hoverState.channel === "fhr" 
+              ? "bpm" 
+              : hoverState.overlayIndex === 0 
+                ? "TOCO" 
+                : "UC"}
           </span>
           <span style={{ opacity: 0.7, fontSize: 11, textTransform: "uppercase" }}>
-            {hoverState.channel}
+            {hoverState.overlayIndex === 0 ? "toco" : hoverState.channel}
           </span>
         </div>
       )}

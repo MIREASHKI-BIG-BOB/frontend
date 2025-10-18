@@ -29,7 +29,12 @@ interface CTGTrackProps {
   qualitySegments: Array<{ start: number; end: number; quality: "poor" | "lost" }>;
   onSelectEvent?: (event: CTGEvent) => void;
   hoverTime: number | null;
-  onHover: (payload: { time: number | null; value: number | null; channel: CTGChannel }) => void;
+  onHover: (payload: { 
+    time: number | null; 
+    value: number | null; 
+    channel: CTGChannel;
+    overlayIndex?: number;
+  }) => void;
   overlays?: LineOverlay[];
 }
 
@@ -197,11 +202,13 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
                 d={path}
                 fill="none"
                 stroke="transparent"
-                strokeWidth={Math.max(10, config.strokeWidth * 3)}
+                strokeWidth={Math.max(15, config.strokeWidth * 5)}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                pointerEvents="stroke"
                 style={{ cursor: 'crosshair' }}
                 onMouseMove={(event) => {
+                  event.stopPropagation();
                   const svg = event.currentTarget.ownerSVGElement;
                   if (!svg) return;
                   const rect = svg.getBoundingClientRect();
@@ -209,8 +216,9 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
                   const time = visibleStart + x * secondsPerPixel;
                   const timeIdx = findNearestIndex(times, time);
                   const val = timeIdx >= 0 ? config.values[timeIdx] : null;
-                  onHover({ time, value: val, channel });
+                  onHover({ time, value: val, channel, overlayIndex: idx });
                 }}
+                onMouseLeave={() => onHover({ time: null, value: null, channel })}
               />
             </g>
           ) : null
@@ -262,6 +270,27 @@ const CTGTrack: React.FC<CTGTrackProps> = ({
             />
           </g>
         )}
+
+        {/* Точки для overlay при наведении */}
+        {hoverTime !== null && overlays && overlays.length > 0 && overlays.map((overlay, idx) => {
+          const overlayIdx = currentIndex >= 0 ? currentIndex : -1;
+          const overlayValue = overlayIdx >= 0 ? overlay.values[overlayIdx] : null;
+          if (overlayValue === null) return null;
+          
+          return (
+            <circle
+              key={`overlay-hover-${idx}`}
+              cx={(hoverTime - visibleStart) / secondsPerPixel}
+              cy={
+                height - ((overlayValue - minValue) / (maxValue - minValue)) * height
+              }
+              r={5}
+              fill="#fff"
+              stroke={overlay.color}
+              strokeWidth={2}
+            />
+          );
+        })}
       </svg>
 
     </div>
