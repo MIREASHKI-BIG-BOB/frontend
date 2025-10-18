@@ -501,6 +501,20 @@ const CTGPage: React.FC = () => {
     Math.max(0, visibleRange.end)
   )}`;
 
+  // Состояние для sticky header
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+
+  // Отслеживаем прокрутку
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      setIsHeaderSticky(scrollTop > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div style={{ padding: 16, background: "#f5f7fa", minHeight: "100%" }}>
       {staticWindow && (

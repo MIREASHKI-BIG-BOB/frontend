@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Card, Typography, Row, Col, Button, Space, Alert, Tag, Modal, Avatar, Divider, Input, Progress, Descriptions, message, Badge, Spin } from 'antd';
 import dayjs from 'dayjs';
-import { PrinterOutlined, DownloadOutlined, UserOutlined, CheckCircleOutlined, RobotOutlined, EditOutlined, SaveOutlined, FileTextOutlined, ThunderboltOutlined, HeartOutlined, WarningOutlined, SafetyOutlined } from '@ant-design/icons';
+import { PrinterOutlined, DownloadOutlined, UserOutlined, CheckCircleOutlined, RobotOutlined, EditOutlined, SaveOutlined, FileTextOutlined, ThunderboltOutlined, HeartOutlined, WarningOutlined, SafetyOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { colors, typography } from '../theme';
 import { useMLDataContext } from '../contexts/MLDataContext';
 import CTGCombinedStrip from '../components/ctg/CTGCombinedStrip';
@@ -20,6 +20,10 @@ export default function ReportsPage() {
     sessionHistory 
   } = useMLDataContext();
   
+  // Состояния для сворачивания блоков
+  const [isPatientInfoCollapsed, setIsPatientInfoCollapsed] = useState(false);
+  const [isDoctorInfoCollapsed, setIsDoctorInfoCollapsed] = useState(false);
+
   // Данные пациента
   const [patientData] = useState({
     name: 'Иванова Мария Петровна',
@@ -35,7 +39,7 @@ export default function ReportsPage() {
 
   // Данные врача
   const [doctorData] = useState({
-    name: 'Др. Петрова Елена Александровна',
+    name: 'Др. Иванова А.С.',
     specialization: 'Акушер-гинеколог высшей категории',
     license: 'МЗ РФ №12345678',
     department: 'Родильное отделение №1',
@@ -562,9 +566,6 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               <Title level={4} style={{ margin: 0, color: colors.text.primary }}>
                 Генерация медицинского отчёта
               </Title>
-              <Text type="secondary" style={{ fontSize: typography.fontSize.sm }}>
-                Комплексный анализ КТГ с рекомендациями
-              </Text>
             </div>
           </div>
           <Space>
@@ -601,15 +602,30 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
       <Row gutter={16}>
         {/* Левая колонка - информация и данные */}
         <Col span={8}>
-          {/* Информация о пациенте */}
+          {/* Информация о пациенте - сворачиваемый блок */}
           <Card 
             size="small"
             title={
-              <div className="flex items-center gap-2">
-                <UserOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
-                <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
-                  Информация о пациенте
-                </span>
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setIsPatientInfoCollapsed(!isPatientInfoCollapsed)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <UserOutlined style={{ color: colors.primary, fontSize: typography.fontSize.lg }} />
+                  <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                    Информация о пациенте
+                  </span>
+                </div>
+                <Button 
+                  type="text" 
+                  size="small"
+                  icon={isPatientInfoCollapsed ? <DownOutlined /> : <UpOutlined />}
+                />
               </div>
             }
             style={{ marginBottom: typography.spacing.md }}
@@ -618,7 +634,10 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               background: colors.primaryPale,
               borderBottom: `1px solid ${colors.border.light}`
             }}
-            bodyStyle={{ padding: typography.spacing.md }}
+            bodyStyle={{ 
+              padding: isPatientInfoCollapsed ? 0 : typography.spacing.md,
+              display: isPatientInfoCollapsed ? 'none' : 'block'
+            }}
           >
             <Descriptions column={1} size="small">
               <Descriptions.Item label="ФИО">
@@ -639,15 +658,30 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
             </Descriptions>
           </Card>
 
-          {/* Информация о враче */}
+          {/* Информация о враче - сворачиваемый блок */}
           <Card 
             size="small"
             title={
-              <div className="flex items-center gap-2">
-                <SafetyOutlined style={{ color: colors.primaryDark, fontSize: typography.fontSize.lg }} />
-                <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
-                  Ответственный врач
-                </span>
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setIsDoctorInfoCollapsed(!isDoctorInfoCollapsed)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <SafetyOutlined style={{ color: colors.primaryDark, fontSize: typography.fontSize.lg }} />
+                  <span style={{ fontSize: typography.fontSize.base, fontWeight: typography.fontWeight.semibold, color: colors.text.primary }}>
+                    Ответственный врач
+                  </span>
+                </div>
+                <Button 
+                  type="text" 
+                  size="small"
+                  icon={isDoctorInfoCollapsed ? <DownOutlined /> : <UpOutlined />}
+                />
               </div>
             }
             style={{ marginBottom: typography.spacing.md }}
@@ -656,7 +690,10 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
               background: colors.primaryPale,
               borderBottom: `1px solid ${colors.border.light}`
             }}
-            bodyStyle={{ padding: typography.spacing.md }}
+            bodyStyle={{ 
+              padding: isDoctorInfoCollapsed ? 0 : typography.spacing.md,
+              display: isDoctorInfoCollapsed ? 'none' : 'block'
+            }}
           >
             <Descriptions column={1} size="small">
               <Descriptions.Item label="ФИО">
