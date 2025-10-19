@@ -79,6 +79,16 @@ const CTGPage: React.FC = () => {
   const sessionOffsetRef = useRef<number | null>(null);
   const exportStripRef = useRef<HTMLDivElement>(null);
 
+const resumeRaw0Ref = useRef<number | null>(null);  // первый rawTime после старта/продолжения
+const resumeBaseRef = useRef<number | null>(null);  // к какому времени CTG привязываем продолжение
+const prevRawRef = useRef<number | null>(null);     // чтобы знать дельту
+
+// в resetSession() обязательно сбросить
+resumeRaw0Ref.current = null;
+resumeBaseRef.current = null;
+prevRawRef.current = null;
+
+
   const hasSamples = samples.length > 0;
 
   // расчёты/метрики
@@ -157,25 +167,42 @@ useEffect(() => {
   const tone = latestData.data?.tone ?? null;
   if (bpm === null && toco === null && uc === null && tone === null) return;
 
-  const rawTime = typeof latestData.secFromStart === "number" ? latestData.secFromStart : null;
+const rawTime = typeof latestData.secFromStart === "number" ? latestData.secFromStart : null;
 
-  // базовая логика «смещения» как у тебя
-  if (rawTime !== null) {
-    if (sessionOffsetRef.current === null || rawTime < (sessionOffsetRef.current ?? 0)) {
-      sessionOffsetRef.current = rawTime;
-    }
-  }
+// если это первая точка после старта/продолжения — ставим якоря
+if (rawTime !== null && resumeRaw0Ref.current === null) {
+  resumeRaw0Ref.current = rawTime;
+  // привязываем к текущему lastTimestamp (на паузе это была, напр., 42.0)
+  resumeBaseRef.current = lastTimestampRef.current;
+}
 
-  let time =
-    rawTime !== null && sessionOffsetRef.current !== null
-      ? Math.max(0, rawTime - sessionOffsetRef.current)
-      : lastTimestampRef.current + 1;
+// основной расчёт времени
+let time: number;
 
-  // 🔧 ГЛАВНОЕ: делаем временную шкалу монотонной
-  if (time <= lastTimestampRef.current) {
-    time = lastTimestampRef.current + 1;
-  }
+if (
+  rawTime !== null &&
+  resumeRaw0Ref.current !== null &&
+  resumeBaseRef.current !== null
+) {
+  // продолжение той же сессии без скачков
+  time = resumeBaseRef.current + (rawTime - resumeRaw0Ref.current);
+} else if (rawTime !== null && sessionOffsetRef.current !== null) {
+  // твой старый путь (на всякий случай)
+  time = Math.max(0, rawTime - sessionOffsetRef.current);
+} else {
+  // совсем аварийный вариант
+  time = lastTimestampRef.current + 1;
+}
 
+// мягкая монотонизация (без «+1 сек на каждую точку»)
+const prevRaw = prevRawRef.current;
+if (time <= lastTimestampRef.current) {
+  // шаг берём из сырой дельты, иначе маленький эпсилон (напр., 0.1)
+  const minStep =
+    rawTime !== null && prevRaw !== null && rawTime > prevRaw ? rawTime - prevRaw : 0.1;
+  time = lastTimestampRef.current + minStep;
+}
+prevRawRef.current = rawTime ?? prevRawRef.current;
   const sample = buildSample(
     time,
     typeof bpm === "number" ? bpm : null,
@@ -343,7 +370,12 @@ useEffect(() => {
     existingSessions.push(newSession);
     localStorage.setItem("ctg_sessions", JSON.stringify(existingSessions));
 
-    message.success('Сессия сохранена! Перейдите во вкладку "Отчеты" для просмотра.');
+    message.success(`Сессия №${newSession.id} сохранена!`, 1);
+
+  setTimeout(() => {
+    // SPA-навигация:
+    location.hash = "#/reports";
+  }, 500);
   }, [hasSamples, recordingSeconds, samples, combinedEvents, metrics, latestData, manualEvents]);
 
   // печать длинной ленты в PDF
@@ -487,9 +519,7 @@ useEffect(() => {
     setVisibleRange({ start, end });
   }, [scrollOffset, visibleWindowSec]);
 
-  const windowLabel = `${formatClock(Math.max(0, visibleRange.start))} – ${formatClock(
-    Math.max(0, visibleRange.end)
-  )}`;
+
 
   return (
     <div style={{ padding: 16, background: "#f5f7fa", minHeight: "100%" }}>
@@ -549,7 +579,6 @@ useEffect(() => {
                         • Смещение: <Text strong>{scrollOffset > 0 ? "+" : ""}{scrollOffset}с</Text>
                       </span>
                     )}
-                    <span> • Окно: <Text strong>{windowLabel}</Text></span>
                   </Text>
                 </div>
 
@@ -604,9 +633,9 @@ useEffect(() => {
                     disabled={!hasSamples}
                     loading={isExporting}
                     size="large"
-                    style={{ minWidth: 140 }}
+                    style={{ minWidth: 120 }}
                   >
-                    Печать ленты
+                    Печать
                   </Button>
 
                   <Button
@@ -614,8 +643,8 @@ useEffect(() => {
                     onClick={handleMarkFetalMovement}
                     disabled={!hasSamples}
                     size="large"
-                    type="default"
-                    style={{ minWidth: 100 }}
+                    type="primary"
+                    style={{ minWidth: 100, backgroundColor: '#60A5FA', borderColor: '#60A5FA' }}
                   >
                     Метка
                   </Button>

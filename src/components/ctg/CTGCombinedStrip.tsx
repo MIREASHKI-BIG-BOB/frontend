@@ -195,7 +195,7 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     }
   };
 
-const handleWheel = (event: WheelEvent) => {
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     if (!onPan) {
       return;
     }
@@ -212,20 +212,7 @@ const handleWheel = (event: WheelEvent) => {
     onPan(wheelRemainderRef.current);
     wheelRemainderRef.current = 0;
   };
-React.useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
 
-    const wheelHandler = (event: WheelEvent) => {
-      event.preventDefault();
-      handleWheel(event);
-    };
-
-    el.addEventListener("wheel", wheelHandler, { passive: false });
-    return () => {
-      el.removeEventListener("wheel", wheelHandler);
-    };
-  }, [handleWheel]);
   return (
     <div style={{ position: "relative", width: "100%", height: totalHeight }}>
       {/* Прокручиваемый контейнер */}
@@ -251,6 +238,7 @@ React.useEffect(() => {
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}
         onPointerLeave={finishDrag}
+        onWheel={handleWheel}
       >
       {/* ==================== ОБЪЕДИНЁННЫЙ БЛОК FHR + UC ==================== */}
       <div

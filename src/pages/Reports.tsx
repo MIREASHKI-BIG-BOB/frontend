@@ -1222,11 +1222,13 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
 
       {/* Модальное окно с CTG лентой */}
       <Modal
-   open={isCTGModalVisible}
-  getContainer={undefined}
+        open={isCTGModalVisible}
+        getContainer={undefined}
         onCancel={closeCTGModal}
         footer={null}
-
+        width={Math.min(1500, window.innerWidth - 30)}
+        style={{ top: 40 }}
+        bodyStyle={{ padding: 24, maxHeight: '80vh', overflowY: 'auto' }}
         title={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -1407,7 +1409,7 @@ ${riskLevel === 'high' ? 'Вы и ваш малыш находитесь под 
 
             {/* События и аномалии */}
             {selectedSession.fullData.events && selectedSession.fullData.events.length > 0 && (
-              <Card size="small" title="События и аномалии">
+              <Card size="large" title="События и аномалии">
                 <Space direction="vertical" style={{ width: '100%' }}>
                   {selectedSession.fullData.events.map((event: any, idx: number) => (
                     <Alert
