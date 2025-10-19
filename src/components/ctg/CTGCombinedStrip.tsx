@@ -79,13 +79,21 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   // Ширина ленты = длительность × пиксели/сек (НЕ зависит от ширины контейнера!)
   const width = Math.max(1, Math.round(duration * pxPerSecond));
   const secondsPerPixel = 1 / pxPerSecond;
-  const dragStateRef = useRef<{ active: boolean; lastX: number; pointerId: number | null }>({
+  const dragStateRef = useRef<{ 
+    active: boolean; 
+    lastX: number; 
+    pointerId: number | null;
+    totalDrag: number; // Накопленное расстояние для определения drag vs click
+  }>({
     active: false,
     lastX: 0,
     pointerId: null,
+    totalDrag: 0,
   });
   const [isDragging, setIsDragging] = useState(false);
   const wheelRemainderRef = useRef(0);
+  const wheelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Для debounce wheel
+  const DRAG_THRESHOLD_PX = 10; // Минимум пикселей для начала панорамирования
 
   // Фильтрация видимых данных
   const visibleSamples = useMemo(() => {
@@ -140,16 +148,74 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
 
   // Автоматическая прокрутка к правому краю (только для live режима)
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const autoScrollAttemptRef = useRef(false);
   
   React.useEffect(() => {
-    if (!isLive) {
+    if (!isLive || !scrollContainerRef.current) {
+      autoScrollAttemptRef.current = false;
       return;
     }
-    if (scrollContainerRef.current && samples.length > 0) {
-      const container = scrollContainerRef.current;
+    
+    const container = scrollContainerRef.current;
+    // Проверяем, находимся ли мы уже в правой части (live режим)
+    const isAlreadyAtRight = container.scrollLeft >= container.scrollWidth - container.clientWidth - 5;
+    
+    if (!isAlreadyAtRight) {
+      autoScrollAttemptRef.current = true;
       container.scrollLeft = container.scrollWidth - container.clientWidth;
+      // Небольшая задержка чтобы позволить пользователю выходить из режима live
+      setTimeout(() => {
+        autoScrollAttemptRef.current = false;
+      }, 100);
     }
   }, [samples.length, visibleEnd, isLive]);
+  
+  // Cleanup для wheel debounce при размонтировании
+  React.useEffect(() => {
+    return () => {
+      if (wheelTimeoutRef.current) {
+        clearTimeout(wheelTimeoutRef.current);
+      }
+    };
+  }, []);
+  
+  // Регистрируем wheel listener с {passive: false} чтобы preventDefault работал
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const handleWheelNonPassive = (event: WheelEvent) => {
+      if (!onPan) return;
+      
+      // Теперь можем вызвать preventDefault без ошибок
+      event.preventDefault();
+      
+      const rawDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (rawDelta === 0) return;
+      
+      const smoothedDelta = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 50);
+      const deltaSeconds = -smoothedDelta * secondsPerPixel;
+      
+      wheelRemainderRef.current += deltaSeconds;
+      
+      if (wheelTimeoutRef.current) {
+        clearTimeout(wheelTimeoutRef.current);
+      }
+      
+      wheelTimeoutRef.current = setTimeout(() => {
+        if (Math.abs(wheelRemainderRef.current) >= 0.05) {
+          (onPan as any)(wheelRemainderRef.current, true);
+          wheelRemainderRef.current = 0;
+        }
+      }, 50);
+    };
+    
+    container.addEventListener('wheel', handleWheelNonPassive, { passive: false });
+    
+    return () => {
+      container.removeEventListener('wheel', handleWheelNonPassive);
+    };
+  }, [onPan, secondsPerPixel]);
 
   const handleDoubleClick = () => onToggleLive(true);
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -160,8 +226,8 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
       active: true,
       lastX: event.clientX,
       pointerId: event.pointerId,
+      totalDrag: 0,
     };
-    setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -169,12 +235,23 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     if (!dragStateRef.current.active) {
       return;
     }
-    event.preventDefault();
+    
     const deltaX = event.clientX - dragStateRef.current.lastX;
     if (deltaX === 0) {
       return;
     }
+    
+    dragStateRef.current.totalDrag += Math.abs(deltaX);
     dragStateRef.current.lastX = event.clientX;
+    
+    // Начинаем панорамирование только если превышен threshold
+    if (dragStateRef.current.totalDrag < DRAG_THRESHOLD_PX) {
+      return;
+    }
+    
+    event.preventDefault();
+    setIsDragging(true);
+    
     const deltaSeconds = -deltaX * secondsPerPixel;
     if (Math.abs(deltaSeconds) < 0.01) {
       return;
@@ -186,31 +263,15 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
     if (!dragStateRef.current.active) {
       return;
     }
-    dragStateRef.current = { active: false, lastX: 0, pointerId: null };
+    
     setIsDragging(false);
+    dragStateRef.current = { active: false, lastX: 0, pointerId: null, totalDrag: 0 };
+    
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
       // ignore if capture not set
     }
-  };
-
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    if (!onPan) {
-      return;
-    }
-    event.preventDefault();
-    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    if (dominantDelta === 0) {
-      return;
-    }
-    const deltaSeconds = -dominantDelta * secondsPerPixel;
-    wheelRemainderRef.current += deltaSeconds;
-    if (Math.abs(wheelRemainderRef.current) < 0.1) {
-      return;
-    }
-    onPan(wheelRemainderRef.current);
-    wheelRemainderRef.current = 0;
   };
 
   return (
@@ -238,7 +299,6 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}
         onPointerLeave={finishDrag}
-        onWheel={handleWheel}
       >
       {/* ==================== ОБЪЕДИНЁННЫЙ БЛОК FHR + UC ==================== */}
       <div

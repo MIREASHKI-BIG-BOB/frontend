@@ -82,6 +82,7 @@ const CTGPage: React.FC = () => {
 const resumeRaw0Ref = useRef<number | null>(null);  // первый rawTime после старта/продолжения
 const resumeBaseRef = useRef<number | null>(null);  // к какому времени CTG привязываем продолжение
 const prevRawRef = useRef<number | null>(null);     // чтобы знать дельту
+const userScrollingRef = useRef(false);  // флаг что пользователь активно скроллит
 
 // в resetSession() обязательно сбросить
 resumeRaw0Ref.current = null;
@@ -90,6 +91,15 @@ prevRawRef.current = null;
 
 
   const hasSamples = samples.length > 0;
+  
+  // Отслеживаем когда пользователь скроллит — блокируем "магнит" к live
+  useEffect(() => {
+    if (scrollOffset !== 0 && isRecording) {
+      userScrollingRef.current = true;
+    } else {
+      userScrollingRef.current = false;
+    }
+  }, [scrollOffset, isRecording]);
 
   // расчёты/метрики
   const detection = useMemo(() => {
@@ -223,7 +233,9 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
 
   setManualEvents((prev) => prev.filter((event) => event.end >= time - MAX_HISTORY_SEC));
 
-  if (isLive && scrollOffset === 0) {
+  // КРИТИЧНО: Обновляем view только если пользователь в live режиме И не скроллит назад
+  // userScrollingRef предотвращает "магнит" к генерации
+  if (isLive && scrollOffset === 0 && !userScrollingRef.current) {
     const end = time;
     const start = Math.max(0, end - visibleWindowSec);
     setVisibleRange({ start, end });
@@ -490,23 +502,29 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
 
   // панорамирование (drag/колёсико) — можно всегда, не только во время записи
   const handlePan = useCallback(
-    (deltaSeconds: number) => {
+    (deltaSeconds: number, fromWheel?: boolean) => {
       if (!hasSamples) return;
 
       const latest = lastTimestampRef.current;
       const earliest = samples.length ? samples[0].time : 0;
 
-      // ограничиваем окно: не правее «текущего момента» и не левее начала + окно видимости
-      const minOffset = Math.min(0, earliest + visibleWindowSec - latest);
-      const maxOffset = 0;
-
       setScrollOffset((prev) => {
         const next = prev + deltaSeconds;
+        
+        // Мягкие ограничения: не левее начала данных, не правее текущего момента
+        const maxNegative = -(latest - earliest - visibleWindowSec);
+        const minOffset = Math.min(maxNegative, 0); // не можем скроллить левее начала
+        const maxOffset = 0; // не можем скроллить правее текущего момента
+        
         const clamped = Math.max(minOffset, Math.min(maxOffset, next));
+        
+        // Если это drag (не колесико) — выключаем live
+        if (!fromWheel && Math.abs(deltaSeconds) > 0.5) {
+          setIsLive(false);
+        }
+        
         return clamped;
       });
-
-      setIsLive(false);
     },
     [hasSamples, samples, visibleWindowSec]
   );
@@ -573,12 +591,6 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
                 <div style={{ fontSize: 13, color: "#64748b" }}>
                   <Text type="secondary">
                     Записано: <Text strong>{formatClock(recordingSeconds)}</Text>
-                    {scrollOffset !== 0 && (
-                      <span>
-                        {" "}
-                        • Смещение: <Text strong>{scrollOffset > 0 ? "+" : ""}{scrollOffset}с</Text>
-                      </span>
-                    )}
                   </Text>
                 </div>
 
@@ -622,7 +634,7 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
                     onClick={handleExportReport}
                     disabled={!hasSamples}
                     size="large"
-                    style={{ minWidth: 120 }}
+                    style={{ minWidth: 100 }}
                   >
                     Сохранить
                   </Button>
@@ -633,7 +645,7 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
                     disabled={!hasSamples}
                     loading={isExporting}
                     size="large"
-                    style={{ minWidth: 120 }}
+                    style={{ minWidth: 100 }}
                   >
                     Печать
                   </Button>
@@ -658,9 +670,9 @@ prevRawRef.current = rawTime ?? prevRawRef.current;
                     disabled={!hasSamples || (isLive && scrollOffset === 0)}
                     size="large"
                     type={isLive && scrollOffset === 0 ? "primary" : "default"}
-                    style={{ minWidth: 120 }}
+                    style={{ minWidth: 100 }}
                   >
-                    {isLive && scrollOffset === 0 ? "● Эфир" : "Эфир"}
+                    {isLive && scrollOffset === 0 ? "Эфир" : "Эфир"}
                   </Button>
                 </div>
               </div>
