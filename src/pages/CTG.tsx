@@ -467,29 +467,30 @@ const CTGPage: React.FC = () => {
     [visibleWindowSec]
   );
 
-  const handlePan = useCallback(
-    (deltaSeconds: number) => {
-      if (!hasSamples) {
-        return;
-      }
-      const latest = lastTimestampRef.current;
-      
-      // Изменяем смещение прокрутки
-      setScrollOffset((prevOffset) => {
-        const newOffset = prevOffset + deltaSeconds;
-        // Ограничиваем: не можем прокрутить дальше текущего момента и не дальше начала данных
-        const maxOffset = 0; // Не дальше текущего момента
-        const minOffset = -(latest - visibleWindowSec); // Не дальше начала данных
-        return Math.max(minOffset, Math.min(maxOffset, newOffset));
-      });
-      
-      // Если прокручиваем назад, выходим из live режима
-      if (deltaSeconds < 0) {
-        setIsLive(false);
-      }
-    },
-    [hasSamples, visibleWindowSec]
-  );
+const handlePan = useCallback(
+  (deltaSeconds: number) => {
+    if (!hasSamples) return;
+
+    const latest = lastTimestampRef.current;
+    const earliest = samples.length ? samples[0].time : 0;
+
+    // Минимально допустимый offset (нельзя уйти левее earliest+window)
+    // X_min = (earliest + visibleWindowSec) - latest
+    // Но не разрешаем скроллить в "будущее": offset ≤ 0
+    const minOffset = Math.min(0, (earliest + visibleWindowSec) - latest);
+    const maxOffset = 0; // нельзя правее "текущего момента"
+
+    setScrollOffset(prev => {
+      const next = prev + deltaSeconds;
+      const clamped = Math.max(minOffset, Math.min(maxOffset, next));
+      return clamped;
+    });
+
+    // Любой ручной пан выключает live (и влево, и вправо)
+    setIsLive(false);
+  },
+  [hasSamples, samples, visibleWindowSec]
+);
 
   const handleChangeWindow = useCallback(
     (seconds: number) => {
@@ -512,10 +513,6 @@ const CTGPage: React.FC = () => {
     const start = Math.max(0, end - visibleWindowSec);
     setVisibleRange({ start, end });
     
-    // Если scrollOffset = 0, включаем live режим
-    if (scrollOffset === 0) {
-      setIsLive(true);
-    }
   }, [scrollOffset, isRecording, visibleWindowSec]);
 
   const handlePaperSpeed = useCallback((speed: 1 | 3) => {

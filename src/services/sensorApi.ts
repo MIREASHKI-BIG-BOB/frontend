@@ -141,7 +141,7 @@ export async function stopGenerator(): Promise<{ message?: string }> {
 
     return { message: "Generator stopped" };
   } catch (error) {
-    console.error("Error stopping generator:", error);
-    throw error;
+    console.warn("Stop ignored:", error);
+    return { message: "already_stopped" };
   }
 }
