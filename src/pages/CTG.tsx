@@ -25,7 +25,13 @@ import { buildSample, computeCTGMetrics } from "../utils/ctgMetrics";
 import { exportLongCTGToPDF } from "../utils/ctgPdfExport";
 
 const { Text, Title } = Typography;
+type SessionStatus = "idle" | "recording" | "paused";
 
+const [status, setStatus] = useState<SessionStatus>("idle");
+const [sessionId, setSessionId] = useState<string | null>(null);
+
+// isRecording теперь вычисляем из статуса:
+const isRecording = status === "recording";
 const MAX_HISTORY_SEC = 40 * 60;
 const STATIC_WINDOW_HALF = 90;
 const FHR_NORM = { from: 110, to: 160 };
@@ -251,29 +257,63 @@ const CTGPage: React.FC = () => {
     }
   }, [visibleWindowSec, latestData]);
 
-  const handleStartStop = useCallback(async () => {
-    if (actionPending) {
-      return;
+  // Старт / Продолжить
+const handleStart = useCallback(async () => {
+  if (actionPending) return;
+  try {
+    setActionPending(true);
+
+    if (status === "idle") {
+      // Новая сессия — генерим id и чистим буферы
+      setSessionId(String(Date.now()));
+      resetSession();
     }
-    try {
-      setActionPending(true);
-      if (isRecording) {
-        await stopGenerator();
-        setIsRecording(false);
-        message.success("Генератор остановлен");
-      } else {
-        await startGenerator();
-        resetSession();
-        setIsRecording(true);
-        message.success("Генератор запущен");
-      }
-    } catch (error) {
-      message.error("Не удалось выполнить операцию");
-      console.error(error);
-    } finally {
-      setActionPending(false);
-    }
-  }, [actionPending, isRecording, resetSession]);
+    // При paused НИЧЕГО не чистим — продолжаем ту же сессию
+
+    await startGenerator();
+    setStatus("recording");
+    message.success(status === "idle" ? "Сессия начата" : "Продолжение записи");
+  } catch (error) {
+    console.error(error);
+    message.error("Не удалось запустить генератор");
+  } finally {
+    setActionPending(false);
+  }
+}, [actionPending, status, resetSession]);
+
+// Пауза
+const handleStop = useCallback(async () => {
+  if (actionPending || status !== "recording") return;
+  try {
+    setActionPending(true);
+    await stopGenerator();
+    setStatus("paused"); // Буферы не трогаем
+    message.success("Пауза");
+  } catch (error) {
+    console.error(error);
+    message.error("Не удалось остановить генератор");
+  } finally {
+    setActionPending(false);
+  }
+}, [actionPending, status]);
+
+// Полный сброс
+const handleDelete = useCallback(async () => {
+  if (actionPending) return;
+  setActionPending(true);
+  try {
+    // Пробуем стопнуть (если и так остановлен — ок)
+    await stopGenerator().catch(() => {});
+  } finally {
+    // Полная очистка
+    setSessionId(null);
+    resetSession();
+    setStatus("idle");
+    setActionPending(false);
+    message.success("Сессия удалена");
+  }
+}, [actionPending, resetSession]);
+
 
   const handleMarkFetalMovement = useCallback(() => {
     if (!hasSamples) {
@@ -611,71 +651,77 @@ const handlePan = useCallback(
                   </Text>
                 </div>
 
-                {/* Кнопки навигации */}
                 <div style={{ display: "flex", gap: 12 }}>
-                  <Button
-                    type="primary"
-                    icon={isRecording ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-                    onClick={handleStartStop}
-                    loading={actionPending}
-                    size="large"
-                    style={{ minWidth: 120 }}
-                  >
-                    {isRecording ? "Стоп" : "Старт"}
-                  </Button>
-                  <Button 
-                    icon={<PushpinOutlined />} 
-                    onClick={handleMarkFetalMovement} 
-                    disabled={!hasSamples}
-                    size="large"
-                    type="default"
-                    style={{ minWidth: 100 }}
-                  >
-                    Метка
-                  </Button>
-                  <Button 
-                    icon={<SyncOutlined />} 
-                    onClick={handleClearSession} 
-                    disabled={!hasSamples && !isRecording}
-                    size="large"
-                    danger
-                    style={{ minWidth: 100 }}
-                  >
-                    Удалить
-                  </Button>
-                  <Button 
-                    icon={<SaveOutlined />} 
-                    onClick={handleExportReport} 
-                    disabled={!hasSamples}
-                    size="large"
-                    style={{ minWidth: 120 }}
-                  >
-                    Сохранить
-                  </Button>
-                  <Button 
-                    icon={<PrinterOutlined />} 
-                    onClick={handlePrintFullStrip} 
-                    disabled={!hasSamples}
-                    loading={isExporting}
-                    size="large"
-                    style={{ minWidth: 140 }}
-                  >
-                    Печать ленты
-                  </Button>
-                  <Button 
-                    icon={<VideoCameraOutlined />}
-                    onClick={() => {
-                      setScrollOffset(0);
-                      setIsLive(true);
-                    }} 
-                    disabled={!hasSamples || (isLive && scrollOffset === 0)}
-                    size="large"
-                    type={isLive && scrollOffset === 0 ? "primary" : "default"}
-                    style={{ minWidth: 120 }}
-                  >
-                    {isLive && scrollOffset === 0 ? "● Эфир" : "Эфир"}
-                  </Button>
-                </div>
+  <Button
+    type="primary"
+    icon={<PlayCircleOutlined />}
+    onClick={handleStart}
+    loading={actionPending}
+    size="large"
+    style={{ minWidth: 120 }}
+    disabled={status === "recording"}
+  >
+    {status === "paused" ? "Продолжить" : "Старт"}
+  </Button>
+
+  <Button
+    icon={<PauseCircleOutlined />}
+    onClick={handleStop}
+    loading={actionPending}
+    size="large"
+    style={{ minWidth: 100 }}
+    disabled={status !== "recording"}
+  >
+    Стоп
+  </Button>
+
+  <Button
+    icon={<SyncOutlined />}
+    onClick={handleDelete}
+    loading={actionPending}
+    danger
+    size="large"
+    style={{ minWidth: 100 }}
+  >
+    Удалить
+  </Button>
+
+  <Button
+    icon={<SaveOutlined />}
+    onClick={handleExportReport}
+    disabled={!hasSamples}
+    size="large"
+    style={{ minWidth: 120 }}
+  >
+    Сохранить
+  </Button>
+
+  <Button
+    icon={<PrinterOutlined />}
+    onClick={handlePrintFullStrip}
+    disabled={!hasSamples}
+    loading={isExporting}
+    size="large"
+    style={{ minWidth: 140 }}
+  >
+    Печать ленты
+  </Button>
+
+  <Button
+    icon={<VideoCameraOutlined />}
+    onClick={() => {
+      setScrollOffset(0);
+      setIsLive(true);
+    }}
+    disabled={!hasSamples || (isLive && scrollOffset === 0)}
+    size="large"
+    type={isLive && scrollOffset === 0 ? "primary" : "default"}
+    style={{ minWidth: 120 }}
+  >
+    {isLive && scrollOffset === 0 ? "● Эфир" : "Эфир"}
+  </Button>
+</div>
+
               </div>
             </Card>
           </Space>
