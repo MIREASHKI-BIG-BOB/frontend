@@ -148,54 +148,61 @@ const CTGPage: React.FC = () => {
   }, [status]);
 
   // при приходе новых данных — аккумулируем сессию
-  useEffect(() => {
-    if (!isRecording || !latestData) return;
+useEffect(() => {
+  if (!isRecording || !latestData) return;
 
-    const bpm = latestData.data?.BPMChild ?? latestData.data?.bpmChild ?? null;
-    const toco = latestData.data?.uterus ?? null;
-    const uc = latestData.data?.spasms ?? null;
-    const tone = latestData.data?.tone ?? null;
+  const bpm  = latestData.data?.BPMChild ?? latestData.data?.bpmChild ?? null;
+  const toco = latestData.data?.uterus ?? null;
+  const uc   = latestData.data?.spasms ?? null;
+  const tone = latestData.data?.tone ?? null;
+  if (bpm === null && toco === null && uc === null && tone === null) return;
 
-    if (bpm === null && toco === null && uc === null && tone === null) return;
+  const rawTime = typeof latestData.secFromStart === "number" ? latestData.secFromStart : null;
 
-    const rawTime = typeof latestData.secFromStart === "number" ? latestData.secFromStart : null;
-    if (rawTime !== null) {
-      if (sessionOffsetRef.current === null || rawTime < (sessionOffsetRef.current ?? 0)) {
-        sessionOffsetRef.current = rawTime;
-      }
+  // базовая логика «смещения» как у тебя
+  if (rawTime !== null) {
+    if (sessionOffsetRef.current === null || rawTime < (sessionOffsetRef.current ?? 0)) {
+      sessionOffsetRef.current = rawTime;
     }
+  }
 
-    const time =
-      rawTime !== null && sessionOffsetRef.current !== null
-        ? Math.max(0, rawTime - sessionOffsetRef.current)
-        : lastTimestampRef.current + 1;
+  let time =
+    rawTime !== null && sessionOffsetRef.current !== null
+      ? Math.max(0, rawTime - sessionOffsetRef.current)
+      : lastTimestampRef.current + 1;
 
-    const sample = buildSample(
-      time,
-      typeof bpm === "number" ? bpm : null,
-      typeof toco === "number" ? toco : null,
-      typeof uc === "number" ? uc : null,
-      typeof tone === "number" ? tone : null
-    );
+  // 🔧 ГЛАВНОЕ: делаем временную шкалу монотонной
+  if (time <= lastTimestampRef.current) {
+    time = lastTimestampRef.current + 1;
+  }
 
-    lastTimestampRef.current = time;
-    setLastTimestamp(time);
-    setRecordingSeconds((prev) => Math.max(prev, Math.floor(time)));
+  const sample = buildSample(
+    time,
+    typeof bpm === "number" ? bpm : null,
+    typeof toco === "number" ? toco : null,
+    typeof uc === "number" ? uc : null,
+    typeof tone === "number" ? tone : null
+  );
 
-    setSamples((prev) => {
-      const cutoff = time - MAX_HISTORY_SEC;
-      const trimmed = prev.filter((item) => item.time >= cutoff);
-      return [...trimmed, sample];
-    });
+  lastTimestampRef.current = time;
+  setLastTimestamp(time);
+  setRecordingSeconds((prev) => Math.max(prev, Math.floor(time)));
 
-    setManualEvents((prev) => prev.filter((event) => event.end >= time - MAX_HISTORY_SEC));
+  setSamples((prev) => {
+    const cutoff = time - MAX_HISTORY_SEC;
+    const trimmed = prev.filter((item) => item.time >= cutoff);
+    return [...trimmed, sample];
+  });
 
-    if (isLive && scrollOffset === 0) {
-      const end = time;
-      const start = Math.max(0, end - visibleWindowSec);
-      setVisibleRange({ start, end });
-    }
-  }, [latestData, isRecording, isLive, visibleWindowSec, scrollOffset]);
+  setManualEvents((prev) => prev.filter((event) => event.end >= time - MAX_HISTORY_SEC));
+
+  if (isLive && scrollOffset === 0) {
+    const end = time;
+    const start = Math.max(0, end - visibleWindowSec);
+    setVisibleRange({ start, end });
+  }
+}, [latestData, isRecording, isLive, visibleWindowSec, scrollOffset]);
+
 
   // сброс буферов (новая сессия)
   const resetSession = useCallback(() => {

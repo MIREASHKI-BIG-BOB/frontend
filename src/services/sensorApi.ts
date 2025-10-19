@@ -165,17 +165,29 @@ export async function startGenerator(): Promise<{ message?: string }> {
  * Остановить генератор данных
  * Возвращает benign-успех, если генератор уже остановлен/отключён.
  */
+// Остановить генератор данных
 export async function stopGenerator(): Promise<{ message?: string }> {
-  const resp = await fetch("/gen-api/off", { method: "GET", cache: "no-store" });
-
-  if (!resp.ok) {
-    const msg = await extractErrorMessage(resp);
-    if (isBenignStop(msg)) {
-      console.warn("Generator already stopped — ignoring");
-      return { message: msg };
+  try {
+    const response = await fetch("/gen-api/off");
+    if (!response.ok) {
+      // пробуем прочитать тело ошибки
+      let data: any = null;
+      try { data = await response.json(); } catch {}
+      const msg = data?.error?.message || "";
+      // игнорируем «уже не подключен»
+      if (msg.includes("not connected")) {
+        console.warn("Generator already stopped — ignoring");
+        return { message: "already_stopped" };
+      }
+      throw new Error(`HTTP ${response.status}`);
     }
-    throw new Error(msg);
-  }
 
-  return okOrDefault(resp, { message: "Generator stopped" });
+    const ct = response.headers.get("content-type");
+    if (ct && ct.includes("application/json")) return await response.json();
+    return { message: "Generator stopped" };
+  } catch (err) {
+    console.warn("Stop ignored:", err);
+    return { message: "already_stopped" };
+  }
 }
+
