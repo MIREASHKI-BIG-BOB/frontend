@@ -592,6 +592,7 @@ const CTGPage: React.FC = () => {
                 onSelectEvent={handleSelectEvent}
                 onPan={handlePan}
                 onToggleLive={handleToggleLive}
+                isLive={isLive && scrollOffset === 0}
               />
               
               {/* Кнопки управления под графиками */}

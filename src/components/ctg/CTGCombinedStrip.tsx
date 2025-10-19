@@ -28,6 +28,7 @@ interface CTGCombinedStripProps {
     toco: number | null;
     uc: number | null;
   };
+  isLive?: boolean;
 }
 
 // Диапазоны значений согласно ТЗ
@@ -51,6 +52,8 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   onPan,
   onToggleLive,
   combinedHeight = 600,
+  currentValues,
+  isLive = false,
 }) => {
   const [hoverState, setHoverState] = useState<{
     time: number | null;
@@ -76,6 +79,13 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   // Ширина ленты = длительность × пиксели/сек (НЕ зависит от ширины контейнера!)
   const width = Math.max(1, Math.round(duration * pxPerSecond));
   const secondsPerPixel = 1 / pxPerSecond;
+  const dragStateRef = useRef<{ active: boolean; lastX: number; pointerId: number | null }>({
+    active: false,
+    lastX: 0,
+    pointerId: null,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const wheelRemainderRef = useRef(0);
 
   // Фильтрация видимых данных
   const visibleSamples = useMemo(() => {
@@ -132,15 +142,76 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   React.useEffect(() => {
-    // Прокручиваем к правому краю при новых данных (имитируя движение ленты)
+    if (!isLive) {
+      return;
+    }
     if (scrollContainerRef.current && samples.length > 0) {
       const container = scrollContainerRef.current;
-      // Прокрутка к правому краю
       container.scrollLeft = container.scrollWidth - container.clientWidth;
     }
-  }, [samples.length, visibleEnd]);
+  }, [samples.length, visibleEnd, isLive]);
 
   const handleDoubleClick = () => onToggleLive(true);
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+    dragStateRef.current = {
+      active: true,
+      lastX: event.clientX,
+      pointerId: event.pointerId,
+    };
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current.active) {
+      return;
+    }
+    event.preventDefault();
+    const deltaX = event.clientX - dragStateRef.current.lastX;
+    if (deltaX === 0) {
+      return;
+    }
+    dragStateRef.current.lastX = event.clientX;
+    const deltaSeconds = -deltaX * secondsPerPixel;
+    if (Math.abs(deltaSeconds) < 0.01) {
+      return;
+    }
+    onPan(deltaSeconds);
+  };
+
+  const finishDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current.active) {
+      return;
+    }
+    dragStateRef.current = { active: false, lastX: 0, pointerId: null };
+    setIsDragging(false);
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // ignore if capture not set
+    }
+  };
+
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    if (!onPan) {
+      return;
+    }
+    event.preventDefault();
+    const dominantDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (dominantDelta === 0) {
+      return;
+    }
+    const deltaSeconds = -dominantDelta * secondsPerPixel;
+    wheelRemainderRef.current += deltaSeconds;
+    if (Math.abs(wheelRemainderRef.current) < 0.1) {
+      return;
+    }
+    onPan(wheelRemainderRef.current);
+    wheelRemainderRef.current = 0;
+  };
 
   return (
     <div style={{ position: "relative", width: "100%", height: totalHeight }}>
@@ -159,8 +230,15 @@ const CTGCombinedStrip: React.FC<CTGCombinedStripProps> = ({
           userSelect: "none",
           display: "flex",
           flexDirection: "column",
+          cursor: isDragging ? "grabbing" : "grab",
+          touchAction: "none",
         }}
         onDoubleClick={handleDoubleClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishDrag}
+        onPointerLeave={finishDrag}
+        onWheel={handleWheel}
       >
       {/* ==================== ОБЪЕДИНЁННЫЙ БЛОК FHR + UC ==================== */}
       <div

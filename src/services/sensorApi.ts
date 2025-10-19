@@ -89,10 +89,24 @@ export async function checkHealth(): Promise<{ status: string }> {
  */
 export async function startGenerator(): Promise<{ message?: string }> {
   try {
-    const response = await fetch("/gen-api/on");
+    const response = await fetch("/gen-api/on", { method: "GET" });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let data: unknown = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        // ignoring JSON parse errors for non-200 responses
+      }
+
+      const errorMessage = (data as { error?: { message?: string } })?.error?.message;
+      if (errorMessage === "failed to connect: already connected") {
+        console.warn("Generator already running — ignoring");
+        return { message: errorMessage };
+      }
+
+      throw new Error(`HTTP ${response.status}`);
     }
 
     // Генератор может вернуть пустой ответ или JSON
